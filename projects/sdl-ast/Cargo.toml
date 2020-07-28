@@ -1,8 +1,8 @@
 [package]
-name = "awsl-ast"
+name = "sdl-ast"
 version = "0.1.0"
 authors = ["Aster <192607617@qq.com>"]
-description = "AWSL Window Structure Language"
+description = "Site Deploy Language AST"
 repository = "https://github.com/GalAster/awsl-rs"
 readme = "Readme.md"
 license = "MPL-2.0"
