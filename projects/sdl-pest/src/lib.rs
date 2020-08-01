@@ -1,3 +1,3 @@
-mod awsl;
-pub use awsl::{AwslParser, Rule};
+mod sdl;
+pub use sdl::{AwslParser, Rule};
 pub use pest;

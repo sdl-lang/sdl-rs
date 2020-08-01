@@ -22,6 +22,18 @@ pub enum AST {
 pub enum ASTKind {
     None,
     Statements,
+    ///
+    /// eg: <img> </img>
+    OpenCloseTemplate,
+    ///
+    /// eg: <img/>
+    SelfCloseTemplate,
+    ///
+    /// eg: <img>
+    HTMLSpecialTemplate,
+    ///
+    /// <\img> </img>
+    SDLSpecialTemplate
 
 }
 
