@@ -1,4 +1,4 @@
-pub struct AwslParser;
+pub struct SDLParser;
 #[allow(dead_code, non_camel_case_types)]
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub enum Rule {
@@ -154,7 +154,7 @@ pub enum Rule {
     Sharp,
 }
 #[allow(clippy::all)]
-impl ::pest::Parser<Rule> for AwslParser {
+impl ::pest::Parser<Rule> for SDLParser {
     fn parse<'i>(rule: Rule, input: &'i str) -> ::std::result::Result<::pest::iterators::Pairs<'i, Rule>, ::pest::error::Error<Rule>> {
         mod rules {
             pub mod hidden {

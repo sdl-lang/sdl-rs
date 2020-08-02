@@ -1,6 +1,6 @@
-use url::Url;
 use sdl_ast::TextRange;
 use sdl_pest::pest::Span;
+use url::Url;
 
 pub struct ParserConfig {
     pub file_url: Option<Url>,
@@ -9,7 +9,10 @@ pub struct ParserConfig {
 
 impl Default for ParserConfig {
     fn default() -> Self {
-        Self { file_url: None, tab_size: 4 }
+        Self {
+            file_url: None,
+            tab_size: 4,
+        }
     }
 }
 

@@ -3,7 +3,7 @@ use std::{fs::File, io::prelude::*, path::Path};
 
 pub fn gen_note_down() {
     let pest = Path::new(concat!(env!("CARGO_MANIFEST_DIR"), "./sdl.pest"));
-    let rs = Path::new(concat!(env!("CARGO_MANIFEST_DIR"), "./src/sdl"));
+    let rs = Path::new(concat!(env!("CARGO_MANIFEST_DIR"), "./src/sdl.rs"));
 
     let derived = {
         let path = pest.to_string_lossy();

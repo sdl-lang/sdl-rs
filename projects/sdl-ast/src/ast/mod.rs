@@ -1,8 +1,13 @@
+mod template;
+use crate::TextRange;
 use std::{
     collections::HashMap,
     fmt::{self, Display, Formatter},
 };
-use crate::TextRange;
+pub use crate::ast::template::{Template,TemplateKind};
+
+type RangedString = (String, TextRange);
+
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum AST {
@@ -22,19 +27,7 @@ pub enum AST {
 pub enum ASTKind {
     None,
     Statements,
-    ///
-    /// eg: <img> </img>
-    OpenCloseTemplate,
-    ///
-    /// eg: <img/>
-    SelfCloseTemplate,
-    ///
-    /// eg: <img>
-    HTMLSpecialTemplate,
-    ///
-    /// <\img> </img>
-    SDLSpecialTemplate
-
+    Template(Box<Template>),
 }
 
 impl Default for AST {
