@@ -1,10 +1,11 @@
 use super::*;
 
+
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Template {
     kind: TemplateKind,
     tag: Option<AST>,
-    tag_end: Option<AST>,
+    end: Option<AST>,
     id: Option<AST>,
     class: Option<AST>,
 }
@@ -26,7 +27,7 @@ impl Default for Template {
         Self {
             kind: TemplateKind::OpenCloseTemplate,
             tag: None,
-            tag_end: None,
+            end: None,
             id: None,
             class: None
         }
@@ -35,52 +36,57 @@ impl Default for Template {
 
 
 impl Template {
-    pub fn open_close(start: RangedString, end: RangedString) -> Self {
+    pub fn open_close(start: AST, end: AST) -> Self {
+        assert!(start.kind().is_string());
+        assert!(end.kind().is_string());
         Self {
             kind: TemplateKind::OpenCloseTemplate,
-            tag:None,
-            tag_end:None,
+            tag:Some(start),
+            end:Some(end),
             ..Self::default()
         }
     }
-    pub fn self_close(start: RangedString) -> Self {
+    pub fn self_close(start: AST) -> Self {
+        assert!(start.kind().is_string());
         Self {
             kind: TemplateKind::SelfCloseTemplate,
-            tag:None,
-            tag_end:None,
+            tag:Some(start),
+            end:None,
             ..Self::default()
         }
     }
-    pub fn html_bad(start: RangedString) -> Self {
+    pub fn html_bad(start: AST) -> Self {
+        assert!(start.kind().is_string());
         Self {
             kind: TemplateKind::HTMLBadTemplate,
-            tag:None,
-            tag_end:None,
+            tag:Some(start),
+            end:None,
             ..Self::default()
         }
     }
-    pub fn sdl_special(start: RangedString, end: RangedString) -> Self {
+    pub fn sdl_special(start: AST, end: AST) -> Self {
+        assert!(start.kind().is_string());
+        assert!(end.kind().is_string());
         Self {
             kind: TemplateKind::SDLSpecialTemplate,
-            tag:None,
-            tag_end:None,
+            tag:Some(start),
+            end:Some(end),
             ..Self::default()
         }
     }
 }
 
 impl Template {
-
-    pub fn set_tag(&mut self) {
-
-    }
-    pub fn set_tag_pair(&mut self) {
-
-    }
     pub fn set_class(&mut self) {
 
     }
     pub fn set_id(&mut self) {
 
+    }
+}
+
+impl Display for Template {
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+        unimplemented!()
     }
 }

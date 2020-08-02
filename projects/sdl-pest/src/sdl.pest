@@ -116,11 +116,15 @@ bracket_call = ${data ~ ((!NEWLINE ~ WHITESPACE)* ~ (slice|apply))+}
 bracket_apply = {Symbol ~ dict}
 dot_call = {term~ Dot ~ (Integer|Symbol) }
 /*====================================================================================================================*/
-template = {EmptyTemplate|Fragment|OpenClose|SelfClose}
+template = {EmptyTemplate|HTMLBad|Fragment|OpenClose|SelfClose}
 EmptyTemplate = {"</>"}
 Fragment = {"<>" ~ text_mode ~ "</>" }
 OpenClose = {"<" ~ PUSH(Symbol) ~ ">" ~ text_mode+ ~ "</" ~ POP ~ ">" }
-SelfClose = {"<" ~ PUSH(Symbol) ~ text_mode+ ~ POP ~ "/>" }
+SelfClose = {"<" ~ Symbol ~ "/>" }
+HTMLBad = {"<" ~ HTMLBadSymbol ~ "/>" }
+HTMLBadSymbol = @{
+    "img"|"hr"|"br"
+}
 text_mode = ${
     "{" ~ statement* ~ "}"|template+|(HTMLEscape|text_char)+
 }

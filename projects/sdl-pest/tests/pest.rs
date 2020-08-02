@@ -2,7 +2,7 @@ use pest_generator::derive_parser;
 use std::{fs::File, io::prelude::*, path::Path};
 
 pub fn gen_note_down() {
-    let pest = Path::new(concat!(env!("CARGO_MANIFEST_DIR"), "./sdl.pest"));
+    let pest = Path::new(concat!(env!("CARGO_MANIFEST_DIR"), "./src/sdl.pest"));
     let rs = Path::new(concat!(env!("CARGO_MANIFEST_DIR"), "./src/sdl.rs"));
 
     let derived = {

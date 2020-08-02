@@ -65,6 +65,8 @@ pub enum Rule {
     Fragment,
     OpenClose,
     SelfClose,
+    HTMLBad,
+    HTMLBadSymbol,
     text_mode,
     text_char,
     HTMLEscape,
@@ -455,7 +457,7 @@ impl ::pest::Parser<Rule> for SDLParser {
                 #[inline]
                 #[allow(non_snake_case, unused_variables)]
                 pub fn template(state: Box<::pest::ParserState<Rule>>) -> ::pest::ParseResult<Box<::pest::ParserState<Rule>>> {
-                    state.rule(Rule::template, |state| self::EmptyTemplate(state).or_else(|state| state.restore_on_err(|state| self::Fragment(state))).or_else(|state| state.restore_on_err(|state| self::OpenClose(state))).or_else(|state| state.restore_on_err(|state| self::SelfClose(state))))
+                    state.rule(Rule::template, |state| self::EmptyTemplate(state).or_else(|state| self::HTMLBad(state)).or_else(|state| state.restore_on_err(|state| self::Fragment(state))).or_else(|state| state.restore_on_err(|state| self::OpenClose(state))).or_else(|state| self::SelfClose(state)))
                 }
                 #[inline]
                 #[allow(non_snake_case, unused_variables)]
@@ -475,7 +477,17 @@ impl ::pest::Parser<Rule> for SDLParser {
                 #[inline]
                 #[allow(non_snake_case, unused_variables)]
                 pub fn SelfClose(state: Box<::pest::ParserState<Rule>>) -> ::pest::ParseResult<Box<::pest::ParserState<Rule>>> {
-                    state.rule(Rule::SelfClose, |state| state.sequence(|state| state.match_string("<").and_then(|state| super::hidden::skip(state)).and_then(|state| state.stack_push(|state| self::Symbol(state))).and_then(|state| super::hidden::skip(state)).and_then(|state| state.sequence(|state| self::text_mode(state).and_then(|state| super::hidden::skip(state)).and_then(|state| state.sequence(|state| state.optional(|state| state.restore_on_err(|state| self::text_mode(state)).and_then(|state| state.repeat(|state| state.sequence(|state| super::hidden::skip(state).and_then(|state| state.restore_on_err(|state| self::text_mode(state))))))))))).and_then(|state| super::hidden::skip(state)).and_then(|state| self::POP(state)).and_then(|state| super::hidden::skip(state)).and_then(|state| state.match_string("/>"))))
+                    state.rule(Rule::SelfClose, |state| state.sequence(|state| state.match_string("<").and_then(|state| super::hidden::skip(state)).and_then(|state| self::Symbol(state)).and_then(|state| super::hidden::skip(state)).and_then(|state| state.match_string("/>"))))
+                }
+                #[inline]
+                #[allow(non_snake_case, unused_variables)]
+                pub fn HTMLBad(state: Box<::pest::ParserState<Rule>>) -> ::pest::ParseResult<Box<::pest::ParserState<Rule>>> {
+                    state.rule(Rule::HTMLBad, |state| state.sequence(|state| state.match_string("<").and_then(|state| super::hidden::skip(state)).and_then(|state| self::HTMLBadSymbol(state)).and_then(|state| super::hidden::skip(state)).and_then(|state| state.match_string("/>"))))
+                }
+                #[inline]
+                #[allow(non_snake_case, unused_variables)]
+                pub fn HTMLBadSymbol(state: Box<::pest::ParserState<Rule>>) -> ::pest::ParseResult<Box<::pest::ParserState<Rule>>> {
+                    state.rule(Rule::HTMLBadSymbol, |state| state.atomic(::pest::Atomicity::Atomic, |state| state.match_string("img").or_else(|state| state.match_string("hr")).or_else(|state| state.match_string("br"))))
                 }
                 #[inline]
                 #[allow(non_snake_case, unused_variables)]
@@ -1053,6 +1065,8 @@ impl ::pest::Parser<Rule> for SDLParser {
             Rule::Fragment => rules::Fragment(state),
             Rule::OpenClose => rules::OpenClose(state),
             Rule::SelfClose => rules::SelfClose(state),
+            Rule::HTMLBad => rules::HTMLBad(state),
+            Rule::HTMLBadSymbol => rules::HTMLBadSymbol(state),
             Rule::text_mode => rules::text_mode(state),
             Rule::text_char => rules::text_char(state),
             Rule::HTMLEscape => rules::HTMLEscape(state),

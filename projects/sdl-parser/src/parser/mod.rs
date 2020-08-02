@@ -29,107 +29,48 @@ impl ParserConfig {
             .replace("\\\n", "")
             .replace("\t", &" ".repeat(self.tab_size));
         let pairs = SDLParser::parse(Rule::program, &input)?;
-        self.parse_program(pairs)
+        Ok(self.parse_program(pairs))
     }
-    pub fn parse_program(&self, pairs: Pairs<Rule>) -> ParserResult<AST> {
-        // let r = self.get_position(pairs.as_span());
+    fn parse_program(&self, pairs: Pairs<Rule>) -> AST {
         let mut codes = vec![];
         for pair in pairs {
             let code = match pair.as_rule() {
                 Rule::EOI => continue,
-                /*
-                Rule::WHITE_SPACE => continue,
-                Rule::LINE_SEPARATOR => continue,
-                Rule::HorizontalRule => {
-                    unimplemented!();
-                    // AST::from("<hr/>")
-                }
-                Rule::Header => self.parse_header(pair),
-                Rule::TextBlock => self.parse_paragraph(pair),
-                Rule::List => {
-                    codes.extend(self.parse_list(pair));
-                    continue;
-                }
-                Rule::Table => {
-                    codes.extend(self.parse_table(pair));
-                    continue;
-                }
-                Rule::Code => self.parse_code_block(pair),
-                Rule::CommandBlock => self.parse_command_block(pair),
-                */
+                Rule::WHITESPACE => continue,
+                Rule::statement=> self.parse_statement(pair),
                 _ => debug_cases!(pair),
             };
-            // println!("{:?}", code);
             codes.push(code);
         }
-        // FIXME: fix range
-        Ok(AST::statements(codes, Default::default()))
+        AST::program(codes)
     }
-    /*
-    fn parse_list(&self, pairs: Pair<Rule>) -> Vec<AST> {
-        // let r = self.get_position(pairs.as_span());
-        let mut list_terms: Vec<(usize, &str, Vec<AST>)> = vec![];
+    fn parse_statement(&self, pairs: Pair<Rule>) -> AST {
+        let r = self.get_position(pairs.as_span());
+        let mut codes = vec![];
         for pair in pairs.into_inner() {
-            match pair.as_rule() {
-                Rule::LINE_SEPARATOR => continue,
-                Rule::ListFirstLine | Rule::ListRestLine => {
-                    let mut kind = "";
-                    let mut indent = 0;
-                    let mut inner = pair.into_inner();
-                    while let Some(n) = inner.next() {
-                        match n.as_rule() {
-                            Rule::WHITE_SPACE => indent += 1,
-                            Rule::ListMark | Rule::Vertical => {
-                                kind = n.as_str();
-                                break;
-                            }
-                            _ => debug_cases!(n),
-                        }
-                    }
-                    let terms = inner.map(|pair| self.parse_span_term(pair)).collect();
-                    list_terms.push((indent, kind, terms))
-                }
+            let code = match pair.as_rule() {
+                Rule::expression=>self.parse_expression(pair),
                 _ => debug_cases!(pair),
             };
+            codes.push(code);
         }
-        return regroup_list_view(&list_terms);
+        AST::statement(codes,r)
     }
-    fn parse_table(&self, pairs: Pair<Rule>) -> Vec<AST> {
-        // let r = self.get_position(pairs.as_span());
-        let mut table_terms = vec![];
+    fn parse_expression(&self, pairs: Pair<Rule>) -> AST {
+        let r = self.get_position(pairs.as_span());
+        let mut codes = vec![];
         for pair in pairs.into_inner() {
-            match pair.as_rule() {
-                Rule::LINE_SEPARATOR => continue,
-                Rule::TableFirstLine | Rule::TableRestLine => {
-                    let mut line = vec![];
-                    let mut inner = pair.into_inner();
-                    let head = inner.next().unwrap();
-                    let mut item = match head.as_rule() {
-                        Rule::Vertical => vec![],
-                        _ => vec![self.parse_span_term(head)],
-                    };
-                    for n in inner {
-                        match n.as_rule() {
-                            Rule::Vertical => {
-                                line.push(item);
-                                item = vec![]
-                            }
-                            _ => item.push(self.parse_span_term(n)),
-                        }
-                    }
-                    if item.is_empty() {
-                        table_terms.push(line)
-                    }
-                    else {
-                        line.push(item);
-                        table_terms.push(line)
-                    }
-                }
-                _ => unreachable!(),
+            let code = match pair.as_rule() {
+                Rule::EOI => continue,
+                Rule::WHITESPACE => continue,
+                _ => debug_cases!(pair),
             };
+            codes.push(code);
         }
-        return regroup_table_view(&table_terms);
+        AST::expression(codes,r)
     }
+
+    /*
     pub fn parse_code_block(&self, pairs: Pair<Rule>) -> AST {
         let r = self.get_position(pairs.as_span());
         let mut lang = String::new();

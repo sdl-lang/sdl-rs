@@ -1,9 +1,11 @@
 mod template;
+
 use crate::TextRange;
 use std::{
     collections::HashMap,
     fmt::{self, Display, Formatter},
 };
+use std::fmt::Debug;
 pub use crate::ast::template::{Template,TemplateKind};
 
 type RangedString = (String, TextRange);
@@ -26,8 +28,13 @@ pub enum AST {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum ASTKind {
     None,
-    Statements,
+    Program,
+    Statement,
     Template(Box<Template>),
+
+    Null,
+    Boolean(bool),
+    String(String),
 }
 
 impl Default for AST {
@@ -57,8 +64,24 @@ impl AST {
 }
 
 impl AST {
-    pub fn statements(children: Vec<AST>, r: TextRange) -> Self {
-        Self::Node { kind: ASTKind::Statements, children, r: box_range(r) }
+    pub fn program(children: Vec<AST>) -> Self {
+        Self::Node { kind: ASTKind::Program, children, r: Default::default() }
+    }
+    pub fn statement(children: Vec<AST>, r: TextRange) -> Self {
+        Self::Node { kind: ASTKind::Statement, children, r: box_range(r) }
+    }
+    pub fn expression(children: Vec<AST>, r: TextRange) -> Self {
+        Self::Node { kind: ASTKind::Statement, children, r: box_range(r) }
+    }
+
+    pub fn null(r: TextRange) -> Self {
+        Self::Leaf { kind: ASTKind::Null, r: box_range(r) }
+    }
+    pub fn boolean(value:bool, r: TextRange) -> Self {
+        Self::Leaf { kind: ASTKind::Boolean(value), r: box_range(r) }
+    }
+    pub fn string(value:String,r: TextRange) -> Self {
+        Self::Leaf { kind: ASTKind::String(value), r: box_range(r) }
     }
 }
 
