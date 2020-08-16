@@ -6,8 +6,12 @@ pub use crate::parser::can_parse::CanParse;
 pub use crate::parser::config::ParserConfig;
 use crate::ParserResult;
 use sdl_ast::{ASTKind, AST};
-use sdl_pest::{Pair, Pairs, Parser, Rule, SDLParser};
+use sdl_pest::{Pair, Pairs, Parser, Rule, SDLParser, PrecClimber, Assoc, Operator};
 use url::Url;
+use std::lazy::SyncLazy;
+
+
+
 
 macro_rules! debug_cases {
     ($i:ident) => {{
@@ -17,6 +21,20 @@ macro_rules! debug_cases {
         unreachable!();
     }};
 }
+
+#[rustfmt::skip]
+pub static PREC_CLIMBER: SyncLazy<PrecClimber<Rule>> = SyncLazy::new(|| {
+    use Rule::*;
+    use Assoc::*;
+    //TODO: use macro
+    PrecClimber::new(vec![
+        Operator::new(Set, Left),
+        Operator::new(Plus, Left) | Operator::new(Minus, Left),
+        Operator::new(Power, Right),
+        Operator::new(Dot, Left)
+    ])
+});
+
 
 impl ParserConfig {
     pub fn parse(&mut self, input: impl CanParse) -> ParserResult<AST> {
@@ -59,10 +77,12 @@ impl ParserConfig {
     fn parse_expression(&self, pairs: Pair<Rule>) -> AST {
         let r = self.get_position(pairs.as_span());
         let mut codes = vec![];
+        // let mut eos = false;
         for pair in pairs.into_inner() {
             let code = match pair.as_rule() {
                 Rule::EOI => continue,
                 Rule::WHITESPACE => continue,
+                Rule::expr=>self.parse_expr(pair),
                 _ => debug_cases!(pair),
             };
             codes.push(code);
@@ -70,38 +90,56 @@ impl ParserConfig {
         AST::expression(codes,r)
     }
 
-    /*
-    pub fn parse_code_block(&self, pairs: Pair<Rule>) -> AST {
+    #[rustfmt::skip]
+    fn parse_expr(&self, pairs: Pair<Rule>) -> AST {
         let r = self.get_position(pairs.as_span());
-        let mut lang = String::new();
-        let mut code = String::new();
+        PREC_CLIMBER.climb(
+            pairs.into_inner(),
+            |pair: Pair<Rule>| match pair.as_rule() {
+                Rule::expr => self.parse_expr(pair),
+                Rule::term => self.parse_term(pair),
+                Rule::bracket_call => debug_cases!(pair),
+                _ => debug_cases!(pair),
+            },
+            |left: AST, op: Pair<Rule>, right: AST| match op.as_rule() {
+                _ => AST::infix(
+                    op.as_str(),
+                    left,
+                    right,
+                    r
+                ),
+            },
+        )
+    }
+
+    fn parse_term(&self, pairs: Pair<Rule>) -> AST {
+        // let pos = get_position(pairs.as_span());
+        let mut base = AST::default();
+        let mut prefix = vec![];
+        let mut suffix = vec![];
         for pair in pairs.into_inner() {
             match pair.as_rule() {
-                Rule::WHITE_SPACE => continue,
-                Rule::CodeLevel => continue,
-                Rule::CodeMark => continue,
-                Rule::SYMBOL => lang = pair.as_str().to_string(),
-                Rule::CodeText => code = pair.as_str().to_string(),
+                Rule::WHITESPACE => continue,
+                Rule::node => base = self.parse_node(pair),
+                Rule::Prefix => prefix.push(pair.as_str().to_string()),
+                Rule::Suffix => suffix.push(pair.as_str().to_string()),
+                _ => unreachable!(),
+            };
+        }
+        AST::default()
+    }
+
+    fn parse_node(&self, pairs: Pair<Rule>) -> AST {
+        for pair in pairs.into_inner() {
+            return match pair.as_rule() {
+                Rule::expr => self.parse_expr(pair),
+                Rule::data => self.parse_data(pair),
                 _ => debug_cases!(pair),
             };
         }
-        let code = CodeBlock { lang, code, inline: false, high_line: vec![] };
-        AST::code(code, r)
+        return AST::default();
     }
-
-    fn parse_header(&self, pairs: Pair<Rule>) -> AST {
-        let r = self.get_position(pairs.as_span());
-        let mut level = 0;
-        let mut children = vec![];
-        for pair in pairs.into_inner() {
-            match pair.as_rule() {
-                Rule::WHITE_SPACE => continue,
-                Rule::Sharp => level += 1,
-                _ => children.push(self.parse_span_term(pair)),
-            };
-        }
-        return AST::header(children, level, r);
-    }
+    /*
     pub fn parse_command_block(&self, pairs: Pair<Rule>) -> AST {
         let r = self.get_position(pairs.as_span());
         let mut cmd = String::new();
@@ -224,6 +262,26 @@ impl ParserConfig {
         AST::escaped(c, r)
     }
     */
+}
+
+impl ParserConfig {
+    fn parse_data(&self, pairs: Pair<Rule>) -> AST {
+        for pair in pairs.into_inner() {
+            return match pair.as_rule() {
+                Rule::template=>self.parse_template(pair),
+                _ => debug_cases!(pair),
+            };
+        }
+        return AST::default();
+    }
+    fn parse_template(&self, pairs: Pair<Rule>) -> AST {
+        for pair in pairs.into_inner() {
+            return match pair.as_rule() {
+                _ => debug_cases!(pair),
+            };
+        }
+        return AST::default();
+    }
 }
 
 /*

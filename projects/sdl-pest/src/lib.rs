@@ -7,3 +7,4 @@ pub use pest::{
     Parser, Span,
 };
 pub use sdl::{Rule, SDLParser};
+pub use pest::prec_climber::{PrecClimber,Assoc,Operator};

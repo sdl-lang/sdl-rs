@@ -32,6 +32,11 @@ pub enum ASTKind {
     Statement,
     Template(Box<Template>),
 
+    InfixExpression,
+    PrefixExpression,
+    SuffixExpression,
+
+
     Null,
     Boolean(bool),
     String(String),
@@ -72,6 +77,18 @@ impl AST {
     }
     pub fn expression(children: Vec<AST>, r: TextRange) -> Self {
         Self::Node { kind: ASTKind::Statement, children, r: box_range(r) }
+    }
+
+    pub fn infix(op: &str, lhs: AST, rhs: AST, r: TextRange) -> Self {
+        Self::Leaf { kind: ASTKind::InfixExpression, r: box_range(r) }
+    }
+
+    pub fn prefix(op: &str, rhs: AST, r: TextRange) -> Self {
+        Self::Leaf { kind: ASTKind::PrefixExpression, r: box_range(r) }
+    }
+
+    pub fn suffix(op: &str, lhs: AST, r: TextRange) -> Self {
+        Self::Leaf { kind: ASTKind::SuffixExpression, r: box_range(r) }
     }
 
     pub fn null(r: TextRange) -> Self {
