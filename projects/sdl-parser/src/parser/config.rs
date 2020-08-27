@@ -9,10 +9,7 @@ pub struct ParserConfig {
 
 impl Default for ParserConfig {
     fn default() -> Self {
-        Self {
-            file_url: None,
-            tab_size: 4,
-        }
+        Self { file_url: None, tab_size: 4 }
     }
 }
 

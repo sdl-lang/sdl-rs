@@ -1,7 +1,6 @@
 use super::*;
-use std::path::PathBuf;
 use crate::errors::Error::FileNotFound;
-use std::fs;
+use std::{fs, path::PathBuf};
 
 pub trait CanParse {
     fn as_url(&self) -> Option<Url> {

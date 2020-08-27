@@ -4,13 +4,13 @@ impl ASTKind {
     pub fn is_null(&self) -> bool {
         match self {
             Self::Null => true,
-            _ => false
+            _ => false,
         }
     }
     pub fn is_string(&self) -> bool {
         match self {
-            Self::String {..} => true,
-            _ => false
+            Self::String { .. } => true,
+            _ => false,
         }
     }
 }

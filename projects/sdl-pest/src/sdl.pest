@@ -117,11 +117,11 @@ bracket_apply = {Symbol ~ dict}
 dot_call = {term~ Dot ~ (Integer|Symbol) }
 /*====================================================================================================================*/
 template = {EmptyTemplate|HTMLBad|Fragment|OpenClose|SelfClose}
-EmptyTemplate = {"</>"}
-Fragment = {"<>" ~ text_mode ~ "</>" }
+EmptyTemplate = {"<>"}
+Fragment = {"<\\>" ~ text_mode ~ "</>" }
 OpenClose = {"<" ~ PUSH(Symbol) ~ ">" ~ text_mode+ ~ "</" ~ POP ~ ">" }
 SelfClose = {"<" ~ Symbol ~ "/>" }
-HTMLBad = {"<" ~ HTMLBadSymbol ~ "/>" }
+HTMLBad = {"<" ~ HTMLBadSymbol ~ ">" }
 HTMLBadSymbol = @{
     "img"|"hr"|"br"
 }

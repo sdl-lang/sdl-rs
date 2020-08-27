@@ -1,6 +1,5 @@
 use super::*;
 
-
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Template {
     kind: TemplateKind,
@@ -29,11 +28,10 @@ impl Default for Template {
             tag: None,
             end: None,
             id: None,
-            class: None
+            class: None,
         }
     }
 }
-
 
 impl Template {
     pub fn open_close(start: AST, end: AST) -> Self {
@@ -41,8 +39,8 @@ impl Template {
         assert!(end.kind().is_string());
         Self {
             kind: TemplateKind::OpenCloseTemplate,
-            tag:Some(start),
-            end:Some(end),
+            tag: Some(start),
+            end: Some(end),
             ..Self::default()
         }
     }
@@ -50,8 +48,8 @@ impl Template {
         assert!(start.kind().is_string());
         Self {
             kind: TemplateKind::SelfCloseTemplate,
-            tag:Some(start),
-            end:None,
+            tag: Some(start),
+            end: None,
             ..Self::default()
         }
     }
@@ -59,8 +57,8 @@ impl Template {
         assert!(start.kind().is_string());
         Self {
             kind: TemplateKind::HTMLBadTemplate,
-            tag:Some(start),
-            end:None,
+            tag: Some(start),
+            end: None,
             ..Self::default()
         }
     }
@@ -69,20 +67,16 @@ impl Template {
         assert!(end.kind().is_string());
         Self {
             kind: TemplateKind::SDLSpecialTemplate,
-            tag:Some(start),
-            end:Some(end),
+            tag: Some(start),
+            end: Some(end),
             ..Self::default()
         }
     }
 }
 
 impl Template {
-    pub fn set_class(&mut self) {
-
-    }
-    pub fn set_id(&mut self) {
-
-    }
+    pub fn set_class(&mut self) {}
+    pub fn set_id(&mut self) {}
 }
 
 impl Display for Template {
