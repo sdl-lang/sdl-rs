@@ -63,7 +63,7 @@ impl ParserConfig {
     fn parse_expression(&self, pairs: Pair<Rule>) -> AST {
         let r = self.get_position(pairs.as_span());
         let mut codes = vec![];
-        // let mut eos = false;
+        let mut eos = false;
         for pair in pairs.into_inner() {
             let code = match pair.as_rule() {
                 Rule::EOI => continue,
@@ -73,7 +73,7 @@ impl ParserConfig {
             };
             codes.push(code);
         }
-        AST::expression(codes, r)
+        AST::expression(codes, eos, r)
     }
 
     #[rustfmt::skip]
@@ -131,12 +131,15 @@ impl ParserConfig {
         let r = self.get_position(pairs.as_span());
         let mut template = Template::default();
         let mut symbols = vec![];
+        let mut attributes = vec![];
         for pair in pairs.into_inner() {
             match pair.as_rule() {
                 Rule::SelfClose => {
                     for inner in pair.into_inner() {
                         match inner.as_rule() {
+                            Rule::WHITESPACE=>continue,
                             Rule::Symbol => symbols.push(self.parse_symbol(inner)),
+                            Rule::SYMBOL => attributes.push(self.parse_symbol(inner)),
                             _ => debug_cases!(inner),
                         };
                     }
@@ -145,126 +148,33 @@ impl ParserConfig {
                 Rule::HTMLBad => {
                     for inner in pair.into_inner() {
                         match inner.as_rule() {
+                            Rule::WHITESPACE=>continue,
                             Rule::HTMLBadSymbol => symbols.push(self.parse_symbol(inner)),
+                            Rule::SYMBOL=>attributes.push(self.parse_string(inner)),
                             _ => debug_cases!(inner),
                         };
                     }
                     template = Template::html_bad(symbols.first().unwrap().to_owned())
                 }
-
                 _ => debug_cases!(pair),
             };
         }
+        template.set_attributes(attributes);
+
         return AST::template(template, r);
     }
     fn parse_symbol(&self, pairs: Pair<Rule>) -> AST {
         let r = self.get_position(pairs.as_span());
-        let s = AST::string(pairs.to_string(), r);
-        println!("{:?}", s);
-        s
+        AST::string(pairs.as_str().to_string(), r)
     }
 
     fn parse_string(&self, pairs: Pair<Rule>) -> AST {
         let r = self.get_position(pairs.as_span());
-        AST::string(pairs.to_string(), r)
+        AST::string(pairs.as_str().to_string(), r)
     }
 
     fn parse_number(&self, pairs: Pair<Rule>) -> AST {
         let r = self.get_position(pairs.as_span());
-        AST::string(pairs.to_string(), r)
+        AST::string(pairs.as_str().to_string(), r)
     }
 }
-
-// fn parse_table_align(input: &str) -> Vec<u8> {
-// let pairs = SDLParser::parse(Rule::TableMode, input).unwrap_or_else(|e| panic!("{}", e));
-// let mut codes = vec![];
-// let mut text = String::new();
-// for pair in pairs {
-// match pair.as_rule() {
-// Rule::EOI => continue,
-// Rule::WHITE_SPACE => text.push(' '),
-// Rule::TableRest => text.push_str(pair.as_str()),
-// Rule::TableMark => {
-// let mut code = 0;
-// if text.contains(":-") {
-// code += 1 << 0
-// }
-// if text.contains("-:") {
-// code += 1 << 1
-// }
-// codes.push(code);
-// text = String::new();
-// }
-// _ => debug_cases!(pair),
-// };
-// }
-// return codes;
-// }
-//
-// #[derive(Debug)]
-// pub enum List {
-// Quote,
-// Ordered,
-// Orderless,
-// }
-//
-// impl List {
-// pub fn get_type(input: &str) -> (usize, List) {
-// let pairs = List::parse_pairs(input);
-// let mut i = 0;
-// let mut m = List::Quote;
-// for pair in pairs {
-// match pair.as_rule() {
-// Rule::WHITE_SPACE => i += 1,
-// Rule::ListMark => match pair.as_str() {
-// ">" => m = List::Quote,
-// "-" => m = List::Orderless,
-// _ => m = List::Ordered,
-// },
-// _ => return (i, m),
-// };
-// }
-// return (i, m);
-// }
-// pub fn trim_indent(line: &str, _indent: usize, ty: &List) -> (bool, String) {
-// let mut new = false;
-// let mut vec: VecDeque<_> = List::parse_pairs(line).into_iter().collect();
-// match ty {
-// List::Quote => match vec[0].as_rule() {
-// Rule::ListMark => match vec[0].as_str() {
-// ">" => {
-// vec.pop_front();
-// }
-// _ => (),
-// },
-// _ => (),
-// },
-// List::Ordered => match vec[0].as_rule() {
-// Rule::ListMark => match vec[0].as_str() {
-// "-" | ">" => (),
-// _ => {
-// vec.pop_front();
-// new = true
-// }
-// },
-// _ => (),
-// },
-// List::Orderless => match vec[0].as_rule() {
-// Rule::ListMark => match vec[0].as_str() {
-// "-" => {
-// vec.pop_front();
-// new = true
-// }
-// _ => (),
-// },
-// _ => (),
-// },
-// }
-// let v: Vec<&str> = vec.iter().map(|x| x.as_str()).collect();
-// return (new, v.join(""));
-// }
-// fn parse_pairs(input: &str) -> Pairs<Rule> {
-// let p = SDLParser::parse(Rule::ListMode, input).unwrap_or_else(|e| panic!("{}", e));
-// p.into_iter().next().unwrap().into_inner()
-// }
-// }

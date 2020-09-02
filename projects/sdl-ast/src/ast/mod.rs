@@ -7,9 +7,7 @@ use std::{
     fmt::{self, Debug, Display, Formatter},
 };
 
-type RangedString = (String, TextRange);
-
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Clone, Eq, PartialEq)]
 pub enum AST {
     Node {
         kind: ASTKind,
@@ -30,6 +28,7 @@ pub enum ASTKind {
     Statement,
     Template(Box<Template>),
 
+    Expression(bool),
     InfixExpression,
     PrefixExpression,
     SuffixExpression,
@@ -41,10 +40,23 @@ pub enum ASTKind {
 
 impl Default for AST {
     fn default() -> Self {
-        Self::Leaf {
-            kind: ASTKind::None,
-            r: Default::default(),
+        Self::Leaf { kind: ASTKind::None, r: Default::default() }
+    }
+}
+
+impl Debug for AST {
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+        let mut out = f.debug_struct("AST");
+        match self {
+            AST::Node { kind, children, .. } => {
+                out.field("kind", kind);
+                out.field("children", children);
+            }
+            AST::Leaf { kind, .. } => {
+                out.field("kind", kind);
+            }
         }
+        out.finish()
     }
 }
 
@@ -70,72 +82,39 @@ impl AST {
 
 impl AST {
     pub fn program(children: Vec<AST>) -> Self {
-        Self::Node {
-            kind: ASTKind::Program,
-            children,
-            r: Default::default(),
-        }
+        Self::Node { kind: ASTKind::Program, children, r: Default::default() }
     }
     pub fn statement(children: Vec<AST>, r: TextRange) -> Self {
-        Self::Node {
-            kind: ASTKind::Statement,
-            children,
-            r: box_range(r),
-        }
+        Self::Node { kind: ASTKind::Statement, children, r: box_range(r) }
     }
-    pub fn expression(children: Vec<AST>, r: TextRange) -> Self {
-        Self::Node {
-            kind: ASTKind::Statement,
-            children,
-            r: box_range(r),
-        }
+    pub fn expression(children: Vec<AST>,eos:bool, r: TextRange) -> Self {
+        Self::Node { kind: ASTKind::Expression(eos), children, r: box_range(r) }
     }
 
     pub fn infix(op: &str, lhs: AST, rhs: AST, r: TextRange) -> Self {
-        Self::Leaf {
-            kind: ASTKind::InfixExpression,
-            r: box_range(r),
-        }
+        Self::Leaf { kind: ASTKind::InfixExpression, r: box_range(r) }
     }
 
     pub fn prefix(op: &str, rhs: AST, r: TextRange) -> Self {
-        Self::Leaf {
-            kind: ASTKind::PrefixExpression,
-            r: box_range(r),
-        }
+        Self::Leaf { kind: ASTKind::PrefixExpression, r: box_range(r) }
     }
 
     pub fn suffix(op: &str, lhs: AST, r: TextRange) -> Self {
-        Self::Leaf {
-            kind: ASTKind::SuffixExpression,
-            r: box_range(r),
-        }
+        Self::Leaf { kind: ASTKind::SuffixExpression, r: box_range(r) }
     }
 
     pub fn template(value: Template, r: TextRange) -> Self {
-        Self::Leaf {
-            kind: ASTKind::Template(Box::new(value)),
-            r: box_range(r),
-        }
+        Self::Leaf { kind: ASTKind::Template(Box::new(value)), r: box_range(r) }
     }
 
     pub fn null(r: TextRange) -> Self {
-        Self::Leaf {
-            kind: ASTKind::Null,
-            r: box_range(r),
-        }
+        Self::Leaf { kind: ASTKind::Null, r: box_range(r) }
     }
     pub fn boolean(value: bool, r: TextRange) -> Self {
-        Self::Leaf {
-            kind: ASTKind::Boolean(value),
-            r: box_range(r),
-        }
+        Self::Leaf { kind: ASTKind::Boolean(value), r: box_range(r) }
     }
     pub fn string(value: String, r: TextRange) -> Self {
-        Self::Leaf {
-            kind: ASTKind::String(value),
-            r: box_range(r),
-        }
+        Self::Leaf { kind: ASTKind::String(value), r: box_range(r) }
     }
 }
 

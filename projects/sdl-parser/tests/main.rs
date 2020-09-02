@@ -3,7 +3,7 @@ use sdl_parser::{ParserConfig, ParserResult};
 
 #[test]
 fn ready() {
-    println!("it, works!")
+    println!("it works!")
 }
 
 pub fn parse(input: &str) -> AST {
@@ -17,7 +17,7 @@ fn new() {
         "{:#?}",
         parse(
             r#"
-<img>
+<img data-->
     "#
         )
     )

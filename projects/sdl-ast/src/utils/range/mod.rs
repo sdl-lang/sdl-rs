@@ -27,10 +27,7 @@ impl Debug for TextRange {
 
 impl TextRange {
     pub fn new(a: impl Into<RangeSize>, b: impl Into<RangeSize>, x: impl Into<RangeSize>, y: impl Into<RangeSize>) -> Self {
-        Self {
-            start: (a.into(), b.into()),
-            end: (x.into(), y.into()),
-        }
+        Self { start: (a.into(), b.into()), end: (x.into(), y.into()) }
     }
     pub fn sum(&self) -> RangeSize {
         self.start.0 + self.start.1 + self.end.0 + self.end.1
