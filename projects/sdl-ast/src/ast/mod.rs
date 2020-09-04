@@ -46,17 +46,18 @@ impl Default for AST {
 
 impl Debug for AST {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        let mut out = f.debug_struct("AST");
-        match self {
-            AST::Node { kind, children, .. } => {
-                out.field("kind", kind);
-                out.field("children", children);
-            }
-            AST::Leaf { kind, .. } => {
-                out.field("kind", kind);
+        let children = self.children();
+        match self.kind() {
+            ASTKind::Null => write!(f, "null"),
+            ASTKind::Boolean(v) => write!(f, "{}", v),
+            ASTKind::String(v) => write!(f, "{}", v),
+            _ => {
+                let mut out = f.debug_struct("AST");
+                out.field("kind", &self.kind());
+                out.field("children", &children);
+                out.finish()
             }
         }
-        out.finish()
     }
 }
 
@@ -87,7 +88,7 @@ impl AST {
     pub fn statement(children: Vec<AST>, r: TextRange) -> Self {
         Self::Node { kind: ASTKind::Statement, children, r: box_range(r) }
     }
-    pub fn expression(children: Vec<AST>,eos:bool, r: TextRange) -> Self {
+    pub fn expression(children: Vec<AST>, eos: bool, r: TextRange) -> Self {
         Self::Node { kind: ASTKind::Expression(eos), children, r: box_range(r) }
     }
 

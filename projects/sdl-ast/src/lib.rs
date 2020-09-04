@@ -1,7 +1,7 @@
 mod ast;
-mod utils;
-mod traits;
 mod compile;
+mod traits;
+mod utils;
 
 pub use ast::{ASTKind, Template, TemplateKind, AST};
 pub use utils::TextRange;

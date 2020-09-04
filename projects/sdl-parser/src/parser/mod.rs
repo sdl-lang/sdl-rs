@@ -4,7 +4,7 @@ mod regroup;
 
 pub use crate::parser::{can_parse::CanParse, config::ParserConfig};
 use crate::ParserResult;
-use sdl_ast::{ASTKind, Template, AST};
+use sdl_ast::{Template, AST};
 use sdl_pest::{Assoc, Operator, Pair, Pairs, Parser, PrecClimber, Rule, SDLParser};
 use std::lazy::SyncLazy;
 use url::Url;
@@ -65,13 +65,11 @@ impl ParserConfig {
         let mut codes = vec![];
         let mut eos = false;
         for pair in pairs.into_inner() {
-            let code = match pair.as_rule() {
-                Rule::EOI => continue,
-                Rule::WHITESPACE => continue,
-                Rule::expr => self.parse_expr(pair),
+            match pair.as_rule() {
+                Rule::expr => codes.push(self.parse_expr(pair)),
+                Rule::eos => eos = true,
                 _ => debug_cases!(pair),
             };
-            codes.push(code);
         }
         AST::expression(codes, eos, r)
     }
@@ -129,38 +127,26 @@ impl ParserConfig {
     }
     fn parse_template(&self, pairs: Pair<Rule>) -> AST {
         let r = self.get_position(pairs.as_span());
-        let mut template = Template::default();
-        let mut symbols = vec![];
+        let mut tag = AST::default();
         let mut attributes = vec![];
-        for pair in pairs.into_inner() {
-            match pair.as_rule() {
-                Rule::SelfClose => {
-                    for inner in pair.into_inner() {
-                        match inner.as_rule() {
-                            Rule::WHITESPACE=>continue,
-                            Rule::Symbol => symbols.push(self.parse_symbol(inner)),
-                            Rule::SYMBOL => attributes.push(self.parse_symbol(inner)),
-                            _ => debug_cases!(inner),
-                        };
-                    }
-                    template = Template::self_close(symbols.first().unwrap().to_owned())
-                }
-                Rule::HTMLBad => {
-                    for inner in pair.into_inner() {
-                        match inner.as_rule() {
-                            Rule::WHITESPACE=>continue,
-                            Rule::HTMLBadSymbol => symbols.push(self.parse_symbol(inner)),
-                            Rule::SYMBOL=>attributes.push(self.parse_string(inner)),
-                            _ => debug_cases!(inner),
-                        };
-                    }
-                    template = Template::html_bad(symbols.first().unwrap().to_owned())
-                }
-                _ => debug_cases!(pair),
+        let pair = pairs.into_inner().nth(0).unwrap();
+        let mut template = match pair.as_rule() {
+            Rule::SelfClose => Template::self_close(),
+            Rule::HTMLBad => Template::html_bad(),
+            Rule::OpenClose => Template::open_close(),
+            _ => debug_cases!(pair),
+        };
+        for inner in pair.into_inner() {
+            match inner.as_rule() {
+                Rule::WHITESPACE => continue,
+                Rule::Symbol => tag = self.parse_symbol(inner),
+                Rule::HTMLBadSymbol => tag = self.parse_symbol(inner),
+                Rule::SYMBOL => attributes.push(self.parse_symbol(inner)),
+                _ => debug_cases!(inner),
             };
         }
+        template.set_tag(tag);
         template.set_attributes(attributes);
-
         return AST::template(template, r);
     }
     fn parse_symbol(&self, pairs: Pair<Rule>) -> AST {

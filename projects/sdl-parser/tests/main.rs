@@ -1,5 +1,5 @@
 use sdl_ast::AST;
-use sdl_parser::{ParserConfig, ParserResult};
+use sdl_parser::ParserConfig;
 
 #[test]
 fn ready() {
@@ -17,7 +17,9 @@ fn new() {
         "{:#?}",
         parse(
             r#"
-<img data-->
+<img>
+
+</img>
     "#
         )
     )

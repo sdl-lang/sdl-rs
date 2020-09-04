@@ -1,4 +1,4 @@
-use crate::{AST, Template};
+use crate::{Template, AST};
 
 pub trait Renderable {
     fn render(&self) -> String;
