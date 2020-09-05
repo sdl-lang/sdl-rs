@@ -1,7 +1,8 @@
+mod loops;
 mod template;
 
 pub use crate::ast::template::{Template, TemplateKind};
-use crate::TextRange;
+use crate::{ast::loops::ForInLoop, TextRange};
 use std::{
     collections::HashMap,
     fmt::{self, Debug, Display, Formatter},
@@ -25,13 +26,19 @@ pub enum AST {
 pub enum ASTKind {
     None,
     Program,
+    Block,
     Statement,
-    Template(Box<Template>),
+    ForInLoop(Box<ForInLoop>),
 
     Expression(bool),
     InfixExpression,
     PrefixExpression,
     SuffixExpression,
+
+    Template(Box<Template>),
+    List,
+    Dict,
+    Pair,
 
     Null,
     Boolean(bool),
@@ -85,9 +92,17 @@ impl AST {
     pub fn program(children: Vec<AST>) -> Self {
         Self::Node { kind: ASTKind::Program, children, r: Default::default() }
     }
+    pub fn block(children: Vec<AST>, r: TextRange) -> Self {
+        Self::Node { kind: ASTKind::Block, children, r: box_range(r) }
+    }
     pub fn statement(children: Vec<AST>, r: TextRange) -> Self {
         Self::Node { kind: ASTKind::Statement, children, r: box_range(r) }
     }
+    pub fn for_in_loop(pattern: AST, terms: AST, block: AST, r: TextRange) -> Self {
+        let kind = ForInLoop { pattern, terms, block };
+        Self::Leaf { kind: ASTKind::ForInLoop(Box::new(kind)), r: box_range(r) }
+    }
+
     pub fn expression(children: Vec<AST>, eos: bool, r: TextRange) -> Self {
         Self::Node { kind: ASTKind::Expression(eos), children, r: box_range(r) }
     }
@@ -106,6 +121,10 @@ impl AST {
 
     pub fn template(value: Template, r: TextRange) -> Self {
         Self::Leaf { kind: ASTKind::Template(Box::new(value)), r: box_range(r) }
+    }
+
+    pub fn list(value: Vec<AST>, r: TextRange) -> Self {
+        Self::Node { kind: ASTKind::List, children: value, r: box_range(r) }
     }
 
     pub fn null(r: TextRange) -> Self {

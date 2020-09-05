@@ -17,9 +17,9 @@ fn new() {
         "{:#?}",
         parse(
             r#"
-<img>
-
-</img>
+for a in [1, 2, 3] {
+    <p>{a}</p>
+}
     "#
         )
     )
