@@ -1,5 +1,4 @@
-
-#[derive(Clone,Debug)]
+#[derive(Clone, Debug)]
 pub enum Value {
     Null,
     Boolean(bool),

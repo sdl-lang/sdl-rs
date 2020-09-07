@@ -115,7 +115,7 @@ impl ParserConfig {
                 _ => debug_cases!(pair),
             },
             |left: AST, op: Pair<Rule>, right: AST| match op.as_rule() {
-                _ => AST::infix(op.as_str(), left, right, r),
+                _ => AST::infix_expression(op.as_str(), left, right, r),
             },
         )
     }
