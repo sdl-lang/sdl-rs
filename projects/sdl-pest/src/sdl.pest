@@ -40,8 +40,10 @@ else_if_block = _{("else" ~ "if"|"ef") ~ condition ~ block}
 if_else_block = _{"else" ~ block}
 condition  = _{"(" ~ expr ~ ")"|expr}
 /*====================================================================================================================*/
-for_statement = {"for" ~ SYMBOL ~ "in"~expr~block}
-for_in_loop = {SYMBOL~"in"~expr~block}
+for_statement = {"for" ~ pattern ~ for_if? ~ "in"~ expr ~ block ~ for_else?}
+for_if = {"if" ~ expr}
+for_else = {"else" ~ block}
+pattern = {SYMBOL}
 /*====================================================================================================================*/
 re_control = {
     Return ~ expr
@@ -118,15 +120,27 @@ bracket_apply = {Symbol ~ dict}
 dot_call = {term~ Dot ~ (Integer|Symbol) }
 /*====================================================================================================================*/
 ///Green
-template = {EmptyTemplate|HTMLBad|Fragment|OpenClose|SelfClose}
-EmptyTemplate = {"<>"}
-Fragment = {"<\\>" ~ text_mode ~ "</>" }
-OpenClose = {"<" ~ PUSH(Symbol) ~ ">" ~ text_mode+ ~ "</" ~ POP ~ ">" }
+template = {
+    EmptyTemplate|SDLFragment|Fragment
+  | SDLOpenClose|OpenClose|HTMLBad|SelfClose
+  | HtmlDTD|HTMLComment
+}
+EmptyTemplate = {"</>"}
+Fragment = {"<>" ~ text_mode* ~ "</>" }
+SDLFragment = {"<\\>" ~ statement* ~ "</>" }
+OpenClose = {"<" ~ PUSH(Symbol) ~ html_term* ~ ">" ~ text_mode* ~ "</" ~ POP ~ ">" }
+SDLOpenClose = {"<\\" ~ PUSH(Symbol) ~ html_term* ~ ">" ~ statement* ~ "</" ~ POP ~ ">" }
 SelfClose = {"<" ~ Symbol ~ html_term* ~ "/>" }
 HTMLBad = {"<" ~ HTMLBadSymbol ~ html_term* ~ ">" }
 HTMLBadSymbol = @{
-    "img"|"hr"|"br"
+    "img"|"hr"|"br"|"input"|"link"|"meta"
+  | "area"|"base"|"col"|"wbr"
+  | "command"|"embed"|"keygen"|"param"|"source"|"track"
 }
+//!Gray: HTMLComment|HtmlDTD
+HTMLComment = {"<!--" ~ (!"-->" ~ ANY*) ~ "-->"}
+HtmlDTD = {"<!" ~ "DOCTYPE" ~ (!">" ~ ANY*) ~ ">"}
+
 html_term = _{html_pair|short_attribute|SYMBOL}
 html_pair = {key_valid ~ Set ~ data}
 ///Red
@@ -179,22 +193,22 @@ Complex    = {(Decimal|Integer)~ SYMBOL}
 //!#3C963C: String
 //!#98C379: StringText|StringLiteralText
 String            = ${SYMBOL? ~ (StringNormal|StringLiteral|StringEmpty)}
-StringLiteral     = {StringStart ~ StringLiteralText ~ StringEnd}
-StringNormal      = {Quotation ~ StringText ~ Quotation}
-StringEmpty       = {Quotation{2}|Apostrophe{2}}
-StringLiteralText = {(!(Apostrophe ~ PEEK) ~ ANY)*}
-StringText        = {(Solidus~(Solidus|Quotation)|!Quotation ~ ANY)*}
+StringLiteral     =  {StringStart ~ StringLiteralText ~ StringEnd}
+StringNormal      =  {Quotation ~ StringText ~ Quotation}
+StringEmpty       =  {Quotation{2}|Apostrophe{2}}
+StringLiteralText =  {(!(Apostrophe ~ PEEK) ~ ANY)*}
+StringText        =  {(Solidus~(Solidus|Quotation)|!Quotation ~ ANY)*}
 StringStart       = @{Apostrophe{1}~PUSH(Apostrophe*)}
 StringEnd         = @{POP ~ Apostrophe{1}}
 /*====================================================================================================================*/
 // NEWLINE = @{"\r"~"\n"|"\r"|"\n"}
-WHITESPACE = {NEWLINE|WHITE_SPACE}
+WHITESPACE = _{NEWLINE|WHITE_SPACE}
 ///#7F848E
 COMMENT = {
     MultiLineComment
-  | "//" ~ (!NEWLINE ~ ANY)*
+  | "%" ~ (!NEWLINE ~ ANY)*
 }
-MultiLineComment = ${ "%%%" ~ (MultiLineComment | !"%%%" ~ ANY)* ~ "%%%"}
+MultiLineComment = ${"%%%" ~ (MultiLineComment | !"%%%" ~ ANY)* ~ "%%%"}
 /*====================================================================================================================*/
 ///#61AFEF
 Symbol = ${namespace|SYMBOL}
