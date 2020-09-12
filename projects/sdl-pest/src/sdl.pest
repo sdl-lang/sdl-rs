@@ -1,15 +1,15 @@
-program = _{SOI~statement* ~ EOI}
+program = _{SOI ~ statement* ~ EOI}
 
 statement = {
-    emptyStatement  |
-    importStatement ~ eos?  |
-    classStatement ~ eos?  |
-    extendStatement ~ eos?  |
-    controlFlow ~ eos?  |
-    assignStatement ~ eos?  |
-    defineStatement ~ eos?  |
-    annotation ~ eos?  |
-    expression
+    emptyStatement
+  | importStatement ~ eos?
+  | classStatement ~ eos?
+  | extendStatement ~ eos?
+  | controlFlow ~ eos?
+  | assignStatement ~ eos?
+  | defineStatement ~ eos?
+  | annotation ~ eos?
+  | expression
 }
 /*====================================================================================================================*/
 emptyStatement = {eos}
@@ -109,7 +109,7 @@ apply_kv = {SYMBOL~ Colon ~ expr|expr}
 function_name = {SYMBOL}
 function_module = {(namespace ~ Dot)? ~ (SYMBOL ~ Dot)*}
 /*====================================================================================================================*/
-expression = {expr~eos?}
+expression = {expr ~ eos?}
 expr = !{term ~ (Infix ~ term)*}
 term =  {Prefix* ~ node ~ Suffix*}
 node = {"(" ~ expr ~ ")"|tuple|bracket_call|data}

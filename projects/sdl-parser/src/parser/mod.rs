@@ -92,16 +92,10 @@ impl ParserConfig {
 impl ParserConfig {
     fn parse_expression(&self, pairs: Pair<Rule>) -> AST {
         let r = self.get_position(pairs.as_span());
-        let mut codes = vec![];
-        let mut eos = false;
-        for pair in pairs.into_inner() {
-            match pair.as_rule() {
-                Rule::expr => codes.push(self.parse_expr(pair)),
-                Rule::eos => eos = true,
-                _ => debug_cases!(pair),
-            };
-        }
-        AST::expression(codes, eos, r)
+        let mut terms = pairs.into_inner();
+        let expr = self.parse_expr(terms.next().unwrap());
+        let eos = terms.next().is_some();
+        AST::expression(expr, eos, r)
     }
 
     #[rustfmt::skip]
@@ -115,7 +109,7 @@ impl ParserConfig {
                 _ => debug_cases!(pair),
             },
             |left: AST, op: Pair<Rule>, right: AST| match op.as_rule() {
-                _ => AST::infix_expression(op.as_str(), left, right, r),
+                _ => AST::infix_expression(AST::default(), left, right, r),
             },
         )
     }

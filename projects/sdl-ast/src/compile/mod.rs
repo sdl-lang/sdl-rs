@@ -1,7 +1,8 @@
+mod evaluate;
 mod value;
 mod variable;
 
-use crate::AST;
+use crate::{ASTKind, AST};
 use std::{
     collections::HashMap,
     ops::Deref,
@@ -24,7 +25,7 @@ impl Default for Context {
 
 impl Context {
     pub fn evaluate(&mut self, code: &AST) -> AST {
-        code.to_owned()
+        code.evaluate(self)
     }
 }
 

@@ -86,27 +86,27 @@ impl AST {
         Self { kind: ASTKind::Statement(children), range: box_range(r) }
     }
     pub fn for_in_loop(pattern: AST, terms: AST, block: AST, r: TextRange) -> Self {
-        let kind = ASTKind::ForInLoop(box ForInLoop { pattern, terms, block });
+        let kind = ASTKind::ForInLoop(Box::new(ForInLoop { pattern, terms, block }));
         Self { kind, range: box_range(r) }
     }
 
     pub fn expression(children: AST, eos: bool, r: TextRange) -> Self {
-        let kind = ASTKind::Expression(box children, eos);
+        let kind = ASTKind::Expression(Box::new(children), eos);
         Self { kind, range: box_range(r) }
     }
 
     pub fn infix_expression(op: AST, lhs: AST, rhs: AST, r: TextRange) -> Self {
-        let kind = ASTKind::InfixExpression(box InfixExpression { op, lhs, rhs });
+        let kind = ASTKind::InfixExpression(Box::new(InfixExpression { op, lhs, rhs }));
         Self { kind, range: box_range(r) }
     }
 
     pub fn prefix_expression(op: AST, rhs: AST, r: TextRange) -> Self {
-        let kind = ASTKind::PrefixExpression(box UnaryExpression { op, base: rhs });
+        let kind = ASTKind::PrefixExpression(Box::new(UnaryExpression { op, base: rhs }));
         Self { kind, range: box_range(r) }
     }
 
     pub fn suffix_expression(op: AST, lhs: AST, r: TextRange) -> Self {
-        let kind = ASTKind::PrefixExpression(box UnaryExpression { op, base: lhs });
+        let kind = ASTKind::PrefixExpression(Box::new(UnaryExpression { op, base: lhs }));
         Self { kind, range: box_range(r) }
     }
 
