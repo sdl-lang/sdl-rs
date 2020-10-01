@@ -8,6 +8,7 @@ use sdl_ast::{Template, AST};
 use sdl_pest::{Assoc, Operator, Pair, Pairs, Parser, PrecClimber, Rule, SDLParser};
 use std::lazy::SyncLazy;
 use url::Url;
+use std::hint::unreachable_unchecked;
 
 macro_rules! debug_cases {
     ($i:ident) => {{
@@ -214,7 +215,14 @@ impl ParserConfig {
 
     fn parse_symbol(&self, pairs: Pair<Rule>) -> AST {
         let r = self.get_position(pairs.as_span());
-        AST::string(pairs.as_str().to_string(), r)
+        let mut value = vec![];
+        for pair in pairs.into_inner() {
+            match pair.as_rule() {
+                Rule::SYMBOL=>value.push(self.parse_string(pair)),
+                _ => debug_cases!(pair),
+            };
+        }
+        AST::symbol(value, r)
     }
 
     fn parse_string(&self, pairs: Pair<Rule>) -> AST {

@@ -23,6 +23,5 @@ impl ASTKind {
 impl ForInLoop {
     pub fn evaluate(&self, ctx: &mut Context) -> ASTKind {
         unimplemented!("{:#?}", self);
-        unimplemented!("{:#?}", ctx);
     }
 }

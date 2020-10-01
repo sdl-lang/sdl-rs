@@ -1,10 +1,12 @@
 mod expression;
 mod loops;
+mod symbol;
 mod template;
 
 pub use crate::ast::{
     expression::{InfixExpression, UnaryExpression},
     loops::ForInLoop,
+    symbol::Symbol,
     template::{Template, TemplateKind},
 };
 use crate::TextRange;
@@ -41,6 +43,7 @@ pub enum ASTKind {
     Null,
     Boolean(bool),
     String(String),
+    Symbol(Box<Symbol>),
 }
 
 impl Default for AST {
@@ -118,6 +121,8 @@ impl AST {
         Self { kind: ASTKind::List(value), range: box_range(r) }
     }
 
+
+
     pub fn null(r: TextRange) -> Self {
         Self { kind: ASTKind::Null, range: box_range(r) }
     }
@@ -126,6 +131,9 @@ impl AST {
     }
     pub fn string(value: String, r: TextRange) -> Self {
         Self { kind: ASTKind::String(value), range: box_range(r) }
+    }
+    pub fn symbol(value: Vec<AST>, r: TextRange) -> Self {
+        Self { kind: ASTKind::Symbol(Box::new(Symbol::from(value))), range: box_range(r) }
     }
 }
 
