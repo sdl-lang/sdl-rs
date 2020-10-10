@@ -2,6 +2,7 @@ mod expression;
 mod loops;
 mod symbol;
 mod template;
+mod operations;
 
 pub use crate::ast::{
     expression::{InfixExpression, UnaryExpression},
@@ -14,6 +15,7 @@ use std::{
     collections::HashMap,
     fmt::{self, Debug, Display, Formatter},
 };
+pub use crate::ast::operations::Operation;
 
 #[derive(Clone, Eq, PartialEq)]
 pub struct AST {
@@ -43,6 +45,7 @@ pub enum ASTKind {
     Null,
     Boolean(bool),
     String(String),
+    Operation(Box<Operation>),
     Symbol(Box<Symbol>),
 }
 
@@ -98,6 +101,16 @@ impl AST {
         Self { kind, range: box_range(r) }
     }
 
+    pub fn operation(op: &str, kind: &str, r: TextRange) -> Self {
+        let o = match kind {
+            "<" => Operation::prefix(op),
+            ">" => Operation::suffix(op),
+            _ => Operation::infix(op),
+        };
+        let kind = ASTKind::Operation(Box::new(o));
+        Self { kind, range: box_range(r) }
+    }
+
     pub fn infix_expression(op: AST, lhs: AST, rhs: AST, r: TextRange) -> Self {
         let kind = ASTKind::InfixExpression(Box::new(InfixExpression { op, lhs, rhs }));
         Self { kind, range: box_range(r) }
@@ -120,8 +133,6 @@ impl AST {
     pub fn list(value: Vec<AST>, r: TextRange) -> Self {
         Self { kind: ASTKind::List(value), range: box_range(r) }
     }
-
-
 
     pub fn null(r: TextRange) -> Self {
         Self { kind: ASTKind::Null, range: box_range(r) }

@@ -12,6 +12,16 @@ pub fn parse(input: &str) -> AST {
 }
 
 const CODE: &'static str = r#"
+1 + 1
+"#;
+
+const CODE3: &'static str = r#"
+if 1 + 1 > 2 {
+    <p>bigger</p>
+}
+"#;
+
+const CODE2: &'static str = r#"
 for a in [1, 2, 3] {
     <p>{a}</p>
 }

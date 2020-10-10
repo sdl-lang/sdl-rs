@@ -6,9 +6,8 @@ pub use crate::parser::{can_parse::CanParse, config::ParserConfig};
 use crate::ParserResult;
 use sdl_ast::{Template, AST};
 use sdl_pest::{Assoc, Operator, Pair, Pairs, Parser, PrecClimber, Rule, SDLParser};
-use std::lazy::SyncLazy;
+use std::{hint::unreachable_unchecked, lazy::SyncLazy};
 use url::Url;
-use std::hint::unreachable_unchecked;
 
 macro_rules! debug_cases {
     ($i:ident) => {{
@@ -110,7 +109,7 @@ impl ParserConfig {
                 _ => debug_cases!(pair),
             },
             |left: AST, op: Pair<Rule>, right: AST| match op.as_rule() {
-                _ => AST::infix_expression(AST::default(), left, right, r),
+                _ => AST::infix_expression(self.parse_operation(op, "="), left, right, r),
             },
         )
     }
@@ -123,10 +122,12 @@ impl ParserConfig {
         for pair in pairs.into_inner() {
             match pair.as_rule() {
                 Rule::WHITESPACE => continue,
-                Rule::node => base = self.parse_node(pair),
-                //       Rule::Prefix => prefix.push(pair.as_str().to_string()),
-                //       Rule::Suffix => suffix.push(pair.as_str().to_string()),
-                _ => unreachable!(),
+                Rule::chain_call=> base = self.parse_chain_call(pair),
+                //Rule::term => base = self.parse_node(pair),
+                //Rule::Prefix => prefix.push(pair.as_str().to_string()),
+                //Rule::Suffix => suffix.push(pair.as_str().to_string()),
+                _ => debug_cases!(pair),
+                //_ => unreachable!(),
             };
         }
         return base;
@@ -146,6 +147,27 @@ impl ParserConfig {
             Rule::SYMBOL => self.parse_symbol(pair),
             _ => debug_cases!(pair),
         }
+    }
+
+    fn parse_chain_call(&self, pairs: Pair<Rule>) -> AST {
+        // let r = self.get_position(pairs.as_span());
+        let mut items = pairs.into_inner();
+        let base = self.parse_data(items.next().unwrap());
+
+        // let mut terms = vec![];
+        for pair in items {
+            match pair.as_rule() {
+
+                _ => debug_cases!(pair),
+            };
+        }
+        return base
+    }
+
+    fn parse_operation(&self, pairs: Pair<Rule>, kind:&str) -> AST {
+        let r = self.get_position(pairs.as_span());
+        let op = pairs.as_str();
+        AST::operation(op,kind,r)
     }
 }
 
@@ -218,10 +240,11 @@ impl ParserConfig {
         let mut value = vec![];
         for pair in pairs.into_inner() {
             match pair.as_rule() {
-                Rule::SYMBOL=>value.push(self.parse_string(pair)),
+                Rule::SYMBOL => value.push(self.parse_string(pair)),
                 _ => debug_cases!(pair),
             };
         }
+        println!("{:?}",value);
         AST::symbol(value, r)
     }
 

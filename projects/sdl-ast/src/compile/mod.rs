@@ -5,8 +5,8 @@ mod variable;
 use crate::{ASTKind, AST};
 use std::{
     collections::HashMap,
-    ops::Deref,
-    rc::{Rc, Weak},
+
+    rc::{ Weak},
 };
 pub use value::Value;
 pub use variable::Variable;

@@ -2,7 +2,7 @@ use super::*;
 
 #[derive(Clone, Eq, PartialEq)]
 pub struct Symbol {
-   pub path: Vec<AST>,
+    pub path: Vec<AST>,
 }
 
 impl Debug for Symbol {
@@ -26,15 +26,20 @@ impl Debug for Symbol {
 
 impl From<Vec<AST>> for Symbol {
     fn from(path: Vec<AST>) -> Self {
-       Self {
-           path,
-       }
+        Self { path }
     }
 }
 
 impl Symbol {
-    pub fn namespace(&self) {
-
+    pub fn namespace(&self) -> Vec<String> {
+        self.path
+            .iter()
+            .take(self.path.len() - 1)
+            .map(|e| match &e.kind {
+                ASTKind::String(s) => s.to_owned(),
+                _ => unreachable!(),
+            })
+            .collect()
     }
     pub fn name(&self) -> String {
         match &self.path.iter().last().unwrap().kind {

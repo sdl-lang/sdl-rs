@@ -29,16 +29,16 @@ module_tuple = {use_alias|use_module_select}
 ModuleSplit= _{Dot|Proportion}
 /*====================================================================================================================*/
 controlFlow = _{re_control|if_statement|for_statement}
-block = !{"{" ~ statement+ ~ "}"}
+condition  = _{"(" ~ expr ~ ")"|expr}
+block = !{"{" ~ statement* ~ "}"}
 /*====================================================================================================================*/
-if_statement = {"if" ~ condition ~ block ~ "else" ~ block}
+if_statement = {if_nested_else|if_single_else|if_nested|if_single}
 if_single = _{"if" ~ condition ~ block}
 if_nested = _{"if" ~ condition ~ block ~ else_if_block+}
 if_single_else = _{"if" ~ condition ~ block ~ if_else_block}
 if_nested_else = _{"if" ~ condition ~ block ~ else_if_block+ ~ if_else_block}
 else_if_block = _{("else" ~ "if"|"ef") ~ condition ~ block}
-if_else_block = _{"else" ~ block}
-condition  = _{"(" ~ expr ~ ")"|expr}
+if_else_block = _{("else"|"es") ~ block}
 /*====================================================================================================================*/
 for_statement = {"for" ~ pattern ~ for_if? ~ "in"~ expr ~ block ~ for_else?}
 for_if = {"if" ~ expr}
@@ -101,6 +101,7 @@ annotation_call = @{"@"~(list|apply|Symbol)}
 apply = !{
      "(" ~ apply_kv? ~ (Comma ~ apply_kv)* ~ Comma? ~")"
 }
+
 apply_kv = {SYMBOL~ Colon ~ expr|expr}
 
 
@@ -111,13 +112,11 @@ function_module = {(namespace ~ Dot)? ~ (SYMBOL ~ Dot)*}
 /*====================================================================================================================*/
 expression = {expr ~ eos?}
 expr = !{term ~ (Infix ~ term)*}
-term =  {Prefix* ~ node ~ Suffix*}
-node = {"(" ~ expr ~ ")"|tuple|bracket_call|data}
+term =  {Prefix* ~ ("(" ~ expr ~ ")"|chain_call)}
 tuple = {"(" ~ expr ~ (Comma ~ expr)* ~ Comma? ~ ")"}
 array = {"[" ~ expr ~ (Comma ~ expr)* ~ Comma? ~ "]"}
-bracket_call = ${data ~ (slice|apply)+}
-bracket_apply = {Symbol ~ dict}
-dot_call = {term~ Dot ~ (Integer|Symbol) }
+chain_call = {data ~ (slice|apply|Suffix|dot_call)*}
+dot_call = {Dot ~ Integer|Dot ~ Symbol ~ apply?}
 /*====================================================================================================================*/
 ///Green
 template = {
@@ -137,18 +136,12 @@ HTMLBadSymbol = @{
   | "area"|"base"|"col"|"wbr"
   | "command"|"embed"|"keygen"|"param"|"source"|"track"
 }
+BadSymbol = @{(XID_START|":"|"_") ~ (XID_CONTINUE|":"|"-"|".")*}
 //!Gray: HTMLComment|HtmlDTD
 HTMLComment = {"<!--" ~ (!"-->" ~ ANY*) ~ "-->"}
 HtmlDTD = {"<!" ~ "DOCTYPE" ~ (!">" ~ ANY*) ~ ">"}
 
-html_term = _{html_pair|short_attribute|SYMBOL}
-html_pair = {key_valid ~ Set ~ data}
-///Red
-short_attribute = {
-      ShortAttributeKind ~ SYMBOL
-    | ShortAttributeKind ~ "[" ~ SYMBOL ~ (Comma ~ SYMBOL)* ~ Comma? ~ "]"
-}
-ShortAttributeKind = @{"."|"#"}
+html_term = _{BadSymbol ~ Set ~ term|BadSymbol}
 
 text_mode = ${
     "{" ~ statement* ~ "}"|template+|(HTMLEscape|text_char)+
@@ -214,8 +207,8 @@ MultiLineComment = ${"%%%" ~ (MultiLineComment | !"%%%" ~ ANY)* ~ "%%%"}
 Symbol = ${namespace|SYMBOL}
 namespace = ${SYMBOL ~ (Proportion ~ SYMBOL)+}
 SYMBOL = @{
-    XID_START ~ (XID_CONTINUE|Minus)*
-  | Underline ~ (XID_CONTINUE|Minus)+
+    XID_START ~ XID_CONTINUE*
+  | Underline ~ XID_CONTINUE+
 }
 /*====================================================================================================================*/
 //!Orange: Modifier
