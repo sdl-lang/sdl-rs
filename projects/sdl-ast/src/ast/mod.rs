@@ -12,7 +12,7 @@ pub use crate::ast::{
 };
 use crate::TextRange;
 use std::{
-    collections::HashMap,
+
     fmt::{self, Debug, Display, Formatter},
 };
 pub use crate::ast::operations::Operation;
@@ -57,15 +57,20 @@ impl Default for AST {
 
 impl Debug for AST {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        let children = self.as_vec();
         match &self.kind {
+            ASTKind::Program(v) | ASTKind::Statement(v) => {
+                for e in v {
+                    Debug::fmt(e,f)?;
+                    writeln!(f)?;
+                }
+                Ok(())
+            }
             ASTKind::Null => write!(f, "null"),
             ASTKind::Boolean(v) => write!(f, "{}", v),
             ASTKind::String(v) => write!(f, "{}", v),
             _ => {
                 let mut out = f.debug_struct("AST");
                 out.field("kind", &self.kind);
-                out.field("children", &children);
                 out.finish()
             }
         }
@@ -136,6 +141,13 @@ impl AST {
 
     pub fn null(r: TextRange) -> Self {
         Self { kind: ASTKind::Null, range: box_range(r) }
+    }
+
+    pub fn integer(value: String, r: TextRange) -> Self {
+        Self { kind: ASTKind::String(value), range: box_range(r) }
+    }
+    pub fn decimal(value: String, r: TextRange) -> Self {
+        Self { kind: ASTKind::String(value), range: box_range(r) }
     }
     pub fn boolean(value: bool, r: TextRange) -> Self {
         Self { kind: ASTKind::Boolean(value), range: box_range(r) }

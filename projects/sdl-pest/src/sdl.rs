@@ -114,6 +114,8 @@ pub enum Rule {
     Prefix,
     Suffix,
     Infix,
+    Is,
+    IsNot,
     Set,
     Or,
     LazyOr,
@@ -545,7 +547,7 @@ impl ::pest::Parser<Rule> for SDLParser {
                 #[inline]
                 #[allow(non_snake_case, unused_variables)]
                 pub fn data(state: Box<::pest::ParserState<Rule>>) -> ::pest::ParseResult<Box<::pest::ParserState<Rule>>> {
-                    state.rule(Rule::data, |state| state.restore_on_err(|state| self::template(state)).or_else(|state| state.restore_on_err(|state| self::dict(state))).or_else(|state| state.restore_on_err(|state| self::list(state))).or_else(|state| self::SpecialValue(state)).or_else(|state| self::Byte(state)).or_else(|state| self::Number(state)).or_else(|state| state.restore_on_err(|state| self::String(state))).or_else(|state| self::Symbol(state)))
+                    state.rule(Rule::data, |state| state.restore_on_err(|state| self::template(state)).or_else(|state| state.restore_on_err(|state| self::dict(state))).or_else(|state| state.restore_on_err(|state| self::list(state))).or_else(|state| self::SpecialValue(state)).or_else(|state| self::Number(state)).or_else(|state| state.restore_on_err(|state| self::String(state))).or_else(|state| self::Symbol(state)))
                 }
                 #[inline]
                 #[allow(non_snake_case, unused_variables)]
@@ -615,7 +617,7 @@ impl ::pest::Parser<Rule> for SDLParser {
                 #[inline]
                 #[allow(non_snake_case, unused_variables)]
                 pub fn Number(state: Box<::pest::ParserState<Rule>>) -> ::pest::ParseResult<Box<::pest::ParserState<Rule>>> {
-                    state.atomic(::pest::Atomicity::CompoundAtomic, |state| state.rule(Rule::Number, |state| self::Complex(state).or_else(|state| self::Decimal(state)).or_else(|state| self::DecimalBad(state)).or_else(|state| self::Integer(state))))
+                    state.atomic(::pest::Atomicity::CompoundAtomic, |state| state.rule(Rule::Number, |state| self::Complex(state).or_else(|state| self::Decimal(state)).or_else(|state| self::DecimalBad(state)).or_else(|state| self::Integer(state)).or_else(|state| self::Byte(state))))
                 }
                 #[inline]
                 #[allow(non_snake_case, unused_variables)]
@@ -725,7 +727,17 @@ impl ::pest::Parser<Rule> for SDLParser {
                 #[inline]
                 #[allow(non_snake_case, unused_variables)]
                 pub fn Infix(state: Box<::pest::ParserState<Rule>>) -> ::pest::ParseResult<Box<::pest::ParserState<Rule>>> {
-                    self::Set(state).or_else(|state| self::Plus(state)).or_else(|state| self::Minus(state)).or_else(|state| self::Power(state)).or_else(|state| self::Dot(state))
+                    self::IsNot(state).or_else(|state| self::Is(state)).or_else(|state| self::Plus(state)).or_else(|state| self::Minus(state)).or_else(|state| self::Power(state)).or_else(|state| self::Set(state))
+                }
+                #[inline]
+                #[allow(non_snake_case, unused_variables)]
+                pub fn Is(state: Box<::pest::ParserState<Rule>>) -> ::pest::ParseResult<Box<::pest::ParserState<Rule>>> {
+                    state.rule(Rule::Is, |state| state.atomic(::pest::Atomicity::Atomic, |state| state.match_string("is").or_else(|state| state.match_string("=="))))
+                }
+                #[inline]
+                #[allow(non_snake_case, unused_variables)]
+                pub fn IsNot(state: Box<::pest::ParserState<Rule>>) -> ::pest::ParseResult<Box<::pest::ParserState<Rule>>> {
+                    state.atomic(::pest::Atomicity::CompoundAtomic, |state| state.rule(Rule::IsNot, |state| state.sequence(|state| self::Is(state).and_then(|state| state.match_string("not"))).or_else(|state| state.match_string("!="))))
                 }
                 #[inline]
                 #[allow(non_snake_case, unused_variables)]
@@ -1132,6 +1144,8 @@ impl ::pest::Parser<Rule> for SDLParser {
             Rule::Prefix => rules::Prefix(state),
             Rule::Suffix => rules::Suffix(state),
             Rule::Infix => rules::Infix(state),
+            Rule::Is => rules::Is(state),
+            Rule::IsNot => rules::IsNot(state),
             Rule::Set => rules::Set(state),
             Rule::Or => rules::Or(state),
             Rule::LazyOr => rules::LazyOr(state),

@@ -1,7 +1,9 @@
+#[allow(unused_variables)]
 mod evaluate;
 mod value;
 mod variable;
 
+use crate::Result;
 use crate::{ASTKind, AST};
 use std::{
     collections::HashMap,
@@ -24,7 +26,7 @@ impl Default for Context {
 }
 
 impl Context {
-    pub fn evaluate(&mut self, code: &AST) -> AST {
+    pub fn evaluate(&mut self, code: &AST) -> Result<AST> {
         code.evaluate(self)
     }
 }

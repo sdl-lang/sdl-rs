@@ -157,7 +157,7 @@ HTMLEscape = @{
 }
 
 /*====================================================================================================================*/
-data = {template|dict|list|SpecialValue|Byte|Number|String|Symbol}
+data = {template|dict|list|SpecialValue|Number|String|Symbol}
 dict = {"{" ~ key_value? ~ (Comma ~ key_value)* ~ Comma? ~ "}"}
 list = {"[" ~ expr? ~ (Comma ~ expr)* ~ Comma? ~ "]"}
 slice = !{"[" ~ index ~ (Comma ~ index)* ~ Comma? ~ "]"}
@@ -177,7 +177,7 @@ Byte_OCT = ${"0" ~ ("o"|"O") ~ (Underline? ~ ASCII_OCT_DIGIT)+}
 Byte_HEX = ${"0" ~ ("x"|"X") ~ (Underline? ~ ASCII_HEX_DIGIT)+}
 /*====================================================================================================================*/
 //!#D19A66: Integer|Decimal|DecimalBad
-Number     = ${Complex|Decimal|DecimalBad|Integer}
+Number     = ${Complex|Decimal|DecimalBad|Integer|Byte}
 Decimal    = ${Integer ~ Dot ~ ASCII_DIGIT+}
 DecimalBad = ${Integer ~ Dot|Dot ~ ASCII_DIGIT+}
 Integer    = @{"0"|ASCII_NONZERO_DIGIT ~ (Underline? ~ ASCII_DIGIT)*}
@@ -213,7 +213,7 @@ SYMBOL = @{
 /*====================================================================================================================*/
 //!Orange: Modifier
 Modifier = !{(!(SYMBOL~(Set|Colon|Semicolon|"{"|"}"|"("|")"|"<"|">")) ~SYMBOL)}
-//!#56B6C2: Prefix|Infix|Postfix
+//!#56B6C2: Prefix|Infix|Postfix|Additive|Logical
 Prefix = @{
     (Bang|Plus|Minus|Star)
 }
@@ -221,10 +221,17 @@ Suffix = @{
    (Bang | Question)
 }
 Infix = _{
-    Set
-  | (Plus|Minus)
+    Logical
+  | Additive
   | Power
-  | Dot
+  | Set
+}
+
+Additive = @{Plus|Minus}
+Logical = !{
+    "is" ~ "not" | "!="
+  | "is" | "=="
+  | "not" ~ "in" | "in"
 }
 
 ///#56B6C2

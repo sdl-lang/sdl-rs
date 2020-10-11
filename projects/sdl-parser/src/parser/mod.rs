@@ -5,9 +5,10 @@ mod regroup;
 pub use crate::parser::{can_parse::CanParse, config::ParserConfig};
 use crate::ParserResult;
 use sdl_ast::{Template, AST};
-use sdl_pest::{Assoc, Operator, Pair, Pairs, Parser, PrecClimber, Rule, SDLParser};
-use std::{hint::unreachable_unchecked, lazy::SyncLazy};
+use sdl_pest::{  Pair, Pairs, Parser,  Rule, SDLParser};
+
 use url::Url;
+use crate::parser::regroup::PREC_CLIMBER;
 
 macro_rules! debug_cases {
     ($i:ident) => {{
@@ -17,19 +18,6 @@ macro_rules! debug_cases {
         unreachable!();
     }};
 }
-
-#[rustfmt::skip]
-pub static PREC_CLIMBER: SyncLazy<PrecClimber<Rule>> = SyncLazy::new(|| {
-    use Rule::*;
-    use Assoc::*;
-    //TODO: use macro
-    PrecClimber::new(vec![
-        Operator::new(Set, Left),
-        Operator::new(Plus, Left) | Operator::new(Minus, Left),
-        Operator::new(Power, Right),
-        Operator::new(Dot, Left)
-    ])
-});
 
 impl ParserConfig {
     pub fn parse(&mut self, input: impl CanParse) -> ParserResult<AST> {
@@ -133,14 +121,6 @@ impl ParserConfig {
         return base;
     }
 
-    fn parse_node(&self, pairs: Pair<Rule>) -> AST {
-        let pair = pairs.into_inner().nth(0).unwrap();
-        match pair.as_rule() {
-            Rule::data => self.parse_data(pair),
-            _ => debug_cases!(pair),
-        }
-    }
-
     fn parse_pattern(&self, pairs: Pair<Rule>) -> AST {
         let pair = pairs.into_inner().nth(0).unwrap();
         match pair.as_rule() {
@@ -177,8 +157,11 @@ impl ParserConfig {
         match pair.as_rule() {
             Rule::template => self.parse_template(pair),
             Rule::list => self.parse_list(pair),
+            Rule::String => self.parse_string(pair),
             Rule::Number => self.parse_number(pair),
             Rule::Symbol => self.parse_symbol(pair),
+            Rule::SpecialValue => self.parse_special(pair),
+
             _ => debug_cases!(pair),
         }
     }
@@ -255,6 +238,14 @@ impl ParserConfig {
 
     fn parse_number(&self, pairs: Pair<Rule>) -> AST {
         let r = self.get_position(pairs.as_span());
-        AST::string(pairs.as_str().to_string(), r)
+        AST::integer(pairs.as_str().to_string(), r)
+    }
+    fn parse_special(&self, pairs: Pair<Rule>) -> AST {
+        let r = self.get_position(pairs.as_span());
+        match pairs.as_str() {
+            "true" => AST::boolean(true,r),
+            "false" => AST::boolean(false,r),
+            _ => AST::null(r),
+        }
     }
 }

@@ -12,7 +12,15 @@ pub fn parse(input: &str) -> AST {
 }
 
 const CODE: &'static str = r#"
-1 + 1
+% 1 == 1;
+
+% 1 is 1;
+
+% 1 != 2;
+
+1 is not 2;
+
+
 "#;
 
 const CODE3: &'static str = r#"
@@ -32,6 +40,6 @@ fn new() {
     let ast = parse(CODE);
     // println!("{:#?}", ast);
     let mut ctx = Context::default();
-    let out = ctx.evaluate(&ast);
+    let out = ctx.evaluate(&ast).unwrap();
     println!("{:#?}", out);
 }
