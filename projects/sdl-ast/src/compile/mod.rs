@@ -3,13 +3,8 @@ mod evaluate;
 mod value;
 mod variable;
 
-use crate::Result;
-use crate::{ASTKind, AST};
-use std::{
-    collections::HashMap,
-
-    rc::{ Weak},
-};
+use crate::{ASTKind, Result, AST};
+use std::{collections::HashMap, rc::Weak};
 pub use value::Value;
 pub use variable::Variable;
 

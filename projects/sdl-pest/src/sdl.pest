@@ -227,12 +227,13 @@ Infix = _{
   | Set
 }
 
-Additive = @{Plus|Minus}
+
 Logical = !{
     "is" ~ "not" | "!="
   | "is" | "=="
   | "not" ~ "in" | "in"
 }
+Additive = @{Plus|Minus}
 
 ///#56B6C2
 Set = @{"="}

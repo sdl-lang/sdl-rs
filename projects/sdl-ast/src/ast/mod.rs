@@ -1,21 +1,19 @@
 mod expression;
 mod loops;
+mod operations;
 mod symbol;
 mod template;
-mod operations;
 
 pub use crate::ast::{
     expression::{InfixExpression, UnaryExpression},
     loops::ForInLoop,
+    operations::Operation,
     symbol::Symbol,
     template::{Template, TemplateKind},
 };
 use crate::TextRange;
-use std::{
-
-    fmt::{self, Debug, Display, Formatter},
-};
-pub use crate::ast::operations::Operation;
+use std::fmt::{self, Debug, Display, Formatter};
+pub use crate::ast::loops::IfElseChain;
 
 #[derive(Clone, Eq, PartialEq)]
 pub struct AST {
@@ -29,6 +27,8 @@ pub enum ASTKind {
     Program(Vec<AST>),
     Block(Vec<AST>),
     Statement(Vec<AST>),
+
+    IfElseChain(Box<IfElseChain>),
     ForInLoop(Box<ForInLoop>),
 
     Expression(Box<AST>, bool),
@@ -60,7 +60,7 @@ impl Debug for AST {
         match &self.kind {
             ASTKind::Program(v) | ASTKind::Statement(v) => {
                 for e in v {
-                    Debug::fmt(e,f)?;
+                    Debug::fmt(e, f)?;
                     writeln!(f)?;
                 }
                 Ok(())
@@ -96,6 +96,12 @@ impl AST {
     pub fn statement(children: Vec<AST>, r: TextRange) -> Self {
         Self { kind: ASTKind::Statement(children), range: box_range(r) }
     }
+
+    pub fn if_else_chain(cds: Vec<AST>, acts: Vec<AST>, r: TextRange) -> Self {
+        let kind = ASTKind::IfElseChain(Box::new(IfElseChain::build(cds,acts)));
+        Self { kind, range: box_range(r) }
+    }
+
     pub fn for_in_loop(pattern: AST, terms: AST, block: AST, r: TextRange) -> Self {
         let kind = ASTKind::ForInLoop(Box::new(ForInLoop { pattern, terms, block }));
         Self { kind, range: box_range(r) }

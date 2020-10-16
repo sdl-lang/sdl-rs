@@ -5,10 +5,10 @@ mod regroup;
 pub use crate::parser::{can_parse::CanParse, config::ParserConfig};
 use crate::ParserResult;
 use sdl_ast::{Template, AST};
-use sdl_pest::{  Pair, Pairs, Parser,  Rule, SDLParser};
+use sdl_pest::{Pair, Pairs, Parser, Rule, SDLParser};
 
-use url::Url;
 use crate::parser::regroup::PREC_CLIMBER;
+use url::Url;
 
 macro_rules! debug_cases {
     ($i:ident) => {{
@@ -43,7 +43,9 @@ impl ParserConfig {
             let code = match pair.as_rule() {
                 Rule::WHITESPACE => continue,
                 Rule::expression => self.parse_expression(pair),
+                Rule::if_statement => self.parse_if_else(pair),
                 Rule::for_statement => self.parse_for_in(pair),
+
                 _ => debug_cases!(pair),
             };
             codes.push(code);
@@ -60,6 +62,20 @@ impl ParserConfig {
 }
 
 impl ParserConfig {
+    fn parse_if_else(&self, pairs: Pair<Rule>) -> AST {
+        let r = self.get_position(pairs.as_span());
+        let mut conditions = vec![];
+        let mut actions = vec![];
+        for pair in pairs.into_inner() {
+            match pair.as_rule() {
+                Rule::expr=>conditions.push(self.parse_expr(pair)),
+                Rule::block=>actions.push(self.parse_block(pair)),
+                _ => debug_cases!(pair),
+            };
+        }
+        AST::if_else_chain(conditions,actions,r)
+    }
+
     fn parse_for_in(&self, pairs: Pair<Rule>) -> AST {
         let r = self.get_position(pairs.as_span());
         // let mut codes = vec![];
@@ -110,7 +126,7 @@ impl ParserConfig {
         for pair in pairs.into_inner() {
             match pair.as_rule() {
                 Rule::WHITESPACE => continue,
-                Rule::chain_call=> base = self.parse_chain_call(pair),
+                Rule::chain_call => base = self.parse_chain_call(pair),
                 //Rule::term => base = self.parse_node(pair),
                 //Rule::Prefix => prefix.push(pair.as_str().to_string()),
                 //Rule::Suffix => suffix.push(pair.as_str().to_string()),
@@ -137,17 +153,16 @@ impl ParserConfig {
         // let mut terms = vec![];
         for pair in items {
             match pair.as_rule() {
-
                 _ => debug_cases!(pair),
             };
         }
-        return base
+        return base;
     }
 
-    fn parse_operation(&self, pairs: Pair<Rule>, kind:&str) -> AST {
+    fn parse_operation(&self, pairs: Pair<Rule>, kind: &str) -> AST {
         let r = self.get_position(pairs.as_span());
         let op = pairs.as_str();
-        AST::operation(op,kind,r)
+        AST::operation(op, kind, r)
     }
 }
 
@@ -194,10 +209,12 @@ impl ParserConfig {
     fn parse_text_mode(&self, pairs: Pair<Rule>) -> AST {
         let r = self.get_position(pairs.as_span());
         let mut terms = vec![];
+        let mut text = vec![];
         for pair in pairs.into_inner() {
             match pair.as_rule() {
                 Rule::WHITESPACE => continue,
                 Rule::statement => terms.push(self.parse_statement(pair)),
+                Rule::text_char=>text.push(pair.as_str()),
                 _ => debug_cases!(pair),
             };
         }
@@ -227,7 +244,7 @@ impl ParserConfig {
                 _ => debug_cases!(pair),
             };
         }
-        println!("{:?}",value);
+        println!("{:?}", value);
         AST::symbol(value, r)
     }
 
@@ -243,8 +260,8 @@ impl ParserConfig {
     fn parse_special(&self, pairs: Pair<Rule>) -> AST {
         let r = self.get_position(pairs.as_span());
         match pairs.as_str() {
-            "true" => AST::boolean(true,r),
-            "false" => AST::boolean(false,r),
+            "true" => AST::boolean(true, r),
+            "false" => AST::boolean(false, r),
             _ => AST::null(r),
         }
     }

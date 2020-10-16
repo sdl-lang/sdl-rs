@@ -12,20 +12,8 @@ pub fn parse(input: &str) -> AST {
 }
 
 const CODE: &'static str = r#"
-% 1 == 1;
-
-% 1 is 1;
-
-% 1 != 2;
-
-1 is not 2;
-
-
-"#;
-
-const CODE3: &'static str = r#"
-if 1 + 1 > 2 {
-    <p>bigger</p>
+if 1 + 1 is 2 {
+    <p>eq</p>
 }
 "#;
 
