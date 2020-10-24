@@ -7,6 +7,24 @@ impl ASTKind {
             _ => false,
         }
     }
+    pub fn is_bool(&self) -> bool {
+        match self {
+            Self::Boolean { .. } => true,
+            _ => false,
+        }
+    }
+    pub fn is_true(&self) -> bool {
+        match self {
+            Self::Boolean(true) => true,
+            _ => false,
+        }
+    }
+    pub fn is_false(&self) -> bool {
+        match self {
+            Self::Boolean(false) => true,
+            _ => false,
+        }
+    }
     pub fn is_string(&self) -> bool {
         match self {
             Self::String { .. } => true,

@@ -1,5 +1,6 @@
 use super::*;
-use crate::ast::{ForInLoop, InfixExpression, Symbol};
+use crate::ast::{ForInLoop, IfElseChain, InfixExpression, Symbol};
+use crate::Template;
 
 impl AST {
     pub fn evaluate(&self, ctx: &mut Context) -> Result<AST> {
@@ -22,9 +23,12 @@ impl ASTKind {
             }
             ASTKind::InfixExpression(inner) => inner.evaluate(ctx)?,
 
+            ASTKind::IfElseChain(inner) => inner.evaluate(ctx)?,
             ASTKind::ForInLoop(inner) => inner.evaluate(ctx)?,
+            ASTKind::Template(inner) => inner.evaluate(ctx)?,
             ASTKind::Symbol(inner) => inner.evaluate(ctx)?,
             ASTKind::Null | ASTKind::Boolean { .. } | ASTKind::String { .. } => self.to_owned(),
+
             _ => unimplemented!("ASTKind::{:?} => {{}}", self),
         };
         Ok(result)
@@ -42,6 +46,21 @@ impl ForInLoop {
     }
 }
 
+impl IfElseChain {
+    pub fn evaluate(&self, ctx: &mut Context) -> Result<ASTKind> {
+        for (cds, act) in &self.pairs {
+            match cds.evaluate(ctx)?.kind {
+                ASTKind::Boolean(true) => return Ok(act.evaluate(ctx)?.kind),
+                _ => continue,
+            }
+        }
+        match &self.cover {
+            Some(last) => Ok(last.evaluate(ctx)?.kind),
+            None => Ok(ASTKind::Null),
+        }
+    }
+}
+
 impl InfixExpression {
     pub fn evaluate(&self, ctx: &mut Context) -> Result<ASTKind> {
         let result = match self.op.as_string().as_str() {
@@ -54,6 +73,13 @@ impl InfixExpression {
             _ => unimplemented!("Operation: {}", self.op.as_string().as_str()),
         };
         Ok(result)
+    }
+}
+
+impl Template {
+    pub fn evaluate(&self, ctx: &mut Context) -> Result<ASTKind> {
+        let norm = self.regularized();
+        Ok(ASTKind::TemplateSimplified(Box::from(norm)))
     }
 }
 

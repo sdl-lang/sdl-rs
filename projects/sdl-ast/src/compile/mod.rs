@@ -1,5 +1,7 @@
 #[allow(unused_variables)]
 mod evaluate;
+#[allow(unused_variables)]
+mod renderer;
 mod value;
 mod variable;
 
@@ -23,6 +25,9 @@ impl Default for Context {
 impl Context {
     pub fn evaluate(&mut self, code: &AST) -> Result<AST> {
         code.evaluate(self)
+    }
+    pub fn render(&mut self, code: &AST) -> Result<String> {
+        code.render(self)
     }
 }
 
