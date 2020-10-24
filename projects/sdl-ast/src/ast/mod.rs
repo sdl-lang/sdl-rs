@@ -6,14 +6,16 @@ mod template;
 
 pub use crate::ast::{
     expression::{InfixExpression, UnaryExpression},
-    loops::ForInLoop,
+    loops::{ForInLoop, IfElseChain},
     operations::Operation,
     symbol::Symbol,
-    template::{Template, TemplateKind},
+    template::{Template, TemplateKind, TemplateSimplified},
 };
 use crate::TextRange;
-use std::fmt::{self, Debug, Display, Formatter};
-pub use crate::ast::loops::IfElseChain;
+use std::{
+    collections::{BTreeMap, BTreeSet},
+    fmt::{self, Debug, Display, Formatter},
+};
 
 #[derive(Clone, Eq, PartialEq)]
 pub struct AST {
@@ -37,6 +39,7 @@ pub enum ASTKind {
     SuffixExpression(Box<UnaryExpression>),
 
     Template(Box<Template>),
+    TemplateSimplified(Box<TemplateSimplified>),
     Text,
     List(Vec<AST>),
     Dict,
@@ -98,7 +101,7 @@ impl AST {
     }
 
     pub fn if_else_chain(cds: Vec<AST>, acts: Vec<AST>, r: TextRange) -> Self {
-        let kind = ASTKind::IfElseChain(Box::new(IfElseChain::build(cds,acts)));
+        let kind = ASTKind::IfElseChain(Box::new(IfElseChain::build(cds, acts)));
         Self { kind, range: box_range(r) }
     }
 

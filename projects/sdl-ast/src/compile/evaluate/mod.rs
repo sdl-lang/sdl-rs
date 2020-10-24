@@ -1,6 +1,8 @@
 use super::*;
-use crate::ast::{ForInLoop, IfElseChain, InfixExpression, Symbol};
-use crate::Template;
+use crate::{
+    ast::{ForInLoop, IfElseChain, InfixExpression, Symbol},
+    Template,
+};
 
 impl AST {
     pub fn evaluate(&self, ctx: &mut Context) -> Result<AST> {

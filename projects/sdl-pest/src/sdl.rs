@@ -74,6 +74,7 @@ pub enum Rule {
     HTMLComment,
     HtmlDTD,
     html_term,
+    html_pair,
     text_mode,
     text_char,
     HTMLEscape,
@@ -114,8 +115,8 @@ pub enum Rule {
     Prefix,
     Suffix,
     Infix,
-    Additive,
     Logical,
+    Additive,
     Set,
     Or,
     LazyOr,
@@ -135,10 +136,6 @@ pub enum Rule {
     RightShift,
     LessEqual,
     GraterEqual,
-    Equivalent,
-    NotEquivalent,
-    Equal,
-    NotEqual,
     Plus,
     Minus,
     Power,
@@ -282,7 +279,7 @@ impl ::pest::Parser<Rule> for SDLParser {
                 #[inline]
                 #[allow(non_snake_case, unused_variables)]
                 pub fn if_else_block(state: Box<::pest::ParserState<Rule>>) -> ::pest::ParseResult<Box<::pest::ParserState<Rule>>> {
-                    state.sequence(|state| state.match_string("else").or_else(|state| state.match_string("es")).and_then(|state| super::hidden::skip(state)).and_then(|state| self::block(state)))
+                    state.sequence(|state| state.match_string("else").or_else(|state| state.match_string("es")).or_else(|state| state.match_string("el")).and_then(|state| super::hidden::skip(state)).and_then(|state| self::block(state)))
                 }
                 #[inline]
                 #[allow(non_snake_case, unused_variables)]
@@ -527,7 +524,12 @@ impl ::pest::Parser<Rule> for SDLParser {
                 #[inline]
                 #[allow(non_snake_case, unused_variables)]
                 pub fn html_term(state: Box<::pest::ParserState<Rule>>) -> ::pest::ParseResult<Box<::pest::ParserState<Rule>>> {
-                    state.restore_on_err(|state| state.sequence(|state| self::BadSymbol(state).and_then(|state| super::hidden::skip(state)).and_then(|state| self::Set(state)).and_then(|state| super::hidden::skip(state)).and_then(|state| self::term(state)))).or_else(|state| self::BadSymbol(state))
+                    state.restore_on_err(|state| self::html_pair(state)).or_else(|state| self::BadSymbol(state))
+                }
+                #[inline]
+                #[allow(non_snake_case, unused_variables)]
+                pub fn html_pair(state: Box<::pest::ParserState<Rule>>) -> ::pest::ParseResult<Box<::pest::ParserState<Rule>>> {
+                    state.rule(Rule::html_pair, |state| state.sequence(|state| self::BadSymbol(state).and_then(|state| super::hidden::skip(state)).and_then(|state| self::Set(state)).and_then(|state| super::hidden::skip(state)).and_then(|state| self::term(state))))
                 }
                 #[inline]
                 #[allow(non_snake_case, unused_variables)]
@@ -727,17 +729,17 @@ impl ::pest::Parser<Rule> for SDLParser {
                 #[inline]
                 #[allow(non_snake_case, unused_variables)]
                 pub fn Infix(state: Box<::pest::ParserState<Rule>>) -> ::pest::ParseResult<Box<::pest::ParserState<Rule>>> {
-                    self::Logical(state).or_else(|state| self::Additive(state)).or_else(|state| self::Power(state)).or_else(|state| self::Set(state))
-                }
-                #[inline]
-                #[allow(non_snake_case, unused_variables)]
-                pub fn Additive(state: Box<::pest::ParserState<Rule>>) -> ::pest::ParseResult<Box<::pest::ParserState<Rule>>> {
-                    state.rule(Rule::Additive, |state| state.atomic(::pest::Atomicity::Atomic, |state| self::Plus(state).or_else(|state| self::Minus(state))))
+                    self::Logical(state).or_else(|state| self::Additive(state)).or_else(|state| self::Star(state)).or_else(|state| self::Power(state)).or_else(|state| self::Set(state))
                 }
                 #[inline]
                 #[allow(non_snake_case, unused_variables)]
                 pub fn Logical(state: Box<::pest::ParserState<Rule>>) -> ::pest::ParseResult<Box<::pest::ParserState<Rule>>> {
                     state.atomic(::pest::Atomicity::NonAtomic, |state| state.rule(Rule::Logical, |state| state.sequence(|state| state.match_string("is").and_then(|state| super::hidden::skip(state)).and_then(|state| state.match_string("not"))).or_else(|state| state.match_string("!=")).or_else(|state| state.match_string("is")).or_else(|state| state.match_string("==")).or_else(|state| state.sequence(|state| state.match_string("not").and_then(|state| super::hidden::skip(state)).and_then(|state| state.match_string("in")))).or_else(|state| state.match_string("in"))))
+                }
+                #[inline]
+                #[allow(non_snake_case, unused_variables)]
+                pub fn Additive(state: Box<::pest::ParserState<Rule>>) -> ::pest::ParseResult<Box<::pest::ParserState<Rule>>> {
+                    state.rule(Rule::Additive, |state| state.atomic(::pest::Atomicity::Atomic, |state| self::Plus(state).or_else(|state| self::Minus(state))))
                 }
                 #[inline]
                 #[allow(non_snake_case, unused_variables)]
@@ -833,26 +835,6 @@ impl ::pest::Parser<Rule> for SDLParser {
                 #[allow(non_snake_case, unused_variables)]
                 pub fn GraterEqual(state: Box<::pest::ParserState<Rule>>) -> ::pest::ParseResult<Box<::pest::ParserState<Rule>>> {
                     state.rule(Rule::GraterEqual, |state| state.atomic(::pest::Atomicity::Atomic, |state| state.match_string(">=")))
-                }
-                #[inline]
-                #[allow(non_snake_case, unused_variables)]
-                pub fn Equivalent(state: Box<::pest::ParserState<Rule>>) -> ::pest::ParseResult<Box<::pest::ParserState<Rule>>> {
-                    state.rule(Rule::Equivalent, |state| state.atomic(::pest::Atomicity::Atomic, |state| state.match_string("===")))
-                }
-                #[inline]
-                #[allow(non_snake_case, unused_variables)]
-                pub fn NotEquivalent(state: Box<::pest::ParserState<Rule>>) -> ::pest::ParseResult<Box<::pest::ParserState<Rule>>> {
-                    state.rule(Rule::NotEquivalent, |state| state.atomic(::pest::Atomicity::Atomic, |state| state.match_string("=!=")))
-                }
-                #[inline]
-                #[allow(non_snake_case, unused_variables)]
-                pub fn Equal(state: Box<::pest::ParserState<Rule>>) -> ::pest::ParseResult<Box<::pest::ParserState<Rule>>> {
-                    state.rule(Rule::Equal, |state| state.atomic(::pest::Atomicity::Atomic, |state| state.match_string("==")))
-                }
-                #[inline]
-                #[allow(non_snake_case, unused_variables)]
-                pub fn NotEqual(state: Box<::pest::ParserState<Rule>>) -> ::pest::ParseResult<Box<::pest::ParserState<Rule>>> {
-                    state.rule(Rule::NotEqual, |state| state.atomic(::pest::Atomicity::Atomic, |state| state.match_string("!=").or_else(|state| state.match_string("≠"))))
                 }
                 #[inline]
                 #[allow(non_snake_case, unused_variables)]
@@ -1104,6 +1086,7 @@ impl ::pest::Parser<Rule> for SDLParser {
             Rule::HTMLComment => rules::HTMLComment(state),
             Rule::HtmlDTD => rules::HtmlDTD(state),
             Rule::html_term => rules::html_term(state),
+            Rule::html_pair => rules::html_pair(state),
             Rule::text_mode => rules::text_mode(state),
             Rule::text_char => rules::text_char(state),
             Rule::HTMLEscape => rules::HTMLEscape(state),
@@ -1144,8 +1127,8 @@ impl ::pest::Parser<Rule> for SDLParser {
             Rule::Prefix => rules::Prefix(state),
             Rule::Suffix => rules::Suffix(state),
             Rule::Infix => rules::Infix(state),
-            Rule::Additive => rules::Additive(state),
             Rule::Logical => rules::Logical(state),
+            Rule::Additive => rules::Additive(state),
             Rule::Set => rules::Set(state),
             Rule::Or => rules::Or(state),
             Rule::LazyOr => rules::LazyOr(state),
@@ -1165,10 +1148,6 @@ impl ::pest::Parser<Rule> for SDLParser {
             Rule::RightShift => rules::RightShift(state),
             Rule::LessEqual => rules::LessEqual(state),
             Rule::GraterEqual => rules::GraterEqual(state),
-            Rule::Equivalent => rules::Equivalent(state),
-            Rule::NotEquivalent => rules::NotEquivalent(state),
-            Rule::Equal => rules::Equal(state),
-            Rule::NotEqual => rules::NotEqual(state),
             Rule::Plus => rules::Plus(state),
             Rule::Minus => rules::Minus(state),
             Rule::Power => rules::Power(state),

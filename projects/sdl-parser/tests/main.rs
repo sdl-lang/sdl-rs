@@ -12,22 +12,15 @@ pub fn parse(input: &str) -> AST {
 }
 
 const CODE: &'static str = r#"
-if 1 + 1 is 2 {
-    <p>eq</p>
-}
-"#;
-
-const CODE2: &'static str = r#"
-for a in [1, 2, 3] {
-    <p>{a}</p>
-}
+<img rel src="https://avatars.githubusercontent.com/u/17541209?s=60&amp;v=4" alt="@GalAster" size="20" height="20" width="20" class="avatar-user avatar avatar--small ">
 "#;
 
 #[test]
 fn new() {
-    let ast = parse(CODE);
+    let out = parse(CODE);
     // println!("{:#?}", ast);
     let mut ctx = Context::default();
-    let out = ctx.evaluate(&ast).unwrap();
+    let out = ctx.evaluate(&out).unwrap();
+    let out = ctx.render(&out).unwrap();
     println!("{:#?}", out);
 }

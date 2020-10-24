@@ -38,7 +38,7 @@ if_nested = _{"if" ~ condition ~ block ~ else_if_block+}
 if_single_else = _{"if" ~ condition ~ block ~ if_else_block}
 if_nested_else = _{"if" ~ condition ~ block ~ else_if_block+ ~ if_else_block}
 else_if_block = _{("else" ~ "if"|"ef") ~ condition ~ block}
-if_else_block = _{("else"|"es") ~ block}
+if_else_block = _{("else"|"es"|"el") ~ block}
 /*====================================================================================================================*/
 for_statement = {"for" ~ pattern ~ for_if? ~ "in"~ expr ~ block ~ for_else?}
 for_if = {"if" ~ expr}
@@ -141,7 +141,8 @@ BadSymbol = @{(XID_START|":"|"_") ~ (XID_CONTINUE|":"|"-"|".")*}
 HTMLComment = {"<!--" ~ (!"-->" ~ ANY*) ~ "-->"}
 HtmlDTD = {"<!" ~ "DOCTYPE" ~ (!">" ~ ANY*) ~ ">"}
 
-html_term = _{BadSymbol ~ Set ~ term|BadSymbol}
+html_term = _{html_pair|BadSymbol}
+html_pair = {BadSymbol ~ Set ~ term}
 
 text_mode = ${
     "{" ~ statement* ~ "}"|template+|(HTMLEscape|text_char)+
@@ -213,7 +214,7 @@ SYMBOL = @{
 /*====================================================================================================================*/
 //!Orange: Modifier
 Modifier = !{(!(SYMBOL~(Set|Colon|Semicolon|"{"|"}"|"("|")"|"<"|">")) ~SYMBOL)}
-//!#56B6C2: Prefix|Infix|Postfix|Additive|Logical
+//!#56B6C2: Prefix|Infix|Suffix|Additive|Logical
 Prefix = @{
     (Bang|Plus|Minus|Star)
 }
@@ -223,6 +224,7 @@ Suffix = @{
 Infix = _{
     Logical
   | Additive
+  | Star
   | Power
   | Set
 }
@@ -265,24 +267,11 @@ LessEqual =@{"<="}
 GraterEqual =@{">="}
 
 
-
-Equivalent =@{"==="}
-NotEquivalent =@{"=!="}
-Equal =@{"=="}
-NotEqual =@{"!="|"≠"} //U+2260
-
-
-
-
-
-
-
 Plus =@{"+"}
 Minus =@{"-"}
 
 Power = @{"^"}
 Surd = @{"√"} //U+221A
-
 
 Increase =@{"++"}
 Decrease =@{"--"}
@@ -290,9 +279,7 @@ Decrease =@{"--"}
 
 To =@{"->"}
 
-
 Elvis =@{":?"}
-
 
 Quote =@{"`"}
 Acute =@{"´"} // U+00B4

@@ -42,7 +42,7 @@ impl Symbol {
             .collect()
     }
     pub fn name(&self) -> String {
-        match &self.path.iter().last().unwrap().kind {
+        match &self.path.last().unwrap().kind {
             ASTKind::String(s) => s.to_owned(),
             _ => unreachable!(),
         }

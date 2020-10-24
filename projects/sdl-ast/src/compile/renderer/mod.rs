@@ -1,5 +1,5 @@
 use super::*;
-use crate::ast::{TemplateSimplified, TemplateKind};
+use crate::ast::{TemplateKind, TemplateSimplified};
 
 impl AST {
     pub fn render(&self, ctx: &mut Context) -> Result<String> {
@@ -10,9 +10,7 @@ impl AST {
 impl ASTKind {
     pub fn render(&self, ctx: &mut Context) -> Result<String> {
         let result = match self {
-            ASTKind::Program(v)|ASTKind::Statement(v) => {
-                render_vec_ast(v,ctx)?
-            }
+            ASTKind::Program(v) | ASTKind::Statement(v) => render_vec_ast(v, ctx)?,
 
             ASTKind::TemplateSimplified(inner) => inner.render(ctx)?,
 
@@ -28,23 +26,18 @@ impl ASTKind {
 impl TemplateSimplified {
     pub fn render(&self, ctx: &mut Context) -> Result<String> {
         let tag = match &self.tag {
-            Some(s) => {s.to_owned()},
-            None => {"Fragment".to_string()}
+            Some(s) => s.to_owned(),
+            None => "Fragment".to_string(),
         };
 
         let result = match self.kind {
-            TemplateKind::OpenCloseTemplate => {
-                format!("<{tag}> </{tag}>", tag=tag)
-            }
-            TemplateKind::HTMLBadTemplate => {
-                format!("<{tag}>", tag=tag)
-            }
-            _ => unreachable!()
+            TemplateKind::OpenCloseTemplate => format!("<{tag}> </{tag}>", tag = tag),
+            TemplateKind::HTMLBadTemplate => format!("<{tag}>", tag = tag),
+            _ => unreachable!(),
         };
         Ok(result)
     }
 }
-
 
 pub fn render_vec_ast(v: &[AST], ctx: &mut Context) -> Result<String> {
     let mut out = String::new();

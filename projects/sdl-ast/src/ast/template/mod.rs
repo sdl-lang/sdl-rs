@@ -1,16 +1,5 @@
 use super::*;
 
-#[derive(Clone, Eq, PartialEq)]
-pub struct Template {
-    kind: TemplateKind,
-    tag: Option<AST>,
-    end: Option<AST>,
-    id: Option<AST>,
-    class: Option<AST>,
-    attributes: Vec<AST>,
-    arguments: Vec<AST>,
-}
-
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum TemplateKind {
     /// eg: <img> </img>
@@ -23,9 +12,41 @@ pub enum TemplateKind {
     SDLSpecialTemplate,
 }
 
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct Template {
+    pub kind: TemplateKind,
+    pub tag: Option<AST>,
+    pub end: Option<AST>,
+    pub id: Option<AST>,
+    pub class: Option<AST>,
+    pub attributes: Vec<AST>,
+    pub arguments: Vec<(AST, AST)>,
+    pub children: Vec<AST>,
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct TemplateSimplified {
+    pub kind: TemplateKind,
+    pub tag: Option<String>,
+    pub id: Option<AST>,
+    pub class: Option<AST>,
+    pub attributes: BTreeSet<String>,
+    pub arguments: BTreeMap<String, AST>,
+    pub children: Vec<AST>,
+}
+
 impl Default for Template {
     fn default() -> Self {
-        Self { kind: TemplateKind::OpenCloseTemplate, tag: None, end: None, id: None, class: None, attributes: vec![], arguments: vec![] }
+        Self {
+            kind: TemplateKind::OpenCloseTemplate,
+            tag: None,
+            end: None,
+            id: None,
+            class: None,
+            attributes: vec![],
+            arguments: vec![],
+            children: vec![],
+        }
     }
 }
 
@@ -56,11 +77,26 @@ impl Template {
     pub fn set_attributes(&mut self, values: Vec<AST>) {
         self.attributes = values
     }
-    pub fn set_arguments(&mut self, values: Vec<AST>) {
+    pub fn set_arguments(&mut self, values: Vec<(AST, AST)>) {
         self.arguments = values
     }
 }
 
+impl Template {
+    pub fn regularized(&self) -> TemplateSimplified {
+        TemplateSimplified {
+            kind: self.kind.to_owned(),
+            tag: None,
+            id: None,
+            class: None,
+            attributes: Default::default(),
+            arguments: Default::default(),
+            children: vec![],
+        }
+    }
+}
+
+/*
 impl Debug for Template {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         match &self.tag {
@@ -78,3 +114,22 @@ impl Debug for Template {
         }
     }
 }
+
+impl Debug for TemplateSimplified {
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+        match &self.tag {
+            None => write!(f, "<>"),
+            Some(s) => {
+                let mut out = f.debug_struct(&format!("<{}>", s.as_string()));
+                if self.attributes.len() != 0 {
+                    out.field("attributes", &self.attributes);
+                }
+                if self.arguments.len() != 0 {
+                    out.field("arguments", &self.arguments);
+                }
+                out.finish()
+            }
+        }
+    }
+}
+*/
