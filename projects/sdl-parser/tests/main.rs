@@ -1,4 +1,4 @@
-use sdl_ast::{Context, AST};
+use sdl_ast::{SDLContext, AST};
 use sdl_parser::ParserConfig;
 
 #[test]
@@ -19,7 +19,7 @@ const CODE: &'static str = r#"
 fn new() {
     let out = parse(CODE);
     // println!("{:#?}", ast);
-    let mut ctx = Context::default();
+    let mut ctx = SDLContext::default();
     let out = ctx.evaluate(&out).unwrap();
     let out = ctx.render(&out).unwrap();
     println!("{:#?}", out);

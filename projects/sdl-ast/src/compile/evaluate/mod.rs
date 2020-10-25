@@ -5,14 +5,14 @@ use crate::{
 };
 
 impl AST {
-    pub fn evaluate(&self, ctx: &mut Context) -> Result<AST> {
+    pub fn evaluate(&self, ctx: &mut SDLContext) -> Result<AST> {
         let kind = self.kind.evaluate(ctx)?;
         Ok(AST { kind, range: self.range.to_owned() })
     }
 }
 
 impl ASTKind {
-    pub fn evaluate(&self, ctx: &mut Context) -> Result<ASTKind> {
+    pub fn evaluate(&self, ctx: &mut SDLContext) -> Result<ASTKind> {
         let result = match self {
             ASTKind::Program(v) => ASTKind::Program(evaluate_vec_ast(v, ctx)?),
             ASTKind::Statement(v) => ASTKind::Statement(evaluate_vec_ast(v, ctx)?),
@@ -38,7 +38,7 @@ impl ASTKind {
 }
 
 impl ForInLoop {
-    pub fn evaluate(&self, ctx: &mut Context) -> Result<ASTKind> {
+    pub fn evaluate(&self, ctx: &mut SDLContext) -> Result<ASTKind> {
         match &self.pattern.kind {
             ASTKind::Symbol(s) => println!("{:#?}", s.name()),
             _ => unreachable!(),
@@ -49,7 +49,7 @@ impl ForInLoop {
 }
 
 impl IfElseChain {
-    pub fn evaluate(&self, ctx: &mut Context) -> Result<ASTKind> {
+    pub fn evaluate(&self, ctx: &mut SDLContext) -> Result<ASTKind> {
         for (cds, act) in &self.pairs {
             match cds.evaluate(ctx)?.kind {
                 ASTKind::Boolean(true) => return Ok(act.evaluate(ctx)?.kind),
@@ -64,7 +64,7 @@ impl IfElseChain {
 }
 
 impl InfixExpression {
-    pub fn evaluate(&self, ctx: &mut Context) -> Result<ASTKind> {
+    pub fn evaluate(&self, ctx: &mut SDLContext) -> Result<ASTKind> {
         let result = match self.op.as_string().as_str() {
             "+" => match (&self.lhs.kind, &self.rhs.kind) {
                 (ASTKind::String(lhs), ASTKind::String(rhs)) => ASTKind::String(String::from(lhs) + rhs),
@@ -79,19 +79,19 @@ impl InfixExpression {
 }
 
 impl Template {
-    pub fn evaluate(&self, ctx: &mut Context) -> Result<ASTKind> {
+    pub fn evaluate(&self, ctx: &mut SDLContext) -> Result<ASTKind> {
         let norm = self.regularized();
         Ok(ASTKind::TemplateSimplified(Box::from(norm)))
     }
 }
 
 impl Symbol {
-    pub fn evaluate(&self, ctx: &mut Context) -> Result<ASTKind> {
+    pub fn evaluate(&self, ctx: &mut SDLContext) -> Result<ASTKind> {
         Ok(ASTKind::String(self.name()))
     }
 }
 
-pub fn evaluate_vec_ast(v: &[AST], ctx: &mut Context) -> Result<Vec<AST>> {
+pub fn evaluate_vec_ast(v: &[AST], ctx: &mut SDLContext) -> Result<Vec<AST>> {
     let mut collected = Vec::with_capacity(v.len());
     for e in v {
         let out = e.evaluate(ctx)?;

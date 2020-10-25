@@ -107,42 +107,56 @@ apply_kv = {SYMBOL~ Colon ~ expr|expr}
 
 
 ///#61AFEF
-function_name = {SYMBOL}
+function_name   = {SYMBOL}
 function_module = {(namespace ~ Dot)? ~ (SYMBOL ~ Dot)*}
 /*====================================================================================================================*/
 expression = {expr ~ eos?}
-expr = !{term ~ (Infix ~ term)*}
-term =  {Prefix* ~ ("(" ~ expr ~ ")"|chain_call)}
-tuple = {"(" ~ expr ~ (Comma ~ expr)* ~ Comma? ~ ")"}
-array = {"[" ~ expr ~ (Comma ~ expr)* ~ Comma? ~ "]"}
+expr       = !{term ~ (Infix ~ term)*}
+term       =  {Prefix* ~ ("(" ~ expr ~ ")"|chain_call)}
 chain_call = {data ~ (slice|apply|Suffix|dot_call)*}
-dot_call = {Dot ~ Integer|Dot ~ Symbol ~ apply?}
+dot_call   = {Dot ~ Integer|Dot ~ Symbol ~ apply?}
+/*====================================================================================================================*/
+data = {template|dict|list|SpecialValue|Number|String|Symbol}
+
+tuple = {"(" ~ expr ~ (Comma ~ expr)* ~ Comma? ~ ")"}
+
+list = {"[" ~ expr? ~ (Comma ~ expr)* ~ Comma? ~ "]"}
+
+dict      =  {"{" ~ dict_pair? ~ (Comma ~ dict_pair)* ~ Comma? ~ "}"}
+dict_pair = !{dict_key ~ Colon ~ expr}
+dict_key  = _{Integer | SYMBOL | String}
+
+slice       = !{"[" ~ index ~ (Comma ~ index)* ~ Comma? ~ "]"}
+index       =  {index_step|index_range|expr}
+index_range = !{expr? ~ Colon ~ expr?}
+index_step  = !{expr? ~ Colon ~ expr? ~ Colon ~ expr?}
 /*====================================================================================================================*/
 ///Green
 template = {
-    EmptyTemplate|SDLFragment|Fragment
+    SDLFragment|Fragment|EmptyTemplate
   | SDLOpenClose|OpenClose|HTMLBad|SelfClose
   | HtmlDTD|HTMLComment
 }
-EmptyTemplate = {"</>"}
-Fragment = {"<>" ~ text_mode* ~ "</>" }
-SDLFragment = {"<\\>" ~ statement* ~ "</>" }
-OpenClose = {"<" ~ PUSH(Symbol) ~ html_term* ~ ">" ~ text_mode* ~ "</" ~ POP ~ ">" }
-SDLOpenClose = {"<\\" ~ PUSH(Symbol) ~ html_term* ~ ">" ~ statement* ~ "</" ~ POP ~ ">" }
-SelfClose = {"<" ~ Symbol ~ html_term* ~ "/>" }
-HTMLBad = {"<" ~ HTMLBadSymbol ~ html_term* ~ ">" }
+
+EmptyTemplate = {"<|>"}
+Fragment      = {"<>" ~ text_mode* ~ "</>" }
+SDLFragment   = {"<\\>" ~ statement* ~ "</>" }
+OpenClose     = {"<" ~ PUSH(Symbol) ~ html_term* ~ ">" ~ text_mode* ~ "</" ~ POP ~ ">" }
+SDLOpenClose  = {"<\\" ~ PUSH(Symbol) ~ html_term* ~ ">" ~ statement* ~ "</" ~ POP ~ ">" }
+SelfClose     = {"<" ~ Symbol ~ html_term* ~ "/>" }
+HTMLBad       = {"<" ~ HTMLBadSymbol ~ html_term* ~ ">" }
 HTMLBadSymbol = @{
     "img"|"hr"|"br"|"input"|"link"|"meta"
   | "area"|"base"|"col"|"wbr"
   | "command"|"embed"|"keygen"|"param"|"source"|"track"
 }
-BadSymbol = @{(XID_START|":"|"_") ~ (XID_CONTINUE|":"|"-"|".")*}
+BadSymbol     = @{(XID_START|":"|"_") ~ (XID_CONTINUE|":"|"-"|".")*}
 //!Gray: HTMLComment|HtmlDTD
 HTMLComment = {"<!--" ~ (!"-->" ~ ANY*) ~ "-->"}
-HtmlDTD = {"<!" ~ "DOCTYPE" ~ (!">" ~ ANY*) ~ ">"}
+HtmlDTD     = {"<!" ~ "DOCTYPE" ~ (!">" ~ ANY*) ~ ">"}
 
 html_term = _{html_pair|BadSymbol}
-html_pair = {BadSymbol ~ Set ~ term}
+html_pair = {BadSymbol ~ "=" ~ term}
 
 text_mode = ${
     "{" ~ statement* ~ "}"|template+|(HTMLEscape|text_char)+
@@ -154,19 +168,8 @@ text_char = @{
 }
 HTMLEscape = @{
     "&" ~ ASCII_ALPHA_LOWER ~ ";" |
-    "&#" ~ Integer ~";"
+    "&#" ~ Integer ~";" | ">"
 }
-
-/*====================================================================================================================*/
-data = {template|dict|list|SpecialValue|Number|String|Symbol}
-dict = {"{" ~ key_value? ~ (Comma ~ key_value)* ~ Comma? ~ "}"}
-list = {"[" ~ expr? ~ (Comma ~ expr)* ~ Comma? ~ "]"}
-slice = !{"[" ~ index ~ (Comma ~ index)* ~ Comma? ~ "]"}
-index ={index_step|index_range|expr}
-key_value =!{key_valid ~ Colon ~ expr}
-key_valid =!{Integer | SYMBOL | String}
-index_range = !{expr? ~ Colon ~ expr?}
-index_step = !{expr? ~ Colon ~ expr? ~ Colon ~ expr?}
 /*====================================================================================================================*/
 ///#D19A66
 SpecialValue = @{"true"|"false"|"null"}
@@ -205,12 +208,12 @@ COMMENT = {
 MultiLineComment = ${"%%%" ~ (MultiLineComment | !"%%%" ~ ANY)* ~ "%%%"}
 /*====================================================================================================================*/
 ///#61AFEF
-Symbol = ${namespace|SYMBOL}
-namespace = ${SYMBOL ~ (Proportion ~ SYMBOL)+}
 SYMBOL = @{
     XID_START ~ XID_CONTINUE*
   | Underline ~ XID_CONTINUE+
 }
+Symbol    = ${namespace|SYMBOL}
+namespace = ${SYMBOL ~ (Proportion ~ SYMBOL)+}
 /*====================================================================================================================*/
 //!Orange: Modifier
 Modifier = !{(!(SYMBOL~(Set|Colon|Semicolon|"{"|"}"|"("|")"|"<"|">")) ~SYMBOL)}
@@ -222,21 +225,24 @@ Suffix = @{
    (Bang | Question)
 }
 Infix = _{
-    Logical
+    Compare
   | Additive
-  | Star
+  | Multiplied
   | Power
   | Set
 }
 
-
-Logical = !{
+Logical = @{
+    "a"
+}
+Compare = !{
     "is" ~ "not" | "!="
   | "is" | "=="
   | "not" ~ "in" | "in"
+  | ">" | "<"
 }
-Additive = @{Plus|Minus}
-
+Additive   = @{Plus|Minus}
+Multiplied = @{Star|"/"}
 ///#56B6C2
 Set = @{"="}
 
@@ -245,7 +251,7 @@ LazyOr = @{"||"}
 
 
 Star =@{"*"}
-Slash =@{"/"}
+
 Solidus = @{"\\"}
 
 Proportion = @{"::"|"∷"}//U+2237

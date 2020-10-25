@@ -238,13 +238,16 @@ impl ParserConfig {
         AST::list(terms, r)
     }
     fn parse_pair(&self, pairs: Pair<Rule>) -> (AST, AST) {
+        let (mut key, mut value) = Default::default();
         for pair in pairs.into_inner() {
             match pair.as_rule() {
-                Rule::BadSymbol => continue,
+                Rule::Set => continue,
+                Rule::BadSymbol => key = self.parse_string(pair),
+                Rule::term => value = self.parse_term(pair),
                 _ => debug_cases!(pair),
             };
         }
-        unimplemented!()
+        (key, value)
     }
     fn parse_symbol(&self, pairs: Pair<Rule>) -> AST {
         let r = self.get_position(pairs.as_span());
