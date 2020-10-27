@@ -1,6 +1,4 @@
 #[allow(unused_variables)]
-mod evaluate;
-#[allow(unused_variables)]
 mod renderer;
 mod value;
 mod variable;
@@ -9,6 +7,7 @@ use crate::{ASTKind, Result, AST};
 use std::{collections::HashMap, rc::Weak};
 pub use value::Value;
 pub use variable::Variable;
+use crate::traits::Evaluate;
 
 #[derive(Clone, Debug)]
 pub struct SDLContext {
@@ -16,6 +15,7 @@ pub struct SDLContext {
     father: Option<Weak<SDLContext>>,
     variables: HashMap<String, Variable>,
 }
+
 #[derive(Clone, Debug)]
 pub struct SDLContextConfig {
     pub is_debug: bool,
@@ -34,7 +34,7 @@ impl Default for SDLContextConfig {
 }
 
 impl SDLContext {
-    pub fn evaluate(&mut self, code: &AST) -> Result<AST> {
+    pub fn evaluate(&mut self, code: &AST) -> Result<Value> {
         code.evaluate(self)
     }
     pub fn render(&mut self, code: &AST) -> Result<String> {
