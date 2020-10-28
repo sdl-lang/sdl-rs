@@ -9,13 +9,10 @@ pub use crate::ast::{
     loops::{ForInLoop, IfElseChain},
     operations::Operation,
     symbol::Symbol,
-    template::{Template, TemplateKind, TemplateSimplified},
+    template::{Template, TemplateKind},
 };
 use crate::TextRange;
-use std::{
-    collections::{BTreeMap, BTreeSet},
-    fmt::{self, Debug, Display, Formatter},
-};
+use std::fmt::{self, Debug, Display, Formatter};
 
 #[derive(Clone, Eq, PartialEq)]
 pub struct AST {
@@ -39,7 +36,7 @@ pub enum ASTKind {
     SuffixExpression(Box<UnaryExpression>),
 
     Template(Box<Template>),
-    TemplateSimplified(Box<TemplateSimplified>),
+
     Text,
     List(Vec<AST>),
     Dict,

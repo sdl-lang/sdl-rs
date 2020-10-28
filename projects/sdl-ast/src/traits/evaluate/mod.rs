@@ -1,11 +1,8 @@
-use crate::{SDLContext, Value};
-use crate::Result;
-use crate::{ast::*};
-use crate::RuntimeError;
+use crate::{ast::*, compile::HTMLElement, Result, RuntimeError, SDLContext, Value};
 
-mod expression;
 mod ast;
 mod control;
+mod expression;
 mod primitive;
 
 pub trait Evaluate {

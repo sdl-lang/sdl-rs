@@ -1,13 +1,13 @@
-#[allow(unused_variables)]
-mod renderer;
 mod value;
 mod variable;
 
-use crate::{ASTKind, Result, AST};
+use crate::{
+    traits::{Evaluate, Render},
+    Result, AST,
+};
 use std::{collections::HashMap, rc::Weak};
-pub use value::Value;
+pub use value::{HTMLElement, Value};
 pub use variable::Variable;
-use crate::traits::Evaluate;
 
 #[derive(Clone, Debug)]
 pub struct SDLContext {
@@ -37,8 +37,8 @@ impl SDLContext {
     pub fn evaluate(&mut self, code: &AST) -> Result<Value> {
         code.evaluate(self)
     }
-    pub fn render(&mut self, code: &AST) -> Result<String> {
-        code.render(self)
+    pub fn render(&mut self, code: &Value) -> Result<String> {
+        Ok(code.render(self)?.into())
     }
     pub fn config(&self) -> SDLContextConfig {
         match &self.config {

@@ -14,4 +14,3 @@ impl Evaluate for InfixExpression {
         Ok(result)
     }
 }
-

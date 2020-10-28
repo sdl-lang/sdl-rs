@@ -24,17 +24,6 @@ pub struct Template {
     pub children: Vec<AST>,
 }
 
-#[derive(Debug, Clone, Eq, PartialEq)]
-pub struct TemplateSimplified {
-    pub kind: TemplateKind,
-    pub tag: Option<String>,
-    pub id: Option<AST>,
-    pub class: Option<AST>,
-    pub attributes: BTreeSet<String>,
-    pub arguments: BTreeMap<String, AST>,
-    pub children: Vec<AST>,
-}
-
 impl Default for Template {
     fn default() -> Self {
         Self {
@@ -82,40 +71,8 @@ impl Template {
     }
 }
 
-impl Template {
-    pub fn regularized(&self) -> TemplateSimplified {
-        TemplateSimplified {
-            kind: self.kind.to_owned(),
-            tag: None,
-            id: None,
-            class: None,
-            attributes: Default::default(),
-            arguments: Default::default(),
-            children: vec![],
-        }
-    }
-}
-
 /*
 impl Debug for Template {
-    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        match &self.tag {
-            None => write!(f, "<>"),
-            Some(s) => {
-                let mut out = f.debug_struct(&format!("<{}>", s.as_string()));
-                if self.attributes.len() != 0 {
-                    out.field("attributes", &self.attributes);
-                }
-                if self.arguments.len() != 0 {
-                    out.field("arguments", &self.arguments);
-                }
-                out.finish()
-            }
-        }
-    }
-}
-
-impl Debug for TemplateSimplified {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         match &self.tag {
             None => write!(f, "<>"),

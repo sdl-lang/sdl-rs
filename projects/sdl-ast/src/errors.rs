@@ -7,10 +7,17 @@ pub struct RuntimeError {
 pub enum ErrorKind {
     FileNotFound(String),
     InvalidOperation(String),
-    IfLost(String)
+    IfLost(String),
+    FormatError(),
 }
 
 pub type Result<T> = std::result::Result<T, RuntimeError>;
+
+impl From<std::fmt::Error> for RuntimeError {
+    fn from(e: std::fmt::Error) -> Self {
+        Self::invalid_operation(&format!("{}", e))
+    }
+}
 
 impl RuntimeError {
     pub fn invalid_operation(msg: &str) -> RuntimeError {

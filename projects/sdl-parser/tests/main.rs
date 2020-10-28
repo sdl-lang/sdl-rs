@@ -18,9 +18,10 @@ const CODE: &'static str = r#"
 #[test]
 fn new() {
     let out = parse(CODE);
-    // println!("{:#?}", ast);
+    println!("{:#?}", out);
     let mut ctx = SDLContext::default();
     let out = ctx.evaluate(&out).unwrap();
+    println!("{:?}", out);
     let out = ctx.render(&out).unwrap();
-    println!("{:#?}", out);
+    println!("{}", out);
 }

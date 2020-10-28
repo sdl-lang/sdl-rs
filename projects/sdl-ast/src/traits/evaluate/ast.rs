@@ -1,6 +1,5 @@
 use super::*;
 
-
 impl Evaluate for AST {
     fn evaluate(&self, ctx: &mut SDLContext) -> Result<Value> {
         self.kind.evaluate(ctx)
@@ -10,8 +9,8 @@ impl Evaluate for AST {
 impl Evaluate for ASTKind {
     fn evaluate(&self, ctx: &mut SDLContext) -> Result<Value> {
         let result = match self {
-            ASTKind::Program(v) => Value::List(evaluate_vec_ast(v, ctx)?),
-            ASTKind::Statement(v) => Value::List(evaluate_vec_ast(v, ctx)?),
+            ASTKind::Program(v) => Value::Block(evaluate_vec_ast(v, ctx)?),
+            ASTKind::Statement(v) => Value::Block(evaluate_vec_ast(v, ctx)?),
             ASTKind::Expression(e, eos) => {
                 let out = e.kind.evaluate(ctx)?;
                 match eos {
@@ -33,4 +32,3 @@ impl Evaluate for ASTKind {
         Ok(result)
     }
 }
-
