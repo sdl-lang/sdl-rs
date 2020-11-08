@@ -2,12 +2,28 @@ use super::*;
 
 impl Evaluate for ForInLoop {
     fn evaluate(&self, ctx: &mut SDLContext) -> Result<Value> {
-        match &self.pattern.kind {
-            ASTKind::Symbol(s) => println!("{:#?}", s.name()),
+        let terms = self.terms.evaluate(ctx)?;
+        let symbol = match &self.pattern.kind {
+            ASTKind::Symbol(s) => s.name(),
             _ => unreachable!(),
+        };
+        let iter = match terms {
+            Value::List(v) => v.into_iter(),
+            Value::String(v) => {
+                // FIXME: avoid collect
+                let v: Vec<_> = v.chars().map(|e| Value::from(e)).collect();
+                v.into_iter()
+            }
+            _ => unimplemented!("Value::{:?} => {{}}", terms),
+        };
+        let mut out = vec![];
+        for i in iter {
+            let mut ctx = ctx.fork();
+            ctx.insert(&symbol, i);
+            let result = self.block.evaluate(&mut ctx)?;
+            out.push(result)
         }
-
-        unimplemented!("{:#?}", self);
+        Ok(Value::List(out))
     }
 }
 

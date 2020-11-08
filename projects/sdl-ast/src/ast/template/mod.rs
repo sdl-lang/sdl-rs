@@ -17,8 +17,6 @@ pub struct Template {
     pub kind: TemplateKind,
     pub tag: Option<AST>,
     pub end: Option<AST>,
-    pub id: Option<AST>,
-    pub class: Option<AST>,
     pub attributes: Vec<AST>,
     pub arguments: Vec<(AST, AST)>,
     pub children: Vec<AST>,
@@ -26,16 +24,7 @@ pub struct Template {
 
 impl Default for Template {
     fn default() -> Self {
-        Self {
-            kind: TemplateKind::OpenCloseTemplate,
-            tag: None,
-            end: None,
-            id: None,
-            class: None,
-            attributes: vec![],
-            arguments: vec![],
-            children: vec![],
-        }
+        Self { kind: TemplateKind::OpenCloseTemplate, tag: None, end: None, attributes: vec![], arguments: vec![], children: vec![] }
     }
 }
 
@@ -61,8 +50,6 @@ impl Template {
     pub fn set_end(&mut self, tag: AST) {
         self.end = Some(tag)
     }
-    pub fn set_class(&mut self) {}
-    pub fn set_id(&mut self) {}
     pub fn set_attributes(&mut self, values: Vec<AST>) {
         self.attributes = values
     }

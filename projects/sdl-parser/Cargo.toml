@@ -12,7 +12,6 @@ edition = "2018"
 sdl-pest = {version = "0.1", path = "../sdl-pest"}
 sdl-ast = {version = "0.1", path = "../sdl-ast"}
 text-utils = "0.3"
-url = "2.1"
 
 [dev-dependencies]
 

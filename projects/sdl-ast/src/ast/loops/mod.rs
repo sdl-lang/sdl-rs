@@ -4,7 +4,9 @@ use super::*;
 pub struct ForInLoop {
     pub pattern: AST,
     pub terms: AST,
+    pub guard: Option<AST>,
     pub block: AST,
+    pub for_else: Option<AST>,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]

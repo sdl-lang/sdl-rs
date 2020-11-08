@@ -24,9 +24,12 @@ impl Evaluate for ASTKind {
             ASTKind::ForInLoop(inner) => inner.evaluate(ctx)?,
             ASTKind::Template(inner) => inner.evaluate(ctx)?,
             ASTKind::Symbol(inner) => inner.evaluate(ctx)?,
+            ASTKind::List(inner) => Value::List(inner.iter().flat_map(|e| e.evaluate(ctx)).collect()),
+
             ASTKind::Null => Value::Null,
             ASTKind::Boolean(v) => Value::Boolean(v.to_owned()),
             ASTKind::String(v) => Value::String(v.to_owned()),
+
             _ => unimplemented!("ASTKind::{:?} => {{}}", self),
         };
         Ok(result)

@@ -1,14 +1,12 @@
-mod can_parse;
 mod config;
 mod regroup;
 
-pub use crate::parser::{can_parse::CanParse, config::ParserConfig};
+pub use crate::parser::config::ParserConfig;
 use crate::ParserResult;
 use sdl_ast::{Template, AST};
 use sdl_pest::{Pair, Pairs, Parser, Rule, SDLParser};
 
 use crate::parser::regroup::PREC_CLIMBER;
-use url::Url;
 
 macro_rules! debug_cases {
     ($i:ident) => {{
@@ -20,11 +18,8 @@ macro_rules! debug_cases {
 }
 
 impl ParserConfig {
-    pub fn parse(&mut self, input: impl CanParse) -> ParserResult<AST> {
-        if let Some(s) = input.as_url() {
-            self.file_url = Some(s)
-        }
-        let input = input.as_text()?.replace("\r\n", "\n").replace("\\\n", "").replace("\t", &" ".repeat(self.tab_size));
+    pub fn parse(&mut self, input: impl AsRef<str>) -> ParserResult<AST> {
+        let input = input.as_ref().replace("\r\n", "\n").replace("\\\n", "").replace("\t", &" ".repeat(self.tab_size));
         Ok(self.parse_program(SDLParser::parse(Rule::program, &input)?))
     }
     fn parse_program(&self, pairs: Pairs<Rule>) -> AST {
@@ -78,7 +73,8 @@ impl ParserConfig {
 
     fn parse_for_in(&self, pairs: Pair<Rule>) -> AST {
         let r = self.get_position(pairs.as_span());
-        // let mut codes = vec![];
+        let mut guard = None;
+        let mut for_else = None;
         let (mut pattern, mut terms, mut block) = Default::default();
         for pair in pairs.into_inner() {
             match pair.as_rule() {
@@ -89,7 +85,8 @@ impl ParserConfig {
                 _ => debug_cases!(pair),
             };
         }
-        AST::for_in_loop(pattern, terms, block, r)
+
+        AST::for_in_loop(pattern, terms, block, guard, for_else, r)
     }
 }
 
@@ -174,7 +171,7 @@ impl ParserConfig {
             Rule::list => self.parse_list(pair),
             Rule::String => self.parse_string(pair),
             Rule::Number => self.parse_number(pair),
-            Rule::Symbol => self.parse_symbol(pair),
+            Rule::Symbol => self.parse_namespace(pair),
             Rule::SpecialValue => self.parse_special(pair),
 
             _ => debug_cases!(pair),
@@ -195,11 +192,11 @@ impl ParserConfig {
         };
         for inner in pair.into_inner() {
             match inner.as_rule() {
-                Rule::Symbol => tag = self.parse_symbol(inner),
+                Rule::Symbol => tag = self.parse_namespace(inner),
                 Rule::HTMLBadSymbol => tag = self.parse_symbol(inner),
                 Rule::text_mode => children.push(self.parse_text_mode(inner)),
 
-                Rule::BadSymbol => attributes.push(self.parse_symbol(inner)),
+                Rule::BadSymbol => attributes.push(self.parse_string(inner)),
                 Rule::html_pair => arguments.push(self.parse_pair(inner)),
                 _ => debug_cases!(inner),
             };
@@ -249,7 +246,7 @@ impl ParserConfig {
         }
         (key, value)
     }
-    fn parse_symbol(&self, pairs: Pair<Rule>) -> AST {
+    fn parse_namespace(&self, pairs: Pair<Rule>) -> AST {
         let r = self.get_position(pairs.as_span());
         let mut value = vec![];
         for pair in pairs.into_inner() {
@@ -258,6 +255,11 @@ impl ParserConfig {
                 _ => debug_cases!(pair),
             };
         }
+        AST::symbol(value, r)
+    }
+    fn parse_symbol(&self, pairs: Pair<Rule>) -> AST {
+        let r = self.get_position(pairs.as_span());
+        let mut value = vec![self.parse_string(pairs)];
         AST::symbol(value, r)
     }
 

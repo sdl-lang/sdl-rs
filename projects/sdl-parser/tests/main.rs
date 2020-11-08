@@ -1,3 +1,5 @@
+mod for_loop;
+
 use sdl_ast::{SDLContext, AST};
 use sdl_parser::ParserConfig;
 
@@ -14,14 +16,3 @@ pub fn parse(input: &str) -> AST {
 const CODE: &'static str = r#"
 <img rel src="https://avatars.githubusercontent.com/u/17541209?s=60&amp;v=4" alt="@GalAster" size="20" height="20" width="20" class="avatar-user avatar avatar--small ">
 "#;
-
-#[test]
-fn new() {
-    let out = parse(CODE);
-    println!("{:#?}", out);
-    let mut ctx = SDLContext::default();
-    let out = ctx.evaluate(&out).unwrap();
-    println!("{:?}", out);
-    let out = ctx.render(&out).unwrap();
-    println!("{}", out);
-}

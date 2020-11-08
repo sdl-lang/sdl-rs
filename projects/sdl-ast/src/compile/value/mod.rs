@@ -29,3 +29,9 @@ impl Value {
         }
     }
 }
+
+impl From<char> for Value {
+    fn from(v: char) -> Self {
+        Self::String(String::from(v))
+    }
+}

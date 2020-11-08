@@ -1,4 +1,5 @@
 use super::*;
+use std::collections::BTreeSet;
 
 #[rustfmt::skip]
 pub static VOID_TAGS: &[&str; 16] = &[
@@ -14,22 +15,27 @@ impl Evaluate for Template {
         };
         let is_void = VOID_TAGS.contains(&tag.as_str());
 
-        let html = HTMLElement {
-            is_void,
-            tag,
-            id: vec![],
-            class: vec![],
-            attributes: Default::default(),
-            arguments: Default::default(),
-            children: vec![],
-        };
+        let mut class = BTreeSet::new();
+
+        // if let Some(s) = &self.class {
+        //     match &s.kind {
+        //         ASTKind::String(s) => {
+        //             for i in s.split(" ") {
+        //                 class.insert(i.to_string())
+        //             }
+        //         }
+        //         _ => ()
+        //     }
+        // }
+
+        let html =
+            HTMLElement { is_void, tag, id: vec![], class, attributes: Default::default(), arguments: Default::default(), children: vec![] };
         Ok(Value::HTMLElement(Box::new(html)))
     }
 }
 
 impl Evaluate for Symbol {
     fn evaluate(&self, ctx: &mut SDLContext) -> Result<Value> {
-        unimplemented!()
-        // Ok(ASTKind::String(self.name()))
+        Ok(ctx.get(&self.name()))
     }
 }

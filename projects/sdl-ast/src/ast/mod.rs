@@ -102,8 +102,8 @@ impl AST {
         Self { kind, range: box_range(r) }
     }
 
-    pub fn for_in_loop(pattern: AST, terms: AST, block: AST, r: TextRange) -> Self {
-        let kind = ASTKind::ForInLoop(Box::new(ForInLoop { pattern, terms, block }));
+    pub fn for_in_loop(pattern: AST, terms: AST, block: AST, guard: Option<AST>, for_else: Option<AST>, r: TextRange) -> Self {
+        let kind = ASTKind::ForInLoop(Box::new(ForInLoop { pattern, terms, guard, block, for_else }));
         Self { kind, range: box_range(r) }
     }
 

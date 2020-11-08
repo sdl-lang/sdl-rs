@@ -5,7 +5,10 @@ use crate::{
     traits::{Evaluate, Render},
     Result, AST,
 };
-use std::{collections::HashMap, rc::Weak};
+use std::{
+    collections::HashMap,
+    rc::{Rc, Weak},
+};
 pub use value::{HTMLElement, Value};
 pub use variable::Variable;
 
@@ -13,7 +16,7 @@ pub use variable::Variable;
 pub struct SDLContext {
     config: Option<Box<SDLContextConfig>>,
     father: Option<Weak<SDLContext>>,
-    variables: HashMap<String, Variable>,
+    variables: HashMap<String, Value>,
 }
 
 #[derive(Clone, Debug)]
@@ -40,19 +43,32 @@ impl SDLContext {
     pub fn render(&mut self, code: &Value) -> Result<String> {
         Ok(code.render(self)?.into())
     }
+
+    pub fn insert(&mut self, key: &str, v: Value) {
+        self.variables.insert(key.to_string(), v);
+    }
+    pub fn get(&mut self, key: &str) -> Value {
+        self.variables.get(key).cloned().unwrap_or_default()
+    }
+
     pub fn config(&self) -> SDLContextConfig {
         match &self.config {
             None => Default::default(),
             Some(x) => *x.clone(),
         }
     }
+
+    pub fn fork(&self) -> SDLContext {
+        let new = Rc::downgrade(&Rc::new(self.to_owned()));
+        SDLContext { config: None, father: Some(new), variables: Default::default() }
+    }
 }
 
 impl SDLContext {
-    pub fn get_value(&self, name: &str) -> Value {
-        match self.variables.get(name) {
-            Some(v) => v.get(),
-            None => self.father.as_ref().and_then(|ctx| ctx.upgrade()).map(|ctx| ctx.get_value(name)).unwrap_or_default(),
-        }
-    }
+    // pub fn get_value(&self, name: &str) -> Value {
+    //     match self.variables.get(name) {
+    //         Some(v) => v.get(),
+    //         None => self.father.as_ref().and_then(|ctx| ctx.upgrade()).map(|ctx| ctx.get_value(name)).unwrap_or_default(),
+    //     }
+    // }
 }

@@ -1,15 +1,13 @@
 use sdl_ast::TextRange;
 use sdl_pest::pest::Span;
-use url::Url;
 
 pub struct ParserConfig {
-    pub file_url: Option<Url>,
     pub tab_size: usize,
 }
 
 impl Default for ParserConfig {
     fn default() -> Self {
-        Self { file_url: None, tab_size: 4 }
+        Self { tab_size: 4 }
     }
 }
 
