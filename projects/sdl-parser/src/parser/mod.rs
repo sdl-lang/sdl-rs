@@ -2,7 +2,7 @@ mod config;
 mod regroup;
 
 pub use crate::parser::config::ParserConfig;
-use crate::ParserResult;
+use crate::Result;
 use sdl_ast::{Template, AST};
 use sdl_pest::{Pair, Pairs, Parser, Rule, SDLParser};
 
@@ -18,7 +18,7 @@ macro_rules! debug_cases {
 }
 
 impl ParserConfig {
-    pub fn parse(&mut self, input: impl AsRef<str>) -> ParserResult<AST> {
+    pub fn parse(&mut self, input: impl AsRef<str>) -> Result<AST> {
         let input = input.as_ref().replace("\r\n", "\n").replace("\\\n", "").replace("\t", &" ".repeat(self.tab_size));
         Ok(self.parse_program(SDLParser::parse(Rule::program, &input)?))
     }
@@ -82,7 +82,9 @@ impl ParserConfig {
                 Rule::pattern => pattern = self.parse_pattern(pair),
                 Rule::expr => terms = self.parse_expr(pair),
                 Rule::block => block = self.parse_block(pair),
-                _ => debug_cases!(pair),
+                Rule::for_if => guard = Some(self.parse_expr(pair.into_inner().nth(0).unwrap())),
+                Rule::for_else => for_else = Some(self.parse_block(pair.into_inner().nth(0).unwrap())),
+                _ => unreachable!(),
             };
         }
 

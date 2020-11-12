@@ -40,10 +40,12 @@ if_nested_else = _{"if" ~ condition ~ block ~ else_if_block+ ~ if_else_block}
 else_if_block = _{("else" ~ "if"|"ef") ~ condition ~ block}
 if_else_block = _{("else"|"es"|"el") ~ block}
 /*====================================================================================================================*/
-for_statement = {"for" ~ pattern ~ for_if? ~ "in"~ expr ~ block ~ for_else?}
+for_statement = {"for" ~ pattern ~ "in" ~ expr ~ for_if? ~ block ~ for_else?}
 for_if = {"if" ~ expr}
 for_else = {"else" ~ block}
-pattern = {SYMBOL}
+pattern = {
+    SYMBOL
+}
 /*====================================================================================================================*/
 re_control = {
     Return ~ expr

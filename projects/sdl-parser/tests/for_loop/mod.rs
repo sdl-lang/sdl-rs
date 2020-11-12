@@ -7,29 +7,20 @@ for i in [1, 2, 3] {
 "#;
 
 const FOR_STRING: &'static str = r#"
-for i in "abc" {
+for i in "abc" if x {
     i + 1
+}
+else {
+    y
 }
 "#;
 
 #[test]
-fn new() {
-    let out = parse(FOR_LIST);
-    // println!("{:#?}", out);
-    let mut ctx = SDLContext::default();
-    let out = ctx.evaluate(&out).unwrap();
-    // println!("{:?}", out);
-    let out = ctx.render(&out).unwrap();
-    println!("{}", out);
+fn for_i_in_list() {
+    println!("{}", render(FOR_LIST).unwrap());
 }
 
 #[test]
-fn new2() {
-    let out = parse(FOR_STRING);
-    // println!("{:#?}", out);
-    let mut ctx = SDLContext::default();
-    let out = ctx.evaluate(&out).unwrap();
-    // println!("{:?}", out);
-    let out = ctx.render(&out).unwrap();
-    println!("{}", out);
+fn for_i_in_string() {
+    println!("{}", render(FOR_STRING).unwrap());
 }
