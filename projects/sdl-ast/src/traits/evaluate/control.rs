@@ -23,7 +23,7 @@ impl Evaluate for ForInLoop {
             let result = self.block.evaluate(&mut ctx)?;
             out.push(result)
         }
-        Ok(Value::List(out))
+        Ok(Value::Block(out))
     }
 }
 

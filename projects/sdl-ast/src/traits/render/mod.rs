@@ -1,48 +1,51 @@
 use crate::{compile::HTMLElement, Result, SDLContext, Value};
-use std::{borrow::Cow, fmt::Write};
+use std::fmt::Write;
 
 pub trait Render {
-    fn render(&self, ctx: &mut SDLContext) -> Result<Cow<str>>;
-    fn render_pretty(&self, ctx: &mut SDLContext) -> Result<Cow<str>> {
-        self.render(ctx)
+    fn render(&self, text: &mut impl Write, ctx: &SDLContext) -> Result<()>;
+    fn render_pretty(&self, text: &mut impl Write, ctx: &SDLContext) -> Result<()> {
+        self.render(text, ctx)
     }
 }
 
 impl Render for Value {
-    fn render(&self, ctx: &mut SDLContext) -> Result<Cow<str>> {
-        self.render_pretty(ctx)
-    }
-
-    fn render_pretty(&self, ctx: &mut SDLContext) -> Result<Cow<str>> {
-        let result = match self {
+    fn render(&self, text: &mut impl Write, ctx: &SDLContext) -> Result<()> {
+        match self {
             Value::Block(v) => {
-                let mut out = String::new();
                 for e in v {
-                    write!(out, "{}", e.render(ctx)?)?
+                    e.render(text, ctx)?
                 }
-                Cow::from(out)
             }
-            Value::Null => Cow::from(String::new()),
-            Value::Boolean(v) => Cow::from(v.to_string()),
-            Value::String(v) => Cow::from(v),
-            Value::List(v) => Cow::from(format!("{:#?}", v)),
-            Value::Dict(v) => Cow::from(format!("{:#?}", v)),
-            Value::HTMLElement(html) => html.render(ctx)?,
+            Value::Null => write!(text, "null")?,
+            Value::Boolean(v) => write!(text, "{}", v)?,
+            Value::String(v) => write!(text, "{}", v)?,
+            Value::List(v) => {
+                write!(text, "[")?;
+                for (i, e) in v.iter().enumerate() {
+                    e.render(text, ctx)?;
+                    if i != v.len() {
+                        write!(text, ", ")?;
+                    }
+                }
+                write!(text, "]")?;
+            }
+            Value::Dict(v) => write!(text, "{:#?}", v)?,
+            Value::HTMLElement(html) => html.render(text, ctx)?,
         };
-        Ok(result)
+        Ok(())
+    }
+    fn render_pretty(&self, text: &mut impl Write, ctx: &SDLContext) -> Result<()> {
+        unimplemented!()
     }
 }
 
 impl Render for HTMLElement {
-    fn render(&self, ctx: &mut SDLContext) -> Result<Cow<str>> {
+    fn render(&self, text: &mut impl Write, ctx: &SDLContext) -> Result<()> {
         let out = match self.is_void {
             true => format!("<{tag}>", tag = self.tag),
             false => format!("<{tag}></{tag}>", tag = self.tag),
         };
-        Ok(Cow::from(out))
-    }
-
-    fn render_pretty(&self, ctx: &mut SDLContext) -> Result<Cow<str>> {
-        unimplemented!()
+        write!(text, "{}", out)?;
+        Ok(())
     }
 }

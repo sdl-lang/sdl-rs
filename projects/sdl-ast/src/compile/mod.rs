@@ -41,7 +41,9 @@ impl SDLContext {
         code.evaluate(self)
     }
     pub fn render(&mut self, code: &Value) -> Result<String> {
-        Ok(code.render(self)?.into())
+        let mut output = String::new();
+        code.render(&mut output, &*self)?;
+        Ok(output)
     }
 
     pub fn insert(&mut self, key: &str, v: Value) {
