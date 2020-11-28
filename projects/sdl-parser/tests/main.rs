@@ -1,3 +1,4 @@
+mod declear;
 mod for_loop;
 
 use sdl_ast::{SDLContext, AST};

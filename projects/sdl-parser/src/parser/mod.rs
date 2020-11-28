@@ -40,7 +40,7 @@ impl ParserConfig {
                 Rule::expression => self.parse_expression(pair),
                 Rule::if_statement => self.parse_if_else(pair),
                 Rule::for_statement => self.parse_for_in(pair),
-
+                Rule::assignStatement => self.parse_assign(pair),
                 _ => debug_cases!(pair),
             };
             codes.push(code);
@@ -163,6 +163,13 @@ impl ParserConfig {
         let op = pairs.as_str();
         AST::operation(op, kind, r)
     }
+
+    fn parse_assign(&self, pairs: Pair<Rule>) -> AST {
+        let mut terms = pairs.into_inner();
+        let pattern = self.parse_pattern(terms.next().unwrap());
+        let expr = self.parse_expr(terms.next().unwrap());
+        unreachable!("{:?}\n{:?}", pattern, expr)
+    }
 }
 
 impl ParserConfig {
@@ -195,7 +202,7 @@ impl ParserConfig {
         for inner in pair.into_inner() {
             match inner.as_rule() {
                 Rule::Symbol => tag = self.parse_namespace(inner),
-                Rule::HTMLBadSymbol => tag = self.parse_symbol(inner),
+                Rule::HTMLBadTag => tag = self.parse_symbol(inner),
                 Rule::text_mode => children.push(self.parse_text_mode(inner)),
 
                 Rule::BadSymbol => attributes.push(self.parse_string(inner)),
