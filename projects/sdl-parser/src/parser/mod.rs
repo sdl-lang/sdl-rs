@@ -7,6 +7,7 @@ use sdl_ast::{Template, AST};
 use sdl_pest::{Pair, Pairs, Parser, Rule, SDLParser};
 
 use crate::parser::regroup::PREC_CLIMBER;
+use sdl_ast::ast::ASTKind::Null;
 
 macro_rules! debug_cases {
     ($i:ident) => {{
@@ -40,7 +41,7 @@ impl ParserConfig {
                 Rule::expression => self.parse_expression(pair),
                 Rule::if_statement => self.parse_if_else(pair),
                 Rule::for_statement => self.parse_for_in(pair),
-                Rule::assignStatement => self.parse_assign(pair),
+                Rule::assign_statement => self.parse_assign(pair),
                 _ => debug_cases!(pair),
             };
             codes.push(code);
@@ -279,7 +280,8 @@ impl ParserConfig {
 
     fn parse_number(&self, pairs: Pair<Rule>) -> AST {
         let r = self.get_position(pairs.as_span());
-        AST::integer(pairs.as_str().to_string(), r)
+
+        AST::number(pairs.as_str().to_string(), r)
     }
     fn parse_special(&self, pairs: Pair<Rule>) -> AST {
         let r = self.get_position(pairs.as_span());

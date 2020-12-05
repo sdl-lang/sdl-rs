@@ -1,5 +1,6 @@
-mod declear;
+mod declare;
 mod for_loop;
+mod literal;
 
 use sdl_ast::{SDLContext, AST};
 use sdl_parser::{ParserConfig, Result};

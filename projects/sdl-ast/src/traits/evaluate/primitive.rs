@@ -15,7 +15,7 @@ impl Evaluate for Template {
         };
         let is_void = VOID_TAGS.contains(&tag.as_str());
 
-        let mut class = BTreeSet::new();
+        let class = BTreeSet::new();
 
         // if let Some(s) = &self.class {
         //     match &s.kind {

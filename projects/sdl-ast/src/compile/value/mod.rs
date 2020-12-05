@@ -1,6 +1,7 @@
 pub use crate::compile::value::template::HTMLElement;
 use std::collections::{BTreeMap, BTreeSet};
 
+mod convert;
 mod template;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -15,11 +16,7 @@ pub enum Value {
     HTMLElement(Box<HTMLElement>),
 }
 
-impl Default for Value {
-    fn default() -> Self {
-        Self::Null
-    }
-}
+
 
 impl Value {
     pub fn is_null(&self) -> bool {
@@ -30,8 +27,3 @@ impl Value {
     }
 }
 
-impl From<char> for Value {
-    fn from(v: char) -> Self {
-        Self::String(String::from(v))
-    }
-}

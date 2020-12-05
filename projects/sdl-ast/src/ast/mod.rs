@@ -13,8 +13,9 @@ pub use crate::ast::{
 };
 use crate::TextRange;
 use std::fmt::{self, Debug, Display, Formatter};
+pub use crate::ast::symbol::Number;
 
-#[derive(Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct AST {
     pub kind: ASTKind,
     pub range: Option<Box<TextRange>>,
@@ -34,6 +35,7 @@ pub enum ASTKind {
     InfixExpression(Box<InfixExpression>),
     PrefixExpression(Box<UnaryExpression>),
     SuffixExpression(Box<UnaryExpression>),
+    StringExpression(Box<StringExpression>),
 
     Template(Box<Template>),
 
@@ -45,6 +47,7 @@ pub enum ASTKind {
     Null,
     Boolean(bool),
     String(String),
+    Number(Box<Number>),
     Operation(Box<Operation>),
     Symbol(Box<Symbol>),
 }
@@ -55,27 +58,27 @@ impl Default for AST {
     }
 }
 
-impl Debug for AST {
-    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        match &self.kind {
-            ASTKind::Program(v) | ASTKind::Statement(v) => {
-                for e in v {
-                    Debug::fmt(e, f)?;
-                    writeln!(f)?;
-                }
-                Ok(())
-            }
-            ASTKind::Null => write!(f, "null"),
-            ASTKind::Boolean(v) => write!(f, "{}", v),
-            ASTKind::String(v) => write!(f, "{}", v),
-            _ => {
-                let mut out = f.debug_struct("AST");
-                out.field("kind", &self.kind);
-                out.finish()
-            }
-        }
-    }
-}
+// impl Debug for AST {
+//     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+//         match &self.kind {
+//             ASTKind::Program(v) | ASTKind::Statement(v) => {
+//                 for e in v {
+//                     Debug::fmt(e, f)?;
+//                     writeln!(f)?;
+//                 }
+//                 Ok(())
+//             }
+//             ASTKind::Null => write!(f, "null"),
+//             ASTKind::Boolean(v) => write!(f, "{}", v),
+//             ASTKind::String(v) => write!(f, "{}", v),
+//             _ => {
+//                 let mut out = f.debug_struct("AST");
+//                 out.field("kind", &self.kind);
+//                 out.finish()
+//             }
+//         }
+//     }
+// }
 
 impl AST {
     pub fn as_vec(&self) -> Vec<AST> {
@@ -149,17 +152,27 @@ impl AST {
         Self { kind: ASTKind::Null, range: box_range(r) }
     }
 
-    pub fn integer(value: String, r: TextRange) -> Self {
-        Self { kind: ASTKind::String(value), range: box_range(r) }
-    }
-    pub fn decimal(value: String, r: TextRange) -> Self {
-        Self { kind: ASTKind::String(value), range: box_range(r) }
-    }
     pub fn boolean(value: bool, r: TextRange) -> Self {
         Self { kind: ASTKind::Boolean(value), range: box_range(r) }
     }
     pub fn string(value: String, r: TextRange) -> Self {
         Self { kind: ASTKind::String(value), range: box_range(r) }
+    }
+    pub fn decimal(value: &str, handler: &str, r: TextRange) -> Self {
+        let handler = match handler.is_empty() {
+            true => None,
+            false => Some(String::from(handler))
+        };
+        let num = Number::Decimal { handler, value: String::from(value) };
+        Self { kind: ASTKind::Number(Box::new(num)), range: box_range(r) }
+    }
+    pub fn integer(value: &str, handler: &str, r: TextRange) -> Self {
+        let handler = match handler.is_empty() {
+            true => None,
+            false => Some(String::from(handler))
+        };
+        let num = Number::Decimal { handler, value: String::from(value) };
+        Self { kind: ASTKind::Number(Box::new(num)), range: box_range(r) }
     }
     pub fn symbol(value: Vec<AST>, r: TextRange) -> Self {
         Self { kind: ASTKind::Symbol(Box::new(Symbol::from(value))), range: box_range(r) }

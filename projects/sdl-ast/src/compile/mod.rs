@@ -46,8 +46,8 @@ impl SDLContext {
         Ok(output)
     }
 
-    pub fn insert(&mut self, key: &str, v: Value) {
-        self.variables.insert(key.to_string(), v);
+    pub fn insert(&mut self, key: &str, v: impl Into<Value>) {
+        self.variables.insert(key.to_string(), v.into());
     }
     pub fn get(&mut self, key: &str) -> Value {
         self.variables.get(key).cloned().unwrap_or_default()

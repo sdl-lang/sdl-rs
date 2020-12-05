@@ -6,8 +6,8 @@ statement = {
   | classStatement ~ eos?
   | extendStatement ~ eos?
   | controlFlow ~ eos?
-  | assignStatement ~ eos?
-  | defineStatement ~ eos?
+  | assign_statement ~ eos?
+  | define_statement ~ eos?
   | annotation ~ eos?
   | expression
 }
@@ -15,7 +15,6 @@ statement = {
 emptyStatement = {eos}
 eos = {Semicolon}
 comma_or_semi = _{Comma|Semicolon}
-block_or_stmt = _{block|Set ~ statement}
 /*====================================================================================================================*/
 //FIXME: 修复 nested using
 importStatement = {
@@ -57,25 +56,21 @@ re_control = {
 // #C678DD
 Control = @{"return"|"yield"|"break"|"pass"}
 /*====================================================================================================================*/
-classStatement = {"class" ~ assign_pair ~ block?}
+classStatement = {"class" ~ SYMBOL ~ block?}
 /*====================================================================================================================*/
 extendStatement = {
     "extend" ~ Symbol ~ ("with"|Colon)? ~ block
 }
 /*====================================================================================================================*/
-assignStatement = {"let" ~ (pattern|pattern_bare) ~ "=" ~ expr | pattern ~ "=" ~ expr}
-
-assign_pair = {Symbol}
+//!#C678DD: assign_word
+assign_statement =  {assign_word ~ (pattern|pattern_bare) ~ Set ~ expr | pattern ~ Set ~ expr}
+assign_word      = @{"let"|"const"}
 /*====================================================================================================================*/
-defineStatement = {"def" ~ define_terms}
-define_terms = _{
-    assign_pair ~ define_parameter ~ block_or_stmt?
-}
-define_parameter = {
-    "(" ~ define_pair ~ (Comma ~ define_pair)* ~ Comma? ~ ")"
-  | "(" ~ ")"
-}
-define_pair = {SYMBOL ~ (Set ~ expr)?}
+//!#C678DD: define_word
+define_statement =  {define_word ~ SYMBOL ~ define_terms ~ block | SYMBOL ~ define_terms ~ Set ~ (block|statement)}
+define_terms     =  {"(" ~ ")" | "(" ~ define_pair ~ (Comma ~ define_pair)* ~ Comma? ~ ")"}
+define_pair      =  {SYMBOL ~ (Set ~ expr)?}
+define_word      = @{"def"}
 /*====================================================================================================================*/
 //!Orange:annotation_call
 annotation = {annotation_call+~statement}
@@ -86,12 +81,6 @@ apply = !{
 }
 
 apply_kv = {SYMBOL~ Colon ~ expr|expr}
-
-
-
-///#61AFEF
-function_name   = {SYMBOL}
-function_module = {(namespace ~ Dot)? ~ (SYMBOL ~ Dot)*}
 /*====================================================================================================================*/
 expression = {expr ~ eos?}
 expr       = !{term ~ (Infix ~ term)*}
@@ -164,7 +153,7 @@ Number     = ${Complex|Decimal|DecimalBad|Integer|Byte}
 Decimal    = ${Integer ~ Dot ~ ASCII_DIGIT+}
 DecimalBad = ${Integer ~ Dot|Dot ~ ASCII_DIGIT+}
 Integer    = @{"0"|ASCII_NONZERO_DIGIT ~ (Underline? ~ ASCII_DIGIT)*}
-Complex    = {(Decimal|Integer)~ SYMBOL}
+Complex    = _{(Decimal|Integer)~ SYMBOL}
 /*====================================================================================================================*/
 //!#3C963C: String
 //!#98C379: StringText|StringLiteralText
@@ -180,11 +169,11 @@ StringEnd         = @{POP ~ Apostrophe{1}}
 // NEWLINE = @{"\r"~"\n"|"\r"|"\n"}
 WHITESPACE = _{NEWLINE|WHITE_SPACE}
 ///#7F848E
-COMMENT = {
+COMMENT = _{
     MultiLineComment
-  | "%" ~ (!NEWLINE ~ ANY)*
+  | "//" ~ (!NEWLINE ~ ANY)*
 }
-MultiLineComment = ${"%%%" ~ (MultiLineComment | !"%%%" ~ ANY)* ~ "%%%"}
+MultiLineComment = _{"/*" ~ (MultiLineComment | !"*/" ~ ANY)* ~ "*/"}
 /*====================================================================================================================*/
 ///#61AFEF
 SYMBOL = @{
@@ -221,6 +210,9 @@ Compare = !{
 }
 Additive   = @{Plus|Minus}
 Multiplied = @{Star|"/"}
+Assign     = @{
+    "+=" | "-="
+}
 ///#56B6C2
 Set = @{"="}
 
