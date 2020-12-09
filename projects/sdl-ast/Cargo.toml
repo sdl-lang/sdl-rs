@@ -9,6 +9,8 @@ license = "MPL-2.0"
 edition = "2018"
 
 [dependencies]
+num = "0.3"
+bigdecimal = "0.2"
 
 [dev-dependencies]
 

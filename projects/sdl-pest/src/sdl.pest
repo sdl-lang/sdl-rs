@@ -143,17 +143,16 @@ HTMLEscape = @{
 SpecialValue = @{"true"|"false"|"null"}
 /*====================================================================================================================*/
 ///#D19A66
-Byte     = ${Byte_BIN|Byte_OCT|Byte_HEX}
-Byte_BIN = ${"0" ~ ("b"|"B") ~ (Underline? ~ ASCII_BIN_DIGIT)+}
-Byte_OCT = ${"0" ~ ("o"|"O") ~ (Underline? ~ ASCII_OCT_DIGIT)+}
-Byte_HEX = ${"0" ~ ("x"|"X") ~ (Underline? ~ ASCII_HEX_DIGIT)+}
-/*====================================================================================================================*/
-//!#D19A66: Integer|Decimal|DecimalBad
-Number     = ${Complex|Decimal|DecimalBad|Integer|Byte}
-Decimal    = ${Integer ~ Dot ~ ASCII_DIGIT+}
-DecimalBad = ${Integer ~ Dot|Dot ~ ASCII_DIGIT+}
+Number     = ${Byte|Decimal|DecimalBad|Integer}
+Byte       = @{
+    "0" ~ ("b"|"B") ~ (Underline? ~ ASCII_BIN_DIGIT)+
+  | "0" ~ ("o"|"O") ~ (Underline? ~ ASCII_OCT_DIGIT)+
+  | "0" ~ ("x"|"X") ~ (Underline? ~ ASCII_HEX_DIGIT)+
+  | "0" ~ ("f"|"F") ~ (Underline? ~ ASCII_HEX_DIGIT)+
+}
+Decimal    = @{Integer ~ Dot ~ ASCII_DIGIT+}
+DecimalBad = @{Integer ~ Dot|Dot ~ ASCII_DIGIT+}
 Integer    = @{"0"|ASCII_NONZERO_DIGIT ~ (Underline? ~ ASCII_DIGIT)*}
-Complex    = _{(Decimal|Integer)~ SYMBOL}
 /*====================================================================================================================*/
 //!#3C963C: String
 //!#98C379: StringText|StringLiteralText

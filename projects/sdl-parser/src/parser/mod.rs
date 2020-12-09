@@ -5,9 +5,7 @@ pub use crate::parser::config::ParserConfig;
 use crate::Result;
 use sdl_ast::{Template, AST};
 use sdl_pest::{Pair, Pairs, Parser, Rule, SDLParser};
-
 use crate::parser::regroup::PREC_CLIMBER;
-use sdl_ast::ast::ASTKind::Null;
 
 macro_rules! debug_cases {
     ($i:ident) => {{
@@ -280,8 +278,32 @@ impl ParserConfig {
 
     fn parse_number(&self, pairs: Pair<Rule>) -> AST {
         let r = self.get_position(pairs.as_span());
-
-        AST::number(pairs.as_str().to_string(), r)
+        let pair = pairs.into_inner().nth(0).unwrap();
+        match pair.as_rule() {
+            Rule::Integer => {
+                AST::integer(pair.as_str(), 10, r)
+            }
+            Rule::Decimal => {
+                AST::decimal(pair.as_str(), 10, r)
+            }
+            Rule::DecimalBad => {
+                let mut s = pair.as_str().to_string();
+                match s.starts_with(".") {
+                    true => AST::decimal(&format!("0{}", s), 10, r),
+                    false => AST::decimal(&format!("{}0", s), 10, r)
+                }
+            }
+            Rule::Byte => {
+                let mut s = pair.as_str().to_string();
+                match &s[0..1] {
+                    "0b" => AST::integer(pair.as_str(), 2, r),
+                    "0o" => AST::integer(pair.as_str(), 8, r),
+                    "0x" => AST::integer(pair.as_str(), 16, r),
+                    _ => AST::decimal(pair.as_str(), 16, r)
+                }
+            }
+            _ => unreachable!(),
+        }
     }
     fn parse_special(&self, pairs: Pair<Rule>) -> AST {
         let r = self.get_position(pairs.as_span());

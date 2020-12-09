@@ -5,15 +5,16 @@ mod symbol;
 mod template;
 
 pub use crate::ast::{
-    expression::{InfixExpression, UnaryExpression},
+    expression::{InfixExpression, StringExpression, UnaryExpression},
     loops::{ForInLoop, IfElseChain},
     operations::Operation,
     symbol::Symbol,
     template::{Template, TemplateKind},
 };
 use crate::TextRange;
+use bigdecimal::BigDecimal;
+use num::BigInt;
 use std::fmt::{self, Debug, Display, Formatter};
-pub use crate::ast::symbol::Number;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct AST {
@@ -47,7 +48,8 @@ pub enum ASTKind {
     Null,
     Boolean(bool),
     String(String),
-    Number(Box<Number>),
+    Integer(Box<BigInt>),
+    Decimal(Box<BigDecimal>),
     Operation(Box<Operation>),
     Symbol(Box<Symbol>),
 }
@@ -125,6 +127,11 @@ impl AST {
         Self { kind, range: box_range(r) }
     }
 
+    pub fn string_expression(value: AST, handler: AST, r: TextRange) -> Self {
+        let kind = ASTKind::StringExpression(Box::new(StringExpression { handler, value }));
+        Self { kind, range: box_range(r) }
+    }
+
     pub fn infix_expression(op: AST, lhs: AST, rhs: AST, r: TextRange) -> Self {
         let kind = ASTKind::InfixExpression(Box::new(InfixExpression { op, lhs, rhs }));
         Self { kind, range: box_range(r) }
@@ -158,21 +165,13 @@ impl AST {
     pub fn string(value: String, r: TextRange) -> Self {
         Self { kind: ASTKind::String(value), range: box_range(r) }
     }
-    pub fn decimal(value: &str, handler: &str, r: TextRange) -> Self {
-        let handler = match handler.is_empty() {
-            true => None,
-            false => Some(String::from(handler))
-        };
-        let num = Number::Decimal { handler, value: String::from(value) };
-        Self { kind: ASTKind::Number(Box::new(num)), range: box_range(r) }
+    pub fn integer(value: &str, base: u32, r: TextRange) -> Self {
+        let n = BigInt::parse_bytes(value.as_bytes(), base).unwrap_or_default();
+        Self { kind: ASTKind::Integer(Box::new(n)), range: box_range(r) }
     }
-    pub fn integer(value: &str, handler: &str, r: TextRange) -> Self {
-        let handler = match handler.is_empty() {
-            true => None,
-            false => Some(String::from(handler))
-        };
-        let num = Number::Decimal { handler, value: String::from(value) };
-        Self { kind: ASTKind::Number(Box::new(num)), range: box_range(r) }
+    pub fn decimal(value: &str, base: u32, r: TextRange) -> Self {
+        let n = BigDecimal::parse_bytes(value.as_bytes(), base).unwrap_or_default();
+        Self { kind: ASTKind::Decimal(Box::new(n)), range: box_range(r) }
     }
     pub fn symbol(value: Vec<AST>, r: TextRange) -> Self {
         Self { kind: ASTKind::Symbol(Box::new(Symbol::from(value))), range: box_range(r) }

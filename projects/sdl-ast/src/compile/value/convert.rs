@@ -29,4 +29,3 @@ impl From<bool> for Value {
         Self::Boolean(v)
     }
 }
-

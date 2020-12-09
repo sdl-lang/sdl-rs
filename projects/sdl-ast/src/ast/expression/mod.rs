@@ -2,21 +2,8 @@ use super::*;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct StringExpression {
-    handler: Option<AST>,
-    value: AST,
-}
-
-#[derive(Debug, Clone, Eq, PartialEq)]
-pub enum Number {
-    Integer {
-        handler: Option<String>,
-        value: String,
-    },
-    Decimal {
-        handler: Option<String>,
-        value: String,
-    },
-
+    pub handler: AST,
+    pub value: AST,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]

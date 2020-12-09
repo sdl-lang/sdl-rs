@@ -16,8 +16,6 @@ pub enum Value {
     HTMLElement(Box<HTMLElement>),
 }
 
-
-
 impl Value {
     pub fn is_null(&self) -> bool {
         match self {
@@ -26,4 +24,3 @@ impl Value {
         }
     }
 }
-

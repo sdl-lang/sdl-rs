@@ -23,7 +23,7 @@ impl Render for Value {
                 write!(text, "[")?;
                 for (i, e) in v.iter().enumerate() {
                     e.render(text, ctx)?;
-                    if i != v.len() {
+                    if i != v.len() - 1 {
                         write!(text, ", ")?;
                     }
                 }
