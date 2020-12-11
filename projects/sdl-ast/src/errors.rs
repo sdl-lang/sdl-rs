@@ -1,9 +1,9 @@
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct RuntimeError {
     kind: Box<ErrorKind>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum ErrorKind {
     FileNotFound(String),
     InvalidOperation(String),

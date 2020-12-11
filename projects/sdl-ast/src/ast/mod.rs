@@ -15,6 +15,7 @@ use crate::TextRange;
 use bigdecimal::BigDecimal;
 use num::BigInt;
 use std::fmt::{self, Debug, Display, Formatter};
+pub use crate::ast::expression::CallChain;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct AST {
@@ -33,6 +34,8 @@ pub enum ASTKind {
     ForInLoop(Box<ForInLoop>),
 
     Expression(Box<AST>, bool),
+    CallChain(Box<CallChain>),
+    CallIndex(Box<BigInt>),
     InfixExpression(Box<InfixExpression>),
     PrefixExpression(Box<UnaryExpression>),
     SuffixExpression(Box<UnaryExpression>),
@@ -59,28 +62,6 @@ impl Default for AST {
         Self { kind: ASTKind::None, range: Default::default() }
     }
 }
-
-// impl Debug for AST {
-//     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-//         match &self.kind {
-//             ASTKind::Program(v) | ASTKind::Statement(v) => {
-//                 for e in v {
-//                     Debug::fmt(e, f)?;
-//                     writeln!(f)?;
-//                 }
-//                 Ok(())
-//             }
-//             ASTKind::Null => write!(f, "null"),
-//             ASTKind::Boolean(v) => write!(f, "{}", v),
-//             ASTKind::String(v) => write!(f, "{}", v),
-//             _ => {
-//                 let mut out = f.debug_struct("AST");
-//                 out.field("kind", &self.kind);
-//                 out.finish()
-//             }
-//         }
-//     }
-// }
 
 impl AST {
     pub fn as_vec(&self) -> Vec<AST> {
@@ -145,6 +126,15 @@ impl AST {
     pub fn suffix_expression(op: AST, lhs: AST, r: TextRange) -> Self {
         let kind = ASTKind::PrefixExpression(Box::new(UnaryExpression { op, base: lhs }));
         Self { kind, range: box_range(r) }
+    }
+
+    pub fn call_chain(chain: CallChain, r: TextRange) -> Self {
+        Self { kind: ASTKind::CallChain(Box::new(chain)), range: box_range(r) }
+    }
+
+    pub fn call_index(index: &str, r: TextRange) -> Self {
+        let n = BigInt::parse_bytes(index.as_bytes(), 10).unwrap_or_default();
+        Self { kind: ASTKind::CallIndex(Box::new(n)), range: box_range(r) }
     }
 
     pub fn template(value: Template, r: TextRange) -> Self {
