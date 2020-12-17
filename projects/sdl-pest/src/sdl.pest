@@ -76,26 +76,23 @@ define_word      = @{"def"}
 annotation = {annotation_call+~statement}
 annotation_call = @{"@"~(list|apply|Symbol)}
 /*====================================================================================================================*/
-apply = !{
-     "(" ~ apply_kv? ~ (Comma ~ apply_kv)* ~ Comma? ~")"
-}
-
-apply_kv = {SYMBOL~ Colon ~ expr|expr}
-/*====================================================================================================================*/
-expression = {expr ~ eos?}
+expression =  {expr ~ eos?}
 expr       = !{term ~ (Infix ~ term)*}
 term       =  {Prefix* ~ ("(" ~ expr ~ ")"|chain_call)}
 chain_call =  {data ~ (slice|apply|Suffix|dot_call)*}
-dot_call   =  {Dot ~ Integer|Dot ~ Symbol ~ apply?}
+dot_call   = !{Dot ~ Integer|Dot ~ Symbol ~ apply?}
 /*====================================================================================================================*/
 data = {template|dict|list|SpecialValue|Number|String|Symbol}
 
-tuple = {"(" ~ ")" | "(" ~ expr ~ (Comma ~ expr)* ~ Comma? ~ ")"}
+tuple = {"(" ~ ")" | "(" ~ expr ~ Comma ~ ")" | "(" ~ expr ~ (Comma ~ expr)+ ~ Comma? ~ ")"}
 list  = {"[" ~ "]" | "[" ~ expr ~ (Comma ~ expr)* ~ Comma? ~ "]"}
 dict  = {"{" ~ "}" | "{" ~ dict_pair ~ (Comma ~ dict_pair)* ~ Comma? ~ "}"}
 
 dict_pair = !{dict_key ~ Colon ~ expr}
 dict_key  = _{Integer | SYMBOL | String}
+
+apply     = !{"(" ~ ")" | "(" ~ apply_kv ~ (Comma ~ apply_kv)* ~ Comma? ~")"}
+apply_kv  = {SYMBOL~ Set ~ expr|expr}
 
 slice       = !{"[" ~ index ~ (Comma ~ index)* ~ Comma? ~ "]"}
 index       =  {index_step|index_range|expr}

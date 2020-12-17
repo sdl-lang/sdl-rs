@@ -1,8 +1,9 @@
 mod declare;
 mod for_loop;
 mod literal;
+mod call_chain;
 
-use sdl_ast::{SDLContext, AST};
+use sdl_ast::{SDLContext};
 use sdl_parser::{ParserConfig, Result};
 
 #[test]

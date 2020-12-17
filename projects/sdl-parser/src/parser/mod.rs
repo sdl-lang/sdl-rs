@@ -2,10 +2,11 @@ mod config;
 mod regroup;
 
 pub use crate::parser::config::ParserConfig;
-use crate::Result;
+use crate::{parser::regroup::PREC_CLIMBER, Result};
 use sdl_ast::{Template, AST};
 use sdl_pest::{Pair, Pairs, Parser, Rule, SDLParser};
-use crate::parser::regroup::PREC_CLIMBER;
+use sdl_ast::ast::CallChain;
+
 
 macro_rules! debug_cases {
     ($i:ident) => {{
@@ -78,11 +79,12 @@ impl ParserConfig {
         for pair in pairs.into_inner() {
             match pair.as_rule() {
                 Rule::WHITESPACE => continue,
-                Rule::pattern => pattern = self.parse_pattern(pair),
+                Rule::pattern | Rule::pattern_bare => pattern = self.parse_pattern(pair),
                 Rule::expr => terms = self.parse_expr(pair),
                 Rule::block => block = self.parse_block(pair),
                 Rule::for_if => guard = Some(self.parse_expr(pair.into_inner().nth(0).unwrap())),
                 Rule::for_else => for_else = Some(self.parse_block(pair.into_inner().nth(0).unwrap())),
+                // _ => debug_cases!(pair),
                 _ => unreachable!(),
             };
         }
@@ -143,20 +145,6 @@ impl ParserConfig {
         }
     }
 
-    fn parse_chain_call(&self, pairs: Pair<Rule>) -> AST {
-        // let r = self.get_position(pairs.as_span());
-        let mut items = pairs.into_inner();
-        let base = self.parse_data(items.next().unwrap());
-
-        // let mut terms = vec![];
-        for pair in items {
-            match pair.as_rule() {
-                _ => debug_cases!(pair),
-            };
-        }
-        return base;
-    }
-
     fn parse_operation(&self, pairs: Pair<Rule>, kind: &str) -> AST {
         let r = self.get_position(pairs.as_span());
         let op = pairs.as_str();
@@ -169,6 +157,38 @@ impl ParserConfig {
         let expr = self.parse_expr(terms.next().unwrap());
         unreachable!("{:?}\n{:?}", pattern, expr)
     }
+
+    fn parse_chain_call(&self, pairs: Pair<Rule>) -> AST {
+        let r = self.get_position(pairs.as_span());
+        let mut items = pairs.into_inner();
+        let mut base = CallChain::new(self.parse_data(items.next().unwrap()));
+        for pair in items {
+            match pair.as_rule() {
+                Rule::dot_call=> base += self.parse_dot_call(pair),
+                _ => debug_cases!(pair),
+            };
+        }
+        AST::call_chain(base, r)
+    }
+
+    fn parse_dot_call(&self, pairs: Pair<Rule>) -> AST {
+        let r = self.get_position(pairs.as_span());
+        // let mut terms = vec![];
+        for pair in pairs.into_inner() {
+            match pair.as_rule() {
+                Rule::Dot=>continue,
+                Rule::Symbol=>continue,
+                Rule::apply=>continue,
+                Rule::Integer=> {
+                   return AST::call_index( pair.as_str(), r)
+
+                },
+                _ => debug_cases!(pair),
+            };
+        }
+        unreachable!()
+    }
+
 }
 
 impl ParserConfig {
@@ -267,7 +287,7 @@ impl ParserConfig {
     }
     fn parse_symbol(&self, pairs: Pair<Rule>) -> AST {
         let r = self.get_position(pairs.as_span());
-        let mut value = vec![self.parse_string(pairs)];
+        let value = vec![self.parse_string(pairs)];
         AST::symbol(value, r)
     }
 
@@ -280,26 +300,22 @@ impl ParserConfig {
         let r = self.get_position(pairs.as_span());
         let pair = pairs.into_inner().nth(0).unwrap();
         match pair.as_rule() {
-            Rule::Integer => {
-                AST::integer(pair.as_str(), 10, r)
-            }
-            Rule::Decimal => {
-                AST::decimal(pair.as_str(), 10, r)
-            }
+            Rule::Integer => AST::integer(pair.as_str(), 10, r),
+            Rule::Decimal => AST::decimal(pair.as_str(), 10, r),
             Rule::DecimalBad => {
-                let mut s = pair.as_str().to_string();
+                let s = pair.as_str().to_string();
                 match s.starts_with(".") {
                     true => AST::decimal(&format!("0{}", s), 10, r),
-                    false => AST::decimal(&format!("{}0", s), 10, r)
+                    false => AST::decimal(&format!("{}0", s), 10, r),
                 }
             }
             Rule::Byte => {
-                let mut s = pair.as_str().to_string();
+                let s = pair.as_str().to_string();
                 match &s[0..1] {
                     "0b" => AST::integer(pair.as_str(), 2, r),
                     "0o" => AST::integer(pair.as_str(), 8, r),
                     "0x" => AST::integer(pair.as_str(), 16, r),
-                    _ => AST::decimal(pair.as_str(), 16, r)
+                    _ => AST::decimal(pair.as_str(), 16, r),
                 }
             }
             _ => unreachable!(),
