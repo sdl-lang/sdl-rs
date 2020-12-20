@@ -19,7 +19,7 @@ impl Render for Value {
             Value::Null => write!(text, "null")?,
             Value::Boolean(v) => write!(text, "{}", v)?,
             Value::Integer(v) => write!(text, "{}", v)?,
-            Value::String(v) => write!(text, "{}", v)?,
+            Value::String(v) => write!(text, "{:?}", v)?,
             Value::List(v) => {
                 write!(text, "[")?;
                 for (i, e) in v.iter().enumerate() {

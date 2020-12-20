@@ -2,6 +2,7 @@ mod declare;
 mod for_loop;
 mod literal;
 mod call_chain;
+mod arithmetic;
 
 use sdl_ast::{SDLContext};
 use sdl_parser::{ParserConfig, Result};
