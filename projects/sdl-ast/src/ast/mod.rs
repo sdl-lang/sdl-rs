@@ -5,9 +5,9 @@ mod symbol;
 mod template;
 
 pub use crate::ast::{
-    expression::{InfixExpression, StringExpression, UnaryExpression},
+    expression::{CallChain, InfixExpression, StringExpression, UnaryExpression},
     loops::{ForInLoop, IfElseChain},
-    operations::Operation,
+    operations::Operator,
     symbol::Symbol,
     template::{Template, TemplateKind},
 };
@@ -15,9 +15,8 @@ use crate::TextRange;
 use bigdecimal::BigDecimal;
 use num::BigInt;
 use std::fmt::{self, Debug, Display, Formatter};
-pub use crate::ast::expression::CallChain;
 
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Clone, Eq, PartialEq)]
 pub struct AST {
     pub kind: ASTKind,
     pub range: Option<Box<TextRange>>,
@@ -50,11 +49,33 @@ pub enum ASTKind {
 
     Null,
     Boolean(bool),
-    String(String),
+    EscapedText(String),
+    UnescapedText(String),
     Integer(Box<BigInt>),
     Decimal(Box<BigDecimal>),
-    Operation(Box<Operation>),
+    Operator(Box<Operator>),
     Symbol(Box<Symbol>),
+}
+
+impl Debug for AST {
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+        match self {
+            AST {
+                kind,
+                range,
+            } => {
+                let mut builder = f.debug_struct("AST");
+                builder.field("kind", kind);
+                match range {
+                    None => (),
+                    Some(s) => {
+                        builder.field("range", s.as_ref());
+                    }
+                }
+                builder.finish()
+            }
+        }
+    }
 }
 
 impl Default for AST {
@@ -100,16 +121,16 @@ impl AST {
 
     pub fn operation(op: &str, kind: &str, r: TextRange) -> Self {
         let o = match kind {
-            "<" => Operation::prefix(op),
-            ">" => Operation::suffix(op),
-            _ => Operation::infix(op),
+            "<" => Operator::prefix(op),
+            ">" => Operator::suffix(op),
+            _ => Operator::infix(op),
         };
-        let kind = ASTKind::Operation(Box::new(o));
+        let kind = ASTKind::Operator(Box::new(o));
         Self { kind, range: box_range(r) }
     }
 
-    pub fn string_expression(value: AST, handler: AST, r: TextRange) -> Self {
-        let kind = ASTKind::StringExpression(Box::new(StringExpression { handler, value }));
+    pub fn string_expression(value: Vec<AST>, handler: AST, r: TextRange) -> Self {
+        let kind = ASTKind::StringExpression(Box::new(StringExpression { handler, inner: value }));
         Self { kind, range: box_range(r) }
     }
 
@@ -153,7 +174,10 @@ impl AST {
         Self { kind: ASTKind::Boolean(value), range: box_range(r) }
     }
     pub fn string(value: String, r: TextRange) -> Self {
-        Self { kind: ASTKind::String(value), range: box_range(r) }
+        Self { kind: ASTKind::UnescapedText(value), range: box_range(r) }
+    }
+    pub fn string_escaped(value: String, r: TextRange) -> Self {
+        Self { kind: ASTKind::EscapedText(value), range: box_range(r) }
     }
     pub fn integer(value: &str, base: u32, r: TextRange) -> Self {
         let n = BigInt::parse_bytes(value.as_bytes(), base).unwrap_or_default();

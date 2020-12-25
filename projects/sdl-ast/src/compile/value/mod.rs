@@ -1,11 +1,12 @@
 pub use crate::compile::value::template::HTMLElement;
-use std::collections::{BTreeMap, BTreeSet};
 use crate::Result;
 use num::BigInt;
+use std::collections::{BTreeMap, BTreeSet};
+use bigdecimal::BigDecimal;
 
 mod convert;
-mod template;
 mod ops;
+mod template;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum Value {
@@ -13,7 +14,9 @@ pub enum Value {
     Null,
     Boolean(bool),
     String(String),
+    UnsafeString(String),
     Integer(Box<BigInt>),
+    Decimal(Box<BigDecimal>),
     List(Vec<Value>),
     Dict(BTreeMap<String, Value>),
     HTMLElement(Box<HTMLElement>),

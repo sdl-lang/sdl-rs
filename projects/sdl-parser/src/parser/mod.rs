@@ -3,10 +3,8 @@ mod regroup;
 
 pub use crate::parser::config::ParserConfig;
 use crate::{parser::regroup::PREC_CLIMBER, Result};
-use sdl_ast::{Template, AST};
+use sdl_ast::{ast::CallChain, Template, AST};
 use sdl_pest::{Pair, Pairs, Parser, Rule, SDLParser};
-use sdl_ast::ast::CallChain;
-
 
 macro_rules! debug_cases {
     ($i:ident) => {{
@@ -119,8 +117,8 @@ impl ParserConfig {
     }
 
     fn parse_term(&self, pairs: Pair<Rule>) -> AST {
-        // let pos = get_position(pairs.as_span());
-        let mut base = AST::default();
+        let r = self.get_position(pairs.as_span());
+        let mut base = CallChain::default();
         // let mut prefix = vec![];
         // let mut suffix = vec![];
         for pair in pairs.into_inner() {
@@ -134,7 +132,10 @@ impl ParserConfig {
                 //_ => unreachable!(),
             };
         }
-        return base;
+        match base.chain.is_empty() {
+            true => base.base,
+            false => AST::call_chain(base, r)
+        }
     }
 
     fn parse_pattern(&self, pairs: Pair<Rule>) -> AST {
@@ -158,17 +159,17 @@ impl ParserConfig {
         unreachable!("{:?}\n{:?}", pattern, expr)
     }
 
-    fn parse_chain_call(&self, pairs: Pair<Rule>) -> AST {
-        let r = self.get_position(pairs.as_span());
+    fn parse_chain_call(&self, pairs: Pair<Rule>) -> CallChain {
+        // let r = self.get_position(pairs.as_span());
         let mut items = pairs.into_inner();
         let mut base = CallChain::new(self.parse_data(items.next().unwrap()));
         for pair in items {
             match pair.as_rule() {
-                Rule::dot_call=> base += self.parse_dot_call(pair),
+                Rule::dot_call => base += self.parse_dot_call(pair),
                 _ => debug_cases!(pair),
             };
         }
-        AST::call_chain(base, r)
+        return base
     }
 
     fn parse_dot_call(&self, pairs: Pair<Rule>) -> AST {
@@ -176,19 +177,15 @@ impl ParserConfig {
         // let mut terms = vec![];
         for pair in pairs.into_inner() {
             match pair.as_rule() {
-                Rule::Dot=>continue,
-                Rule::Symbol=>continue,
-                Rule::apply=>continue,
-                Rule::Integer=> {
-                   return AST::call_index( pair.as_str(), r)
-
-                },
+                Rule::Dot => continue,
+                Rule::Symbol => continue,
+                Rule::apply => continue,
+                Rule::Integer => return AST::call_index(pair.as_str(), r),
                 _ => debug_cases!(pair),
             };
         }
         unreachable!()
     }
-
 }
 
 impl ParserConfig {

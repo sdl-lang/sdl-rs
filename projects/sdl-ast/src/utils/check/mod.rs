@@ -27,7 +27,8 @@ impl ASTKind {
     }
     pub fn is_string(&self) -> bool {
         match self {
-            Self::String { .. } => true,
+            Self::EscapedText { .. } => true,
+            Self::UnescapedText { .. } => true,
             _ => false,
         }
     }

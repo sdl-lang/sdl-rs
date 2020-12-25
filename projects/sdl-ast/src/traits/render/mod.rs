@@ -19,7 +19,9 @@ impl Render for Value {
             Value::Null => write!(text, "null")?,
             Value::Boolean(v) => write!(text, "{}", v)?,
             Value::Integer(v) => write!(text, "{}", v)?,
+            Value::Decimal(v) => write!(text, "{}", v)?,
             Value::String(v) => write!(text, "{:?}", v)?,
+            Value::UnsafeString(v) => write!(text, "{:?}", v)?,
             Value::List(v) => {
                 write!(text, "[")?;
                 for (i, e) in v.iter().enumerate() {
@@ -32,6 +34,8 @@ impl Render for Value {
             }
             Value::Dict(v) => write!(text, "{:#?}", v)?,
             Value::HTMLElement(html) => html.render(text, ctx)?,
+
+
         };
         Ok(())
     }

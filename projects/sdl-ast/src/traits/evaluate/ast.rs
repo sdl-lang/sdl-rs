@@ -31,9 +31,10 @@ impl Evaluate for ASTKind {
 
             ASTKind::Null => Value::Null,
             ASTKind::Boolean(v) => Value::Boolean(v.to_owned()),
-            ASTKind::String(v) => Value::String(v.to_owned()),
+            ASTKind::EscapedText(v) => Value::String(v.to_owned()),
+            ASTKind::UnescapedText(v) => Value::UnsafeString(v.to_owned()),
             ASTKind::Integer(v) => Value::Integer(v.to_owned()),
-            ASTKind::Decimal(v) => Value::String(v.to_string()),
+            ASTKind::Decimal(v) => Value::Decimal(v.to_owned()),
 
             _ => unimplemented!("ASTKind::{:?} => {{}}", self),
         };

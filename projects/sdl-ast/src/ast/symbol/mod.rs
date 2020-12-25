@@ -10,13 +10,13 @@ impl Debug for Symbol {
         let mut path = self.path.iter();
         if let Some(head) = path.next() {
             match &head.kind {
-                ASTKind::String(s) => write!(f, "{}", s)?,
+                ASTKind::EscapedText(s) => write!(f, "{}", s)?,
                 _ => unreachable!(),
             }
         }
         for i in path {
             match &i.kind {
-                ASTKind::String(s) => write!(f, "::{}", s)?,
+                ASTKind::EscapedText(s) => write!(f, "::{}", s)?,
                 _ => unreachable!(),
             }
         }
@@ -36,14 +36,14 @@ impl Symbol {
             .iter()
             .take(self.path.len() - 1)
             .map(|e| match &e.kind {
-                ASTKind::String(s) => s.to_owned(),
+                ASTKind::EscapedText(s) => s.to_owned(),
                 _ => unreachable!(),
             })
             .collect()
     }
     pub fn name(&self) -> String {
         match &self.path.last().unwrap().kind {
-            ASTKind::String(s) => s.to_owned(),
+            ASTKind::EscapedText(s) => s.to_owned(),
             _ => unreachable!(),
         }
     }

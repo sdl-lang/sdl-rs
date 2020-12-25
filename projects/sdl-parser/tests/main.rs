@@ -1,10 +1,10 @@
+mod arithmetic;
+mod call_chain;
 mod declare;
 mod for_loop;
 mod literal;
-mod call_chain;
-mod arithmetic;
 
-use sdl_ast::{SDLContext};
+use sdl_ast::SDLContext;
 use sdl_parser::{ParserConfig, Result};
 
 #[test]
@@ -15,11 +15,22 @@ fn ready() {
 pub fn render(input: &str) -> Result<String> {
     let mut parser = ParserConfig::default();
     let out = parser.parse(input)?;
-    // println!("{:#?}", out);
     let mut ctx = SDLContext::default();
     let out = ctx.evaluate(&out)?;
-    // println!("{:?}", out);
-    Ok(ctx.render(&out)?)
+    let out = ctx.render(&out)?;
+    Ok(out)
+}
+
+pub fn render_steps(input: &str) -> Result<String> {
+    let mut parser = ParserConfig::default();
+    let out = parser.parse(input)?;
+    println!("{:#?}", out);
+    let mut ctx = SDLContext::default();
+    let out = ctx.evaluate(&out)?;
+    println!("{:?}", out);
+    let out = ctx.render(&out)?;
+    println!("{:?}", out);
+    Ok(out)
 }
 
 const CODE: &'static str = r#"

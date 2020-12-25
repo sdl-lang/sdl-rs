@@ -44,7 +44,7 @@ else {
 
 #[test]
 fn for_else_guard() {
-    assert_eq!(render(FOR_ELSE_GUARD).unwrap(),"true")
+    assert_eq!(render(FOR_ELSE_GUARD).unwrap(), "true")
 }
 
 const FOR_IF_ELSE_GUARD: &'static str = r#"
@@ -58,5 +58,5 @@ else {
 
 #[test]
 fn for_if_else_guard() {
-    assert_eq!(render(FOR_IF_ELSE_GUARD).unwrap(),"true")
+    assert_eq!(render(FOR_IF_ELSE_GUARD).unwrap(), "true")
 }

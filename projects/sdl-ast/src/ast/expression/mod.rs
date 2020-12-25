@@ -1,10 +1,10 @@
 use super::*;
-use std::ops::{AddAssign};
+use std::ops::AddAssign;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct StringExpression {
     pub handler: AST,
-    pub value: AST,
+    pub inner: Vec<AST>,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -22,14 +22,14 @@ pub struct UnaryExpression {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct CallChain {
-    pub(crate)   base: AST,
-    pub(crate)   chain: Vec<AST>,
+    pub  base: AST,
+    pub  chain: Vec<AST>,
 }
 
-impl CallChain {
-    pub fn new(ast: AST) -> Self {
+impl Default for CallChain {
+    fn default() -> Self {
         Self {
-            base: ast,
+            base: Default::default(),
             chain: vec![]
         }
     }
@@ -40,3 +40,11 @@ impl AddAssign<AST> for CallChain {
         self.chain.push(rhs)
     }
 }
+
+
+impl CallChain {
+    pub fn new(ast: AST) -> Self {
+        Self { base: ast, chain: vec![] }
+    }
+}
+
