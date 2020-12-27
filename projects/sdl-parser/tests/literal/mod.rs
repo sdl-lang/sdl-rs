@@ -16,3 +16,15 @@ const NUMBER: &'static str = r#"[0x0, .1, 2., 3.0, '4', "5.0"]"#;
 fn number() {
     assert_eq!(render(NUMBER).unwrap(), r#"[0, 0.1, 2.0, 3.0, "4", "5.0"]"#)
 }
+
+
+const STRING: &'static str = r#"[
+    "1",
+    '2',
+    `3`,
+]"#;
+
+#[test]
+fn string() {
+    assert_eq!(render(STRING).unwrap(), r#"[0, 0.1, 2.0, 3.0, "4", "5.0"]"#)
+}

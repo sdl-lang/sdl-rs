@@ -290,7 +290,22 @@ impl ParserConfig {
 
     fn parse_string(&self, pairs: Pair<Rule>) -> AST {
         let r = self.get_position(pairs.as_span());
-        AST::string(pairs.as_str().to_string(), r)
+        let mut marks = 0;
+        for pair in pairs.into_inner() {
+            match pair.as_rule() {
+                Rule::Quotation=>marks+=1,
+                Rule::StringQuotation=> {
+                    for inner in pair.into_inner() {
+                        match inner.as_rule() {
+                            _ => debug_cases!(inner),
+                        };
+                    }
+                },
+                _ => debug_cases!(pair),
+            };
+        }
+        unreachable!()
+        //AST::string(pairs.as_str().to_string(), r)
     }
 
     fn parse_number(&self, pairs: Pair<Rule>) -> AST {

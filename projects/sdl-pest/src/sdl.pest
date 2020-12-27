@@ -152,15 +152,25 @@ DecimalBad = @{Integer ~ Dot|Dot ~ ASCII_DIGIT+}
 Integer    = @{"0"|ASCII_NONZERO_DIGIT ~ (Underline? ~ ASCII_DIGIT)*}
 /*====================================================================================================================*/
 //!#3C963C: String
-//!#98C379: StringText|StringLiteralText
-String            = ${SYMBOL? ~ (StringNormal|StringLiteral|StringEmpty)}
-StringLiteral     =  {StringStart ~ StringLiteralText ~ StringEnd}
-StringNormal      =  {Quotation ~ StringText ~ Quotation}
-StringEmpty       =  {Quotation{2}|Apostrophe{2}}
-StringLiteralText =  {(!(Apostrophe ~ PEEK) ~ ANY)*}
-StringText        =  {(Solidus~(Solidus|Quotation)|!Quotation ~ ANY)*}
-StringStart       = @{Apostrophe{1}~PUSH(Apostrophe*)}
-StringEnd         = @{POP ~ Apostrophe{1}}
+//!#98C379: StringNormal|StringEmpty
+String           = ${SYMBOL? ~ (StringNormal|StringEmpty)}
+StringEmpty      =  {Quotation{2}|Apostrophe{2}|Quote{2}|Acute{2}}
+StringNormal     = _{
+    Apostrophe{1} ~ PUSH(Apostrophe*) ~ StringApostrophe ~ POP ~ Apostrophe{1}
+  | Quotation{1} ~ PUSH(Quotation*) ~ StringQuotation ~ POP ~ Quotation{1}
+  | Acute{1} ~ PUSH(Acute*) ~ StringAcute ~ POP ~ Acute{1}
+  | Quote{1} ~ PUSH(Quote*) ~ StringQuote ~ POP ~ Quote{1}
+}
+StringApostrophe =  {(Escape ~ (Escape|Apostrophe)|"{{"|"}}"| "{" ~ statement ~ "}" | !(Apostrophe ~ PEEK) ~ ANY)*}
+StringQuotation  =  {(Escape ~ (Escape|Quotation) |"{{"|"}}"| "{" ~ statement ~ "}" | !(Quotation ~ PEEK) ~ ANY)*}
+StringAcute      =  {(Escape ~ (Escape|Acute)     |"{{"|"}}"| "{" ~ statement ~ "}" | !(Acute ~ PEEK) ~ ANY)*}
+StringQuote      =  {(Escape ~ (Escape|Quote)     |"{{"|"}}"| "{" ~ statement ~ "}" | !(Quote ~ PEEK) ~ ANY)*}
+
+Quote      = @{"`"}
+Acute      = @{"´"} // U+00B4
+Apostrophe = @{"'"}
+Quotation  = @{"\""}
+Solidus    = @{"\\\\"}
 /*====================================================================================================================*/
 // NEWLINE = @{"\r"~"\n"|"\r"|"\n"}
 WHITESPACE = _{NEWLINE|WHITE_SPACE}
@@ -218,7 +228,7 @@ LazyOr = @{"||"}
 
 Star =@{"*"}
 
-Solidus = @{"\\"}
+Escape = @{"\\"}
 
 Proportion = @{"::"|"∷"}//U+2237
 Dot = @{"."}
@@ -253,10 +263,7 @@ To =@{"->"}
 
 Elvis =@{":?"}
 
-Quote =@{"`"}
-Acute =@{"´"} // U+00B4
-Apostrophe = @{"'"}
-Quotation = @{"\""}
+
 
 
 LogicOr =@{"||"|"∧"} //U+2227
