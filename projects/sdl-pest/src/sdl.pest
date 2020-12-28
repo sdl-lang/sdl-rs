@@ -161,16 +161,21 @@ StringNormal     = _{
   | Acute{1} ~ PUSH(Acute*) ~ StringAcute ~ POP ~ Acute{1}
   | Quote{1} ~ PUSH(Quote*) ~ StringQuote ~ POP ~ Quote{1}
 }
-StringApostrophe =  {(Escape ~ (Escape|Apostrophe)|"{{"|"}}"| "{" ~ statement ~ "}" | !(Apostrophe ~ PEEK) ~ ANY)*}
-StringQuotation  =  {(Escape ~ (Escape|Quotation) |"{{"|"}}"| "{" ~ statement ~ "}" | !(Quotation ~ PEEK) ~ ANY)*}
-StringAcute      =  {(Escape ~ (Escape|Acute)     |"{{"|"}}"| "{" ~ statement ~ "}" | !(Acute ~ PEEK) ~ ANY)*}
-StringQuote      =  {(Escape ~ (Escape|Quote)     |"{{"|"}}"| "{" ~ statement ~ "}" | !(Quote ~ PEEK) ~ ANY)*}
+StringApostrophe = ${(Escape ~ Apostrophe | "{" ~ expr ~ "}" | StringEscaped | NonApostrophe)+}
+StringQuotation  = ${(Escape ~ Quotation  | "{" ~ expr ~ "}" | StringEscaped | NonQuotation)+}
+StringAcute      = ${(Escape ~ Acute      | "{" ~ expr ~ "}" | StringEscaped | NonAcute)+}
+StringQuote      = ${(Escape ~ Quote      | "{" ~ expr ~ "}" | StringEscaped | NonQuote)+}
+StringEscaped    = @{"{{" | "}}" | Escape ~ ANY}
 
-Quote      = @{"`"}
-Acute      = @{"´"} // U+00B4
-Apostrophe = @{"'"}
-Quotation  = @{"\""}
-Solidus    = @{"\\\\"}
+NonApostrophe    = @{!(Apostrophe ~ PEEK) ~ ANY}
+NonQuotation     = @{!(Quotation ~ PEEK) ~ ANY}
+NonAcute         = @{!(Acute ~ PEEK) ~ ANY}
+NonQuote         = @{!(Quote ~ PEEK) ~ ANY}
+
+Quote            = @{"`"}
+Acute            = @{"´"} // U+00B4
+Apostrophe       = @{"'"}
+Quotation        = @{"\""}
 /*====================================================================================================================*/
 // NEWLINE = @{"\r"~"\n"|"\r"|"\n"}
 WHITESPACE = _{NEWLINE|WHITE_SPACE}

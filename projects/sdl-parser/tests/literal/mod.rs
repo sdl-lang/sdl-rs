@@ -19,10 +19,15 @@ fn number() {
 
 
 const STRING: &'static str = r#"[
-    "1",
+    "\\ \" 1,2",
     '2',
     `3`,
+    "{ 2 + 2 }"
 ]"#;
+
+const STRING2: &'static str = r#"
+"\\ \" \' \n 1,2"
+"#;
 
 #[test]
 fn string() {

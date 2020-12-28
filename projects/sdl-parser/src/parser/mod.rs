@@ -291,12 +291,24 @@ impl ParserConfig {
     fn parse_string(&self, pairs: Pair<Rule>) -> AST {
         let r = self.get_position(pairs.as_span());
         let mut marks = 0;
+        let mut buffer = String::new();
         for pair in pairs.into_inner() {
             match pair.as_rule() {
                 Rule::Quotation=>marks+=1,
                 Rule::StringQuotation=> {
                     for inner in pair.into_inner() {
                         match inner.as_rule() {
+                            Rule::Escape=>continue,
+                            Rule::Quotation=>continue,
+                            Rule::NonQuotation => {
+                                buffer.push_str(inner.as_str())
+                            }
+                            Rule::StringEscaped=> {
+                                match inner.as_str() {
+                                 "\\\\" => buffer.push('\\')  ,
+                                    _ => debug_cases!(inner)
+                                }
+                            },
                             _ => debug_cases!(inner),
                         };
                     }
@@ -304,8 +316,7 @@ impl ParserConfig {
                 _ => debug_cases!(pair),
             };
         }
-        unreachable!()
-        //AST::string(pairs.as_str().to_string(), r)
+        AST::string(buffer, r)
     }
 
     fn parse_number(&self, pairs: Pair<Rule>) -> AST {
