@@ -290,28 +290,29 @@ impl ParserConfig {
 
     fn parse_string(&self, pairs: Pair<Rule>) -> AST {
         let r = self.get_position(pairs.as_span());
+        let mut block = vec![];
         let mut marks = 0;
         let mut buffer = String::new();
         for pair in pairs.into_inner() {
             match pair.as_rule() {
-                Rule::Quotation=>marks+=1,
-                Rule::StringQuotation=> {
-                    for inner in pair.into_inner() {
-                        match inner.as_rule() {
-                            Rule::Escape=>continue,
-                            Rule::Quotation=>continue,
-                            Rule::NonQuotation => {
-                                buffer.push_str(inner.as_str())
-                            }
-                            Rule::StringEscaped=> {
-                                match inner.as_str() {
-                                 "\\\\" => buffer.push('\\')  ,
-                                    _ => debug_cases!(inner)
-                                }
-                            },
-                            _ => debug_cases!(inner),
-                        };
+                Rule::Quotation|Rule::Quote|Rule::Apostrophe=>marks+=1,
+                Rule::NonQuotation |Rule::NonQuote| Rule::NonApostrophe=> {
+                    buffer.push_str(pair.as_str())
+                }
+                Rule::StringEscaped=> {
+                    match pair.as_str() {
+                        "\\\\" => buffer.push('\\'),
+                        "\\\"" => buffer.push('\"'),
+                        _ => debug_cases!(pair)
                     }
+                },
+                Rule::expr=> {
+                    if !buffer.is_empty() {
+                        block.push(AST::string( Default::default()))
+                        buffer = String::new()
+                    }
+
+
                 },
                 _ => debug_cases!(pair),
             };

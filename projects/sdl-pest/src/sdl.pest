@@ -161,10 +161,10 @@ StringNormal     = _{
   | Acute{1} ~ PUSH(Acute*) ~ StringAcute ~ POP ~ Acute{1}
   | Quote{1} ~ PUSH(Quote*) ~ StringQuote ~ POP ~ Quote{1}
 }
-StringApostrophe = ${(Escape ~ Apostrophe | "{" ~ expr ~ "}" | StringEscaped | NonApostrophe)+}
-StringQuotation  = ${(Escape ~ Quotation  | "{" ~ expr ~ "}" | StringEscaped | NonQuotation)+}
-StringAcute      = ${(Escape ~ Acute      | "{" ~ expr ~ "}" | StringEscaped | NonAcute)+}
-StringQuote      = ${(Escape ~ Quote      | "{" ~ expr ~ "}" | StringEscaped | NonQuote)+}
+StringApostrophe = _{("{" ~ expr ~ "}" | StringEscaped | NonApostrophe)+}
+StringQuotation  = _{("{" ~ expr ~ "}" | StringEscaped | NonQuotation)+}
+StringAcute      = _{("{" ~ expr ~ "}" | StringEscaped | NonAcute)+}
+StringQuote      = _{("{" ~ expr ~ "}" | StringEscaped | NonQuote)+}
 StringEscaped    = @{"{{" | "}}" | Escape ~ ANY}
 
 NonApostrophe    = @{!(Apostrophe ~ PEEK) ~ ANY}
