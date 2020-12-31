@@ -19,6 +19,7 @@ impl Evaluate for ASTKind {
                 }
             }
             ASTKind::InfixExpression(inner) => inner.evaluate(ctx)?,
+            ASTKind::StringExpression(inner) => inner.evaluate(ctx)?,
 
             ASTKind::IfElseChain(inner) => inner.evaluate(ctx)?,
             ASTKind::ForInLoop(inner) => inner.evaluate(ctx)?,
@@ -33,6 +34,7 @@ impl Evaluate for ASTKind {
             ASTKind::Boolean(v) => Value::Boolean(v.to_owned()),
             ASTKind::EscapedText(v) => Value::String(v.to_owned()),
             ASTKind::UnescapedText(v) => Value::UnsafeString(v.to_owned()),
+
             ASTKind::Integer(v) => Value::Integer(v.to_owned()),
             ASTKind::Decimal(v) => Value::Decimal(v.to_owned()),
 

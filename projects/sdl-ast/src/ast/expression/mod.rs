@@ -3,7 +3,7 @@ use std::ops::AddAssign;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct StringExpression {
-    pub handler: AST,
+    pub handler: Option<AST>,
     pub inner: Vec<AST>,
 }
 

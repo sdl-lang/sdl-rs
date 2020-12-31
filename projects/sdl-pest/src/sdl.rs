@@ -83,19 +83,14 @@ pub enum Rule {
     String,
     StringEmpty,
     StringNormal,
-    StringApostrophe,
-    StringQuotation,
-    StringAcute,
-    StringQuote,
-    StringEscaped,
-    NonApostrophe,
-    NonQuotation,
-    NonAcute,
-    NonQuote,
-    Quote,
-    Acute,
-    Apostrophe,
-    Quotation,
+    NS1,
+    NS2,
+    NS3,
+    NS4,
+    S1,
+    S2,
+    S3,
+    S4,
     WHITESPACE,
     COMMENT,
     MultiLineComment,
@@ -553,77 +548,52 @@ impl ::pest::Parser<Rule> for SDLParser {
                 #[inline]
                 #[allow(non_snake_case, unused_variables)]
                 pub fn StringEmpty(state: Box<::pest::ParserState<Rule>>) -> ::pest::ParseResult<Box<::pest::ParserState<Rule>>> {
-                    state.rule(Rule::StringEmpty, |state| state.sequence(|state| self::Quotation(state).and_then(|state| super::hidden::skip(state)).and_then(|state| self::Quotation(state))).or_else(|state| state.sequence(|state| self::Apostrophe(state).and_then(|state| super::hidden::skip(state)).and_then(|state| self::Apostrophe(state)))).or_else(|state| state.sequence(|state| self::Quote(state).and_then(|state| super::hidden::skip(state)).and_then(|state| self::Quote(state)))).or_else(|state| state.sequence(|state| self::Acute(state).and_then(|state| super::hidden::skip(state)).and_then(|state| self::Acute(state)))))
+                    state.rule(Rule::StringEmpty, |state| state.atomic(::pest::Atomicity::Atomic, |state| state.sequence(|state| self::S1(state).and_then(|state| self::S1(state))).or_else(|state| state.sequence(|state| self::S2(state).and_then(|state| self::S2(state)))).or_else(|state| state.sequence(|state| self::S3(state).and_then(|state| self::S3(state)))).or_else(|state| state.sequence(|state| self::S4(state).and_then(|state| self::S4(state))))))
                 }
                 #[inline]
                 #[allow(non_snake_case, unused_variables)]
                 pub fn StringNormal(state: Box<::pest::ParserState<Rule>>) -> ::pest::ParseResult<Box<::pest::ParserState<Rule>>> {
-                    state.restore_on_err(|state| state.sequence(|state| self::Apostrophe(state).and_then(|state| super::hidden::skip(state)).and_then(|state| state.stack_push(|state| state.sequence(|state| state.optional(|state| self::Apostrophe(state).and_then(|state| state.repeat(|state| state.sequence(|state| super::hidden::skip(state).and_then(|state| self::Apostrophe(state))))))))).and_then(|state| super::hidden::skip(state)).and_then(|state| self::StringApostrophe(state)).and_then(|state| super::hidden::skip(state)).and_then(|state| self::POP(state)).and_then(|state| super::hidden::skip(state)).and_then(|state| self::Apostrophe(state)))).or_else(|state| state.restore_on_err(|state| state.sequence(|state| self::Quotation(state).and_then(|state| super::hidden::skip(state)).and_then(|state| state.stack_push(|state| state.sequence(|state| state.optional(|state| self::Quotation(state).and_then(|state| state.repeat(|state| state.sequence(|state| super::hidden::skip(state).and_then(|state| self::Quotation(state))))))))).and_then(|state| super::hidden::skip(state)).and_then(|state| self::StringQuotation(state)).and_then(|state| super::hidden::skip(state)).and_then(|state| self::POP(state)).and_then(|state| super::hidden::skip(state)).and_then(|state| self::Quotation(state))))).or_else(|state| state.restore_on_err(|state| state.sequence(|state| self::Acute(state).and_then(|state| super::hidden::skip(state)).and_then(|state| state.stack_push(|state| state.sequence(|state| state.optional(|state| self::Acute(state).and_then(|state| state.repeat(|state| state.sequence(|state| super::hidden::skip(state).and_then(|state| self::Acute(state))))))))).and_then(|state| super::hidden::skip(state)).and_then(|state| self::StringAcute(state)).and_then(|state| super::hidden::skip(state)).and_then(|state| self::POP(state)).and_then(|state| super::hidden::skip(state)).and_then(|state| self::Acute(state))))).or_else(|state| state.restore_on_err(|state| state.sequence(|state| self::Quote(state).and_then(|state| super::hidden::skip(state)).and_then(|state| state.stack_push(|state| state.sequence(|state| state.optional(|state| self::Quote(state).and_then(|state| state.repeat(|state| state.sequence(|state| super::hidden::skip(state).and_then(|state| self::Quote(state))))))))).and_then(|state| super::hidden::skip(state)).and_then(|state| self::StringQuote(state)).and_then(|state| super::hidden::skip(state)).and_then(|state| self::POP(state)).and_then(|state| super::hidden::skip(state)).and_then(|state| self::Quote(state)))))
+                    state.restore_on_err(|state| state.sequence(|state| self::S1(state).and_then(|state| super::hidden::skip(state)).and_then(|state| state.stack_push(|state| state.sequence(|state| state.optional(|state| self::S1(state).and_then(|state| state.repeat(|state| state.sequence(|state| super::hidden::skip(state).and_then(|state| self::S1(state))))))))).and_then(|state| super::hidden::skip(state)).and_then(|state| state.sequence(|state| state.restore_on_err(|state| state.sequence(|state| state.match_string("{").and_then(|state| super::hidden::skip(state)).and_then(|state| self::expr(state)).and_then(|state| super::hidden::skip(state)).and_then(|state| state.match_string("}")))).or_else(|state| self::NS1(state)).and_then(|state| super::hidden::skip(state)).and_then(|state| state.sequence(|state| state.optional(|state| state.restore_on_err(|state| state.sequence(|state| state.match_string("{").and_then(|state| super::hidden::skip(state)).and_then(|state| self::expr(state)).and_then(|state| super::hidden::skip(state)).and_then(|state| state.match_string("}")))).or_else(|state| self::NS1(state)).and_then(|state| state.repeat(|state| state.sequence(|state| super::hidden::skip(state).and_then(|state| state.restore_on_err(|state| state.sequence(|state| state.match_string("{").and_then(|state| super::hidden::skip(state)).and_then(|state| self::expr(state)).and_then(|state| super::hidden::skip(state)).and_then(|state| state.match_string("}")))).or_else(|state| self::NS1(state))))))))))).and_then(|state| super::hidden::skip(state)).and_then(|state| self::POP(state)).and_then(|state| super::hidden::skip(state)).and_then(|state| self::S1(state)))).or_else(|state| state.restore_on_err(|state| state.sequence(|state| self::S2(state).and_then(|state| super::hidden::skip(state)).and_then(|state| state.stack_push(|state| state.sequence(|state| state.optional(|state| self::S2(state).and_then(|state| state.repeat(|state| state.sequence(|state| super::hidden::skip(state).and_then(|state| self::S2(state))))))))).and_then(|state| super::hidden::skip(state)).and_then(|state| state.sequence(|state| state.restore_on_err(|state| state.sequence(|state| state.match_string("{").and_then(|state| super::hidden::skip(state)).and_then(|state| self::expr(state)).and_then(|state| super::hidden::skip(state)).and_then(|state| state.match_string("}")))).or_else(|state| self::NS2(state)).and_then(|state| super::hidden::skip(state)).and_then(|state| state.sequence(|state| state.optional(|state| state.restore_on_err(|state| state.sequence(|state| state.match_string("{").and_then(|state| super::hidden::skip(state)).and_then(|state| self::expr(state)).and_then(|state| super::hidden::skip(state)).and_then(|state| state.match_string("}")))).or_else(|state| self::NS2(state)).and_then(|state| state.repeat(|state| state.sequence(|state| super::hidden::skip(state).and_then(|state| state.restore_on_err(|state| state.sequence(|state| state.match_string("{").and_then(|state| super::hidden::skip(state)).and_then(|state| self::expr(state)).and_then(|state| super::hidden::skip(state)).and_then(|state| state.match_string("}")))).or_else(|state| self::NS2(state))))))))))).and_then(|state| super::hidden::skip(state)).and_then(|state| self::POP(state)).and_then(|state| super::hidden::skip(state)).and_then(|state| self::S2(state))))).or_else(|state| state.restore_on_err(|state| state.sequence(|state| self::S3(state).and_then(|state| super::hidden::skip(state)).and_then(|state| state.stack_push(|state| state.sequence(|state| state.optional(|state| self::S3(state).and_then(|state| state.repeat(|state| state.sequence(|state| super::hidden::skip(state).and_then(|state| self::S3(state))))))))).and_then(|state| super::hidden::skip(state)).and_then(|state| state.sequence(|state| state.restore_on_err(|state| state.sequence(|state| state.match_string("{").and_then(|state| super::hidden::skip(state)).and_then(|state| self::expr(state)).and_then(|state| super::hidden::skip(state)).and_then(|state| state.match_string("}")))).or_else(|state| self::NS3(state)).and_then(|state| super::hidden::skip(state)).and_then(|state| state.sequence(|state| state.optional(|state| state.restore_on_err(|state| state.sequence(|state| state.match_string("{").and_then(|state| super::hidden::skip(state)).and_then(|state| self::expr(state)).and_then(|state| super::hidden::skip(state)).and_then(|state| state.match_string("}")))).or_else(|state| self::NS3(state)).and_then(|state| state.repeat(|state| state.sequence(|state| super::hidden::skip(state).and_then(|state| state.restore_on_err(|state| state.sequence(|state| state.match_string("{").and_then(|state| super::hidden::skip(state)).and_then(|state| self::expr(state)).and_then(|state| super::hidden::skip(state)).and_then(|state| state.match_string("}")))).or_else(|state| self::NS3(state))))))))))).and_then(|state| super::hidden::skip(state)).and_then(|state| self::POP(state)).and_then(|state| super::hidden::skip(state)).and_then(|state| self::S3(state))))).or_else(|state| state.restore_on_err(|state| state.sequence(|state| self::S4(state).and_then(|state| super::hidden::skip(state)).and_then(|state| state.stack_push(|state| state.sequence(|state| state.optional(|state| self::S4(state).and_then(|state| state.repeat(|state| state.sequence(|state| super::hidden::skip(state).and_then(|state| self::S4(state))))))))).and_then(|state| super::hidden::skip(state)).and_then(|state| state.sequence(|state| state.restore_on_err(|state| state.sequence(|state| state.match_string("{").and_then(|state| super::hidden::skip(state)).and_then(|state| self::expr(state)).and_then(|state| super::hidden::skip(state)).and_then(|state| state.match_string("}")))).or_else(|state| self::NS4(state)).and_then(|state| super::hidden::skip(state)).and_then(|state| state.sequence(|state| state.optional(|state| state.restore_on_err(|state| state.sequence(|state| state.match_string("{").and_then(|state| super::hidden::skip(state)).and_then(|state| self::expr(state)).and_then(|state| super::hidden::skip(state)).and_then(|state| state.match_string("}")))).or_else(|state| self::NS4(state)).and_then(|state| state.repeat(|state| state.sequence(|state| super::hidden::skip(state).and_then(|state| state.restore_on_err(|state| state.sequence(|state| state.match_string("{").and_then(|state| super::hidden::skip(state)).and_then(|state| self::expr(state)).and_then(|state| super::hidden::skip(state)).and_then(|state| state.match_string("}")))).or_else(|state| self::NS4(state))))))))))).and_then(|state| super::hidden::skip(state)).and_then(|state| self::POP(state)).and_then(|state| super::hidden::skip(state)).and_then(|state| self::S4(state)))))
                 }
                 #[inline]
                 #[allow(non_snake_case, unused_variables)]
-                pub fn StringApostrophe(state: Box<::pest::ParserState<Rule>>) -> ::pest::ParseResult<Box<::pest::ParserState<Rule>>> {
-                    state.sequence(|state| state.restore_on_err(|state| state.sequence(|state| state.match_string("{").and_then(|state| super::hidden::skip(state)).and_then(|state| self::expr(state)).and_then(|state| super::hidden::skip(state)).and_then(|state| state.match_string("}")))).or_else(|state| self::StringEscaped(state)).or_else(|state| self::NonApostrophe(state)).and_then(|state| super::hidden::skip(state)).and_then(|state| state.sequence(|state| state.optional(|state| state.restore_on_err(|state| state.sequence(|state| state.match_string("{").and_then(|state| super::hidden::skip(state)).and_then(|state| self::expr(state)).and_then(|state| super::hidden::skip(state)).and_then(|state| state.match_string("}")))).or_else(|state| self::StringEscaped(state)).or_else(|state| self::NonApostrophe(state)).and_then(|state| state.repeat(|state| state.sequence(|state| super::hidden::skip(state).and_then(|state| state.restore_on_err(|state| state.sequence(|state| state.match_string("{").and_then(|state| super::hidden::skip(state)).and_then(|state| self::expr(state)).and_then(|state| super::hidden::skip(state)).and_then(|state| state.match_string("}")))).or_else(|state| self::StringEscaped(state)).or_else(|state| self::NonApostrophe(state))))))))))
+                pub fn NS1(state: Box<::pest::ParserState<Rule>>) -> ::pest::ParseResult<Box<::pest::ParserState<Rule>>> {
+                    state.rule(Rule::NS1, |state| state.atomic(::pest::Atomicity::Atomic, |state| state.match_string("{{").or_else(|state| state.match_string("}}")).or_else(|state| state.sequence(|state| self::Escape(state).and_then(|state| self::ANY(state)))).or_else(|state| state.sequence(|state| state.lookahead(false, |state| state.sequence(|state| self::S1(state).and_then(|state| self::PEEK(state)))).and_then(|state| self::ANY(state))))))
                 }
                 #[inline]
                 #[allow(non_snake_case, unused_variables)]
-                pub fn StringQuotation(state: Box<::pest::ParserState<Rule>>) -> ::pest::ParseResult<Box<::pest::ParserState<Rule>>> {
-                    state.sequence(|state| state.restore_on_err(|state| state.sequence(|state| state.match_string("{").and_then(|state| super::hidden::skip(state)).and_then(|state| self::expr(state)).and_then(|state| super::hidden::skip(state)).and_then(|state| state.match_string("}")))).or_else(|state| self::StringEscaped(state)).or_else(|state| self::NonQuotation(state)).and_then(|state| super::hidden::skip(state)).and_then(|state| state.sequence(|state| state.optional(|state| state.restore_on_err(|state| state.sequence(|state| state.match_string("{").and_then(|state| super::hidden::skip(state)).and_then(|state| self::expr(state)).and_then(|state| super::hidden::skip(state)).and_then(|state| state.match_string("}")))).or_else(|state| self::StringEscaped(state)).or_else(|state| self::NonQuotation(state)).and_then(|state| state.repeat(|state| state.sequence(|state| super::hidden::skip(state).and_then(|state| state.restore_on_err(|state| state.sequence(|state| state.match_string("{").and_then(|state| super::hidden::skip(state)).and_then(|state| self::expr(state)).and_then(|state| super::hidden::skip(state)).and_then(|state| state.match_string("}")))).or_else(|state| self::StringEscaped(state)).or_else(|state| self::NonQuotation(state))))))))))
+                pub fn NS2(state: Box<::pest::ParserState<Rule>>) -> ::pest::ParseResult<Box<::pest::ParserState<Rule>>> {
+                    state.rule(Rule::NS2, |state| state.atomic(::pest::Atomicity::Atomic, |state| state.match_string("{{").or_else(|state| state.match_string("}}")).or_else(|state| state.sequence(|state| self::Escape(state).and_then(|state| self::ANY(state)))).or_else(|state| state.sequence(|state| state.lookahead(false, |state| state.sequence(|state| self::S2(state).and_then(|state| self::PEEK(state)))).and_then(|state| self::ANY(state))))))
                 }
                 #[inline]
                 #[allow(non_snake_case, unused_variables)]
-                pub fn StringAcute(state: Box<::pest::ParserState<Rule>>) -> ::pest::ParseResult<Box<::pest::ParserState<Rule>>> {
-                    state.sequence(|state| state.restore_on_err(|state| state.sequence(|state| state.match_string("{").and_then(|state| super::hidden::skip(state)).and_then(|state| self::expr(state)).and_then(|state| super::hidden::skip(state)).and_then(|state| state.match_string("}")))).or_else(|state| self::StringEscaped(state)).or_else(|state| self::NonAcute(state)).and_then(|state| super::hidden::skip(state)).and_then(|state| state.sequence(|state| state.optional(|state| state.restore_on_err(|state| state.sequence(|state| state.match_string("{").and_then(|state| super::hidden::skip(state)).and_then(|state| self::expr(state)).and_then(|state| super::hidden::skip(state)).and_then(|state| state.match_string("}")))).or_else(|state| self::StringEscaped(state)).or_else(|state| self::NonAcute(state)).and_then(|state| state.repeat(|state| state.sequence(|state| super::hidden::skip(state).and_then(|state| state.restore_on_err(|state| state.sequence(|state| state.match_string("{").and_then(|state| super::hidden::skip(state)).and_then(|state| self::expr(state)).and_then(|state| super::hidden::skip(state)).and_then(|state| state.match_string("}")))).or_else(|state| self::StringEscaped(state)).or_else(|state| self::NonAcute(state))))))))))
+                pub fn NS3(state: Box<::pest::ParserState<Rule>>) -> ::pest::ParseResult<Box<::pest::ParserState<Rule>>> {
+                    state.rule(Rule::NS3, |state| state.atomic(::pest::Atomicity::Atomic, |state| state.match_string("{{").or_else(|state| state.match_string("}}")).or_else(|state| state.sequence(|state| self::Escape(state).and_then(|state| self::ANY(state)))).or_else(|state| state.sequence(|state| state.lookahead(false, |state| state.sequence(|state| self::S3(state).and_then(|state| self::PEEK(state)))).and_then(|state| self::ANY(state))))))
                 }
                 #[inline]
                 #[allow(non_snake_case, unused_variables)]
-                pub fn StringQuote(state: Box<::pest::ParserState<Rule>>) -> ::pest::ParseResult<Box<::pest::ParserState<Rule>>> {
-                    state.sequence(|state| state.restore_on_err(|state| state.sequence(|state| state.match_string("{").and_then(|state| super::hidden::skip(state)).and_then(|state| self::expr(state)).and_then(|state| super::hidden::skip(state)).and_then(|state| state.match_string("}")))).or_else(|state| self::StringEscaped(state)).or_else(|state| self::NonQuote(state)).and_then(|state| super::hidden::skip(state)).and_then(|state| state.sequence(|state| state.optional(|state| state.restore_on_err(|state| state.sequence(|state| state.match_string("{").and_then(|state| super::hidden::skip(state)).and_then(|state| self::expr(state)).and_then(|state| super::hidden::skip(state)).and_then(|state| state.match_string("}")))).or_else(|state| self::StringEscaped(state)).or_else(|state| self::NonQuote(state)).and_then(|state| state.repeat(|state| state.sequence(|state| super::hidden::skip(state).and_then(|state| state.restore_on_err(|state| state.sequence(|state| state.match_string("{").and_then(|state| super::hidden::skip(state)).and_then(|state| self::expr(state)).and_then(|state| super::hidden::skip(state)).and_then(|state| state.match_string("}")))).or_else(|state| self::StringEscaped(state)).or_else(|state| self::NonQuote(state))))))))))
+                pub fn NS4(state: Box<::pest::ParserState<Rule>>) -> ::pest::ParseResult<Box<::pest::ParserState<Rule>>> {
+                    state.rule(Rule::NS4, |state| state.atomic(::pest::Atomicity::Atomic, |state| state.match_string("{{").or_else(|state| state.match_string("}}")).or_else(|state| state.sequence(|state| self::Escape(state).and_then(|state| self::ANY(state)))).or_else(|state| state.sequence(|state| state.lookahead(false, |state| state.sequence(|state| self::S4(state).and_then(|state| self::PEEK(state)))).and_then(|state| self::ANY(state))))))
                 }
                 #[inline]
                 #[allow(non_snake_case, unused_variables)]
-                pub fn StringEscaped(state: Box<::pest::ParserState<Rule>>) -> ::pest::ParseResult<Box<::pest::ParserState<Rule>>> {
-                    state.rule(Rule::StringEscaped, |state| state.atomic(::pest::Atomicity::Atomic, |state| state.match_string("{{").or_else(|state| state.match_string("}}")).or_else(|state| state.sequence(|state| self::Escape(state).and_then(|state| self::ANY(state))))))
+                pub fn S1(state: Box<::pest::ParserState<Rule>>) -> ::pest::ParseResult<Box<::pest::ParserState<Rule>>> {
+                    state.rule(Rule::S1, |state| state.atomic(::pest::Atomicity::Atomic, |state| state.match_string("\"")))
                 }
                 #[inline]
                 #[allow(non_snake_case, unused_variables)]
-                pub fn NonApostrophe(state: Box<::pest::ParserState<Rule>>) -> ::pest::ParseResult<Box<::pest::ParserState<Rule>>> {
-                    state.rule(Rule::NonApostrophe, |state| state.atomic(::pest::Atomicity::Atomic, |state| state.sequence(|state| state.lookahead(false, |state| state.sequence(|state| self::Apostrophe(state).and_then(|state| self::PEEK(state)))).and_then(|state| self::ANY(state)))))
+                pub fn S2(state: Box<::pest::ParserState<Rule>>) -> ::pest::ParseResult<Box<::pest::ParserState<Rule>>> {
+                    state.rule(Rule::S2, |state| state.atomic(::pest::Atomicity::Atomic, |state| state.match_string("'")))
                 }
                 #[inline]
                 #[allow(non_snake_case, unused_variables)]
-                pub fn NonQuotation(state: Box<::pest::ParserState<Rule>>) -> ::pest::ParseResult<Box<::pest::ParserState<Rule>>> {
-                    state.rule(Rule::NonQuotation, |state| state.atomic(::pest::Atomicity::Atomic, |state| state.sequence(|state| state.lookahead(false, |state| state.sequence(|state| self::Quotation(state).and_then(|state| self::PEEK(state)))).and_then(|state| self::ANY(state)))))
+                pub fn S3(state: Box<::pest::ParserState<Rule>>) -> ::pest::ParseResult<Box<::pest::ParserState<Rule>>> {
+                    state.rule(Rule::S3, |state| state.atomic(::pest::Atomicity::Atomic, |state| state.match_string("´")))
                 }
                 #[inline]
                 #[allow(non_snake_case, unused_variables)]
-                pub fn NonAcute(state: Box<::pest::ParserState<Rule>>) -> ::pest::ParseResult<Box<::pest::ParserState<Rule>>> {
-                    state.rule(Rule::NonAcute, |state| state.atomic(::pest::Atomicity::Atomic, |state| state.sequence(|state| state.lookahead(false, |state| state.sequence(|state| self::Acute(state).and_then(|state| self::PEEK(state)))).and_then(|state| self::ANY(state)))))
-                }
-                #[inline]
-                #[allow(non_snake_case, unused_variables)]
-                pub fn NonQuote(state: Box<::pest::ParserState<Rule>>) -> ::pest::ParseResult<Box<::pest::ParserState<Rule>>> {
-                    state.rule(Rule::NonQuote, |state| state.atomic(::pest::Atomicity::Atomic, |state| state.sequence(|state| state.lookahead(false, |state| state.sequence(|state| self::Quote(state).and_then(|state| self::PEEK(state)))).and_then(|state| self::ANY(state)))))
-                }
-                #[inline]
-                #[allow(non_snake_case, unused_variables)]
-                pub fn Quote(state: Box<::pest::ParserState<Rule>>) -> ::pest::ParseResult<Box<::pest::ParserState<Rule>>> {
-                    state.rule(Rule::Quote, |state| state.atomic(::pest::Atomicity::Atomic, |state| state.match_string("`")))
-                }
-                #[inline]
-                #[allow(non_snake_case, unused_variables)]
-                pub fn Acute(state: Box<::pest::ParserState<Rule>>) -> ::pest::ParseResult<Box<::pest::ParserState<Rule>>> {
-                    state.rule(Rule::Acute, |state| state.atomic(::pest::Atomicity::Atomic, |state| state.match_string("´")))
-                }
-                #[inline]
-                #[allow(non_snake_case, unused_variables)]
-                pub fn Apostrophe(state: Box<::pest::ParserState<Rule>>) -> ::pest::ParseResult<Box<::pest::ParserState<Rule>>> {
-                    state.rule(Rule::Apostrophe, |state| state.atomic(::pest::Atomicity::Atomic, |state| state.match_string("'")))
-                }
-                #[inline]
-                #[allow(non_snake_case, unused_variables)]
-                pub fn Quotation(state: Box<::pest::ParserState<Rule>>) -> ::pest::ParseResult<Box<::pest::ParserState<Rule>>> {
-                    state.rule(Rule::Quotation, |state| state.atomic(::pest::Atomicity::Atomic, |state| state.match_string("\"")))
+                pub fn S4(state: Box<::pest::ParserState<Rule>>) -> ::pest::ParseResult<Box<::pest::ParserState<Rule>>> {
+                    state.rule(Rule::S4, |state| state.atomic(::pest::Atomicity::Atomic, |state| state.match_string("`")))
                 }
                 #[inline]
                 #[allow(non_snake_case, unused_variables)]
@@ -1029,19 +999,14 @@ impl ::pest::Parser<Rule> for SDLParser {
             Rule::String => rules::String(state),
             Rule::StringEmpty => rules::StringEmpty(state),
             Rule::StringNormal => rules::StringNormal(state),
-            Rule::StringApostrophe => rules::StringApostrophe(state),
-            Rule::StringQuotation => rules::StringQuotation(state),
-            Rule::StringAcute => rules::StringAcute(state),
-            Rule::StringQuote => rules::StringQuote(state),
-            Rule::StringEscaped => rules::StringEscaped(state),
-            Rule::NonApostrophe => rules::NonApostrophe(state),
-            Rule::NonQuotation => rules::NonQuotation(state),
-            Rule::NonAcute => rules::NonAcute(state),
-            Rule::NonQuote => rules::NonQuote(state),
-            Rule::Quote => rules::Quote(state),
-            Rule::Acute => rules::Acute(state),
-            Rule::Apostrophe => rules::Apostrophe(state),
-            Rule::Quotation => rules::Quotation(state),
+            Rule::NS1 => rules::NS1(state),
+            Rule::NS2 => rules::NS2(state),
+            Rule::NS3 => rules::NS3(state),
+            Rule::NS4 => rules::NS4(state),
+            Rule::S1 => rules::S1(state),
+            Rule::S2 => rules::S2(state),
+            Rule::S3 => rules::S3(state),
+            Rule::S4 => rules::S4(state),
             Rule::WHITESPACE => rules::WHITESPACE(state),
             Rule::COMMENT => rules::COMMENT(state),
             Rule::MultiLineComment => rules::MultiLineComment(state),

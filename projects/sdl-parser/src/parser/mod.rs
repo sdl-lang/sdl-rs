@@ -290,34 +290,53 @@ impl ParserConfig {
 
     fn parse_string(&self, pairs: Pair<Rule>) -> AST {
         let r = self.get_position(pairs.as_span());
+        let mut is_pure_string = true;
         let mut block = vec![];
         let mut marks = 0;
         let mut buffer = String::new();
         for pair in pairs.into_inner() {
             match pair.as_rule() {
-                Rule::Quotation|Rule::Quote|Rule::Apostrophe=>marks+=1,
-                Rule::NonQuotation |Rule::NonQuote| Rule::NonApostrophe=> {
-                    buffer.push_str(pair.as_str())
-                }
-                Rule::StringEscaped=> {
-                    match pair.as_str() {
-                        "\\\\" => buffer.push('\\'),
-                        "\\\"" => buffer.push('\"'),
-                        _ => debug_cases!(pair)
+                Rule::StringEmpty=> {
+                    return AST::string(String::new(),r)
+
+                     },
+                Rule::S1|Rule::S2|Rule::S3|Rule::S4=>marks+=1,
+                Rule::NS1|Rule::NS2 |Rule::NS3 |Rule::NS4  => {
+                    let text = pair.as_str();
+                    match text {
+                        "{{" => {
+                            buffer.push('{')
+                        }
+                        "}}" => {
+                            buffer.push('}')
+                        }
+                        _ => {
+                            match text.starts_with('\\') {
+                                true => buffer.push_str(&text[1..text.len()]),
+                                false => buffer.push_str(text)
+                            }
+                        }
                     }
                 },
                 Rule::expr=> {
+                    is_pure_string = false;
                     if !buffer.is_empty() {
-                        block.push(AST::string( Default::default()))
+                        block.push(AST::string( buffer,Default::default()));
                         buffer = String::new()
                     }
-
-
                 },
                 _ => debug_cases!(pair),
             };
         }
-        AST::string(buffer, r)
+        match is_pure_string {
+            true => AST::string(buffer,r),
+            false =>  {
+                if !buffer.is_empty() {
+                    block.push(AST::string( buffer,Default::default()));
+                }
+                AST::string_expression(block, Default::default(), r)
+            }
+        }
     }
 
     fn parse_number(&self, pairs: Pair<Rule>) -> AST {

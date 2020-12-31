@@ -39,3 +39,15 @@ impl Evaluate for Symbol {
         Ok(ctx.get(&self.name()))
     }
 }
+
+impl Evaluate for StringExpression {
+    fn evaluate(&self, ctx: &mut SDLContext) -> Result<Value> {
+        let out = match self.handler {
+            Some(_) => {unimplemented!()},
+            None => {
+                Value::Block(self.inner.iter().flat_map(|e|e.evaluate(ctx)).collect())
+            }
+        };
+        Ok(out)
+    }
+}

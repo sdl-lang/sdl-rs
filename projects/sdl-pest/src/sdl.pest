@@ -153,29 +153,24 @@ Integer    = @{"0"|ASCII_NONZERO_DIGIT ~ (Underline? ~ ASCII_DIGIT)*}
 /*====================================================================================================================*/
 //!#3C963C: String
 //!#98C379: StringNormal|StringEmpty
-String           = ${SYMBOL? ~ (StringNormal|StringEmpty)}
-StringEmpty      =  {Quotation{2}|Apostrophe{2}|Quote{2}|Acute{2}}
-StringNormal     = _{
-    Apostrophe{1} ~ PUSH(Apostrophe*) ~ StringApostrophe ~ POP ~ Apostrophe{1}
-  | Quotation{1} ~ PUSH(Quotation*) ~ StringQuotation ~ POP ~ Quotation{1}
-  | Acute{1} ~ PUSH(Acute*) ~ StringAcute ~ POP ~ Acute{1}
-  | Quote{1} ~ PUSH(Quote*) ~ StringQuote ~ POP ~ Quote{1}
+String       = ${SYMBOL? ~ (StringNormal|StringEmpty)}
+StringEmpty  = @{S1{2}|S2{2}|S3{2}|S4{2}}
+StringNormal = _{
+    S1{1} ~ PUSH(S1*) ~ ("{" ~ expr ~ "}" | NS1)+ ~ POP ~ S1{1}
+  | S2{1} ~ PUSH(S2*) ~ ("{" ~ expr ~ "}" | NS2)+ ~ POP ~ S2{1}
+  | S3{1} ~ PUSH(S3*) ~ ("{" ~ expr ~ "}" | NS3)+ ~ POP ~ S3{1}
+  | S4{1} ~ PUSH(S4*) ~ ("{" ~ expr ~ "}" | NS4)+ ~ POP ~ S4{1}
 }
-StringApostrophe = _{("{" ~ expr ~ "}" | StringEscaped | NonApostrophe)+}
-StringQuotation  = _{("{" ~ expr ~ "}" | StringEscaped | NonQuotation)+}
-StringAcute      = _{("{" ~ expr ~ "}" | StringEscaped | NonAcute)+}
-StringQuote      = _{("{" ~ expr ~ "}" | StringEscaped | NonQuote)+}
-StringEscaped    = @{"{{" | "}}" | Escape ~ ANY}
 
-NonApostrophe    = @{!(Apostrophe ~ PEEK) ~ ANY}
-NonQuotation     = @{!(Quotation ~ PEEK) ~ ANY}
-NonAcute         = @{!(Acute ~ PEEK) ~ ANY}
-NonQuote         = @{!(Quote ~ PEEK) ~ ANY}
+NS1 = @{"{{" | "}}" | Escape ~ ANY | (!(S1 ~ PEEK) ~ ANY)+}
+NS2 = @{"{{" | "}}" | Escape ~ ANY | (!(S2 ~ PEEK) ~ ANY)+}
+NS3 = @{"{{" | "}}" | Escape ~ ANY | (!(S3 ~ PEEK) ~ ANY)+}
+NS4 = @{"{{" | "}}" | Escape ~ ANY | (!(S4 ~ PEEK) ~ ANY)+}
 
-Quote            = @{"`"}
-Acute            = @{"´"} // U+00B4
-Apostrophe       = @{"'"}
-Quotation        = @{"\""}
+S1  = @{"\""}
+S2  = @{"'"}
+S3  = @{"´"} // U+00B4
+S4  = @{"`"}
 /*====================================================================================================================*/
 // NEWLINE = @{"\r"~"\n"|"\r"|"\n"}
 WHITESPACE = _{NEWLINE|WHITE_SPACE}

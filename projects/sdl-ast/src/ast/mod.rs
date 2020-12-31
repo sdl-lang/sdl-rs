@@ -129,7 +129,7 @@ impl AST {
         Self { kind, range: box_range(r) }
     }
 
-    pub fn string_expression(value: Vec<AST>, handler: AST, r: TextRange) -> Self {
+    pub fn string_expression(value: Vec<AST>, handler: Option<AST>, r: TextRange) -> Self {
         let kind = ASTKind::StringExpression(Box::new(StringExpression { handler, inner: value }));
         Self { kind, range: box_range(r) }
     }

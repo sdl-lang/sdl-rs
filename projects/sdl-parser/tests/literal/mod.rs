@@ -19,17 +19,14 @@ fn number() {
 
 
 const STRING: &'static str = r#"[
-    "\\ \" 1,2",
-    '2',
-    `3`,
-    "{ 2 + 2 }"
+    "",
+    '1',
+    `2`,
+    ´3´,
+    "{ 2 + 2 }",
 ]"#;
-
-const STRING2: &'static str = r#"
-"\\ \" \' \n 1,2"
-"#;
 
 #[test]
 fn string() {
-    assert_eq!(render(STRING).unwrap(), r#"[0, 0.1, 2.0, 3.0, "4", "5.0"]"#)
+    assert_eq!(render_steps(STRING).unwrap(), r#"["", "1", "2", "3", "4"]"#)
 }
