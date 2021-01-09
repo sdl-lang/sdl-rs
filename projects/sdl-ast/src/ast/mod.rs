@@ -60,10 +60,7 @@ pub enum ASTKind {
 impl Debug for AST {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         match self {
-            AST {
-                kind,
-                range,
-            } => {
+            AST { kind, range } => {
                 let mut builder = f.debug_struct("AST");
                 builder.field("kind", kind);
                 match range {

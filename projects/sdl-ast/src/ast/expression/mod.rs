@@ -22,16 +22,13 @@ pub struct UnaryExpression {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct CallChain {
-    pub  base: AST,
-    pub  chain: Vec<AST>,
+    pub base: AST,
+    pub chain: Vec<AST>,
 }
 
 impl Default for CallChain {
     fn default() -> Self {
-        Self {
-            base: Default::default(),
-            chain: vec![]
-        }
+        Self { base: Default::default(), chain: vec![] }
     }
 }
 
@@ -41,10 +38,8 @@ impl AddAssign<AST> for CallChain {
     }
 }
 
-
 impl CallChain {
     pub fn new(ast: AST) -> Self {
         Self { base: ast, chain: vec![] }
     }
 }
-

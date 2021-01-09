@@ -1,4 +1,5 @@
 use super::*;
+use crate::traits::Render;
 use std::collections::BTreeSet;
 
 #[rustfmt::skip]
@@ -43,9 +44,13 @@ impl Evaluate for Symbol {
 impl Evaluate for StringExpression {
     fn evaluate(&self, ctx: &mut SDLContext) -> Result<Value> {
         let out = match self.handler {
-            Some(_) => {unimplemented!()},
+            Some(_) => unimplemented!(),
             None => {
-                Value::Block(self.inner.iter().flat_map(|e|e.evaluate(ctx)).collect())
+                let mut out = String::new();
+                for e in &self.inner {
+                    e.evaluate(ctx)?.render(&mut out, ctx)?;
+                }
+                Value::String(out)
             }
         };
         Ok(out)

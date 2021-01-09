@@ -134,7 +134,7 @@ impl ParserConfig {
         }
         match base.chain.is_empty() {
             true => base.base,
-            false => AST::call_chain(base, r)
+            false => AST::call_chain(base, r),
         }
     }
 
@@ -169,7 +169,7 @@ impl ParserConfig {
                 _ => debug_cases!(pair),
             };
         }
-        return base
+        return base;
     }
 
     fn parse_dot_call(&self, pairs: Pair<Rule>) -> AST {
@@ -292,47 +292,40 @@ impl ParserConfig {
         let r = self.get_position(pairs.as_span());
         let mut is_pure_string = true;
         let mut block = vec![];
-        let mut marks = 0;
+        let mut _marks = 0;
         let mut buffer = String::new();
         for pair in pairs.into_inner() {
             match pair.as_rule() {
-                Rule::StringEmpty=> {
-                    return AST::string(String::new(),r)
-
-                     },
-                Rule::S1|Rule::S2|Rule::S3|Rule::S4=>marks+=1,
-                Rule::NS1|Rule::NS2 |Rule::NS3 |Rule::NS4  => {
+                Rule::StringEmpty => return AST::string(String::new(), r),
+                Rule::S1 | Rule::S2 | Rule::S3 | Rule::S4 => _marks += 1,
+                Rule::NS1 | Rule::NS2 | Rule::NS3 | Rule::NS4 => {
                     let text = pair.as_str();
                     match text {
-                        "{{" => {
-                            buffer.push('{')
-                        }
-                        "}}" => {
-                            buffer.push('}')
-                        }
-                        _ => {
-                            match text.starts_with('\\') {
-                                true => buffer.push_str(&text[1..text.len()]),
-                                false => buffer.push_str(text)
-                            }
-                        }
+                        "{{" => buffer.push('{'),
+                        "}}" => buffer.push('}'),
+                        "\\n" => buffer.push('\n'),
+                        _ => match text.starts_with('\\') {
+                            true => buffer.push_str(&text[1..text.len()]),
+                            false => buffer.push_str(text),
+                        },
                     }
-                },
-                Rule::expr=> {
+                }
+                Rule::expr => {
                     is_pure_string = false;
                     if !buffer.is_empty() {
-                        block.push(AST::string( buffer,Default::default()));
+                        block.push(AST::string(buffer, Default::default()));
                         buffer = String::new()
                     }
-                },
+                    block.push(self.parse_expr(pair))
+                }
                 _ => debug_cases!(pair),
             };
         }
         match is_pure_string {
-            true => AST::string(buffer,r),
-            false =>  {
+            true => AST::string(buffer, r),
+            false => {
                 if !buffer.is_empty() {
-                    block.push(AST::string( buffer,Default::default()));
+                    block.push(AST::string(buffer, Default::default()));
                 }
                 AST::string_expression(block, Default::default(), r)
             }

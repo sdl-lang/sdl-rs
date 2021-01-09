@@ -17,7 +17,6 @@ fn number() {
     assert_eq!(render(NUMBER).unwrap(), r#"[0, 0.1, 2.0, 3.0, "4", "5.0"]"#)
 }
 
-
 const STRING: &'static str = r#"[
     "",
     '1',
@@ -28,5 +27,17 @@ const STRING: &'static str = r#"[
 
 #[test]
 fn string() {
-    assert_eq!(render_steps(STRING).unwrap(), r#"["", "1", "2", "3", "4"]"#)
+    assert_eq!(render(STRING).unwrap(), r#"["", "1", "2", "3", "4"]"#)
+}
+
+const STRING_ESCAPED: &'static str = r#"[
+    "\"",
+    '\'',
+    `\\`,
+    ´\n´,
+]"#;
+
+#[test]
+fn string_escaped() {
+    assert_eq!(render(STRING_ESCAPED).unwrap(), r#"["\"", "'", "\\", "\n"]"#)
 }

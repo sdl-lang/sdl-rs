@@ -34,8 +34,6 @@ impl Render for Value {
             }
             Value::Dict(v) => write!(text, "{:#?}", v)?,
             Value::HTMLElement(html) => html.render(text, ctx)?,
-
-
         };
         Ok(())
     }

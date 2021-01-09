@@ -1,8 +1,8 @@
 pub use crate::compile::value::template::HTMLElement;
 use crate::Result;
+use bigdecimal::BigDecimal;
 use num::BigInt;
 use std::collections::{BTreeMap, BTreeSet};
-use bigdecimal::BigDecimal;
 
 mod convert;
 mod ops;

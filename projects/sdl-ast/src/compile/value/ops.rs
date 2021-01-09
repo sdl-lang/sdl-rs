@@ -1,7 +1,7 @@
 use super::*;
+use crate::utils::get_variant_name;
 use num::ToPrimitive;
 use std::ops::{Add, Div, Mul, Sub};
-use crate::utils::get_variant_name;
 
 impl Add<Value> for Value {
     type Output = Result<Value>;
@@ -13,13 +13,13 @@ impl Add<Value> for Value {
             (Value::UnsafeString(lhs), Value::UnsafeString(rhs)) => Value::String(lhs + &rhs),
             (Value::Integer(lhs), Value::Integer(rhs)) => Value::Integer(Box::new(lhs.as_ref() + rhs.as_ref())),
             (Value::Decimal(lhs), Value::Decimal(rhs)) => Value::Decimal(Box::new(lhs.as_ref() + rhs.as_ref())),
-            (Value::Decimal(lhs), Value::Integer(rhs))|(Value::Integer(rhs), Value::Decimal(lhs)) => {
+            (Value::Decimal(lhs), Value::Integer(rhs)) | (Value::Integer(rhs), Value::Decimal(lhs)) => {
                 Value::Decimal(Box::new(lhs.as_ref() + BigDecimal::from(rhs.as_ref().clone())))
             }
             _ => {
                 println!("{}", error);
                 unreachable!()
-            },
+            }
         };
         Ok(out)
     }
@@ -33,7 +33,7 @@ impl Sub<Value> for Value {
         let out = match (self, rhs) {
             (Value::Integer(lhs), Value::Integer(rhs)) => Value::Integer(Box::new(lhs.as_ref() - rhs.as_ref())),
             (Value::Decimal(lhs), Value::Decimal(rhs)) => Value::Decimal(Box::new(lhs.as_ref() - rhs.as_ref())),
-            (Value::Decimal(lhs), Value::Integer(rhs))|(Value::Integer(rhs), Value::Decimal(lhs)) => {
+            (Value::Decimal(lhs), Value::Integer(rhs)) | (Value::Integer(rhs), Value::Decimal(lhs)) => {
                 Value::Decimal(Box::new(lhs.as_ref() - BigDecimal::from(rhs.as_ref().clone())))
             }
             _ => unimplemented!("{}", error),
