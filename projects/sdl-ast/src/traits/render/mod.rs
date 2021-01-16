@@ -21,7 +21,6 @@ impl Render for Value {
             Value::Integer(v) => write!(text, "{}", v)?,
             Value::Decimal(v) => write!(text, "{}", v)?,
             Value::String(v) => write!(text, "{:?}", v)?,
-            Value::UnsafeString(v) => write!(text, "{:?}", v)?,
             Value::List(v) => {
                 write!(text, "[")?;
                 for (i, e) in v.iter().enumerate() {

@@ -1,4 +1,5 @@
 use super::*;
+use crate::compile::StringValue;
 
 impl Evaluate for AST {
     fn evaluate(&self, ctx: &mut SDLContext) -> Result<Value> {
@@ -32,8 +33,8 @@ impl Evaluate for ASTKind {
 
             ASTKind::Null => Value::Null,
             ASTKind::Boolean(v) => Value::Boolean(v.to_owned()),
-            ASTKind::EscapedText(v) => Value::String(v.to_owned()),
-            ASTKind::UnescapedText(v) => Value::UnsafeString(v.to_owned()),
+            ASTKind::EscapedText(v) => StringValue::escaped(v),
+            ASTKind::UnescapedText(v) => StringValue::non_escaped(v),
 
             ASTKind::Integer(v) => Value::Integer(v.to_owned()),
             ASTKind::Decimal(v) => Value::Decimal(v.to_owned()),

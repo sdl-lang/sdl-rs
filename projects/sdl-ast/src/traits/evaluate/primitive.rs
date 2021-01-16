@@ -1,6 +1,7 @@
 use super::*;
 use crate::traits::Render;
 use std::collections::BTreeSet;
+use crate::compile::StringValue;
 
 #[rustfmt::skip]
 pub static VOID_TAGS: &[&str; 16] = &[
@@ -50,7 +51,7 @@ impl Evaluate for StringExpression {
                 for e in &self.inner {
                     e.evaluate(ctx)?.render(&mut out, ctx)?;
                 }
-                Value::String(out)
+                StringValue::non_escaped(out)
             }
         };
         Ok(out)

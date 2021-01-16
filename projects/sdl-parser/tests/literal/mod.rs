@@ -39,5 +39,5 @@ const STRING_ESCAPED: &'static str = r#"[
 
 #[test]
 fn string_escaped() {
-    assert_eq!(render(STRING_ESCAPED).unwrap(), r#"["\"", "'", "\\", "\n"]"#)
+    assert_eq!(render(STRING_ESCAPED).unwrap(), r#"["\"", "\'", "\\", "\n"]"#)
 }

@@ -8,19 +8,19 @@ impl Default for Value {
 
 impl From<char> for Value {
     fn from(v: char) -> Self {
-        Self::String(String::from(v))
+        StringValue::non_escaped(v)
     }
 }
 
 impl From<&str> for Value {
     fn from(v: &str) -> Self {
-        Self::String(String::from(v))
+        StringValue::non_escaped(v)
     }
 }
 
 impl From<String> for Value {
     fn from(v: String) -> Self {
-        Self::String(v)
+        StringValue::non_escaped(v)
     }
 }
 

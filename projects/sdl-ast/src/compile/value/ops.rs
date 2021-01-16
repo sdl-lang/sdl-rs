@@ -9,8 +9,7 @@ impl Add<Value> for Value {
     fn add(self, rhs: Value) -> Self::Output {
         let error = format!("(Value::{}(lhs), Value::{}(rhs)) => {{}}", get_variant_name(&self), get_variant_name(&rhs));
         let out = match (self, rhs) {
-            (Value::String(lhs), Value::String(rhs)) => Value::String(lhs + &rhs),
-            (Value::UnsafeString(lhs), Value::UnsafeString(rhs)) => Value::String(lhs + &rhs),
+            (Value::String(lhs), Value::String(rhs)) => Value::String(Box::new(lhs + rhs)),
             (Value::Integer(lhs), Value::Integer(rhs)) => Value::Integer(Box::new(lhs.as_ref() + rhs.as_ref())),
             (Value::Decimal(lhs), Value::Decimal(rhs)) => Value::Decimal(Box::new(lhs.as_ref() + rhs.as_ref())),
             (Value::Decimal(lhs), Value::Integer(rhs)) | (Value::Integer(rhs), Value::Decimal(lhs)) => {
@@ -75,13 +74,11 @@ impl Value {
         // TODO: Invalid Index Error
         let n = n.to_usize().unwrap_or_default();
         let out = match self {
-            Value::List(list) => match list.get(n) {
-                Some(s) => s.to_owned(),
-                None => Value::Null,
+            Value::List(list) => {
+                list.get(n).cloned().unwrap_or_default()
             },
-            Value::String(string) => match string.chars().nth(n) {
-                Some(s) => Value::from(s),
-                None => Value::Null,
+            Value::String(string) => {
+                StringValue::non_escaped(string.chars().nth(n).unwrap_or_default())
             },
             Value::Null => Value::Null,
 
