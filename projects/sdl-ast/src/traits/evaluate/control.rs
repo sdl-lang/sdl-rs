@@ -38,7 +38,7 @@ impl Evaluate for IfElseChain {
         match &self.cover {
             Some(last) => Ok(last.evaluate(ctx)?),
             None => match ctx.config().is_debug {
-                true => Err(RuntimeError::if_lost("TODO: ")),
+                true => Err(RuntimeError::if_lost("TODO: ", format!(""))),
                 false => Ok(Value::Null),
             },
         }

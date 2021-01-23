@@ -1,15 +1,16 @@
-pub use crate::compile::value::template::HTMLElement;
+pub use crate::compile::value::{string::StringValue, template::HTMLElement};
 use crate::Result;
 use bigdecimal::BigDecimal;
 use num::BigInt;
-use std::collections::{BTreeMap, BTreeSet};
-pub use crate::compile::value::string::StringValue;
-use std::fmt::{self, Debug, Formatter};
+use std::{
+    collections::{BTreeMap, BTreeSet},
+    fmt::{self, Debug, Formatter},
+};
 
 mod convert;
 mod ops;
-mod template;
 mod string;
+mod template;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum Value {

@@ -1,7 +1,5 @@
-use std::ops::{Add};
 use super::*;
-use std::str::Chars;
-
+use std::{ops::Add, str::Chars};
 
 #[derive(Clone, Eq, PartialEq)]
 pub enum StringValue {
@@ -13,16 +11,10 @@ impl Add<StringValue> for StringValue {
     type Output = Self;
 
     fn add(self, rhs: StringValue) -> Self::Output {
-        match (self,rhs) {
-            (Self::Unsafe(lhs), Self::Unsafe(rhs)) => {
-                Self::Unsafe(lhs+&rhs)
-            }
-            (Self::Escaped(lhs), Self::Escaped(rhs)) => {
-                Self::Escaped(lhs+&rhs)
-            }
-            (Self::Escaped(lhs), Self::Unsafe(rhs))|(Self::Unsafe(rhs), Self::Escaped(lhs)) => {
-                Self::Escaped(lhs + &string_escape(&rhs))
-            }
+        match (self, rhs) {
+            (Self::Unsafe(lhs), Self::Unsafe(rhs)) => Self::Unsafe(lhs + &rhs),
+            (Self::Escaped(lhs), Self::Escaped(rhs)) => Self::Escaped(lhs + &rhs),
+            (Self::Escaped(lhs), Self::Unsafe(rhs)) | (Self::Unsafe(rhs), Self::Escaped(lhs)) => Self::Escaped(lhs + &string_escape(&rhs)),
         }
     }
 }
@@ -47,24 +39,17 @@ impl Add<&StringValue> for StringValue {
         //     }
         // }
         match self {
-            StringValue::Escaped(lhs) => {
-                match rhs {
-                    StringValue::Escaped(rhs) => {Self::Escaped(lhs+rhs)}
-                    StringValue::Unsafe(rhs) => {Self::Escaped(lhs + &string_escape(rhs))}
-                }
-            }
-            StringValue::Unsafe(lhs) => {
-                match rhs {
-                    StringValue::Escaped(rhs) => {Self::Escaped(string_escape(&lhs) + rhs)}
-                    StringValue::Unsafe(rhs) => {Self::Unsafe(lhs+rhs)}
-                }
-            }
+            StringValue::Escaped(lhs) => match rhs {
+                StringValue::Escaped(rhs) => Self::Escaped(lhs + rhs),
+                StringValue::Unsafe(rhs) => Self::Escaped(lhs + &string_escape(rhs)),
+            },
+            StringValue::Unsafe(lhs) => match rhs {
+                StringValue::Escaped(rhs) => Self::Escaped(string_escape(&lhs) + rhs),
+                StringValue::Unsafe(rhs) => Self::Unsafe(lhs + rhs),
+            },
         }
-
-
     }
 }
-
 
 impl Add<Box<StringValue>> for Box<StringValue> {
     type Output = StringValue;
@@ -83,12 +68,8 @@ impl StringValue {
     }
     pub fn chars(&self) -> Chars<'_> {
         match self {
-            StringValue::Escaped(s) => {
-                s.chars()
-            }
-            StringValue::Unsafe(s) => {
-                s.chars()
-            }
+            StringValue::Escaped(s) => s.chars(),
+            StringValue::Unsafe(s) => s.chars(),
         }
     }
 }
@@ -96,16 +77,11 @@ impl StringValue {
 impl Debug for StringValue {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         match self {
-            Self::Escaped(s) => {
-                write!(f, "{:?}", s)
-            }
-            Self::Unsafe(s) => {
-                write!(f, "{:?}", string_escape(s))
-            }
+            Self::Escaped(s) => write!(f, "{:?}", s),
+            Self::Unsafe(s) => write!(f, "{:?}", string_escape(s)),
         }
     }
 }
-
 
 fn string_escape(input: &str) -> String {
     input.to_owned()

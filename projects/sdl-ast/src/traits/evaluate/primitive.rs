@@ -1,7 +1,6 @@
 use super::*;
-use crate::traits::Render;
+use crate::{compile::StringValue, traits::Render};
 use std::collections::BTreeSet;
-use crate::compile::StringValue;
 
 #[rustfmt::skip]
 pub static VOID_TAGS: &[&str; 16] = &[

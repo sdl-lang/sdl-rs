@@ -74,12 +74,8 @@ impl Value {
         // TODO: Invalid Index Error
         let n = n.to_usize().unwrap_or_default();
         let out = match self {
-            Value::List(list) => {
-                list.get(n).cloned().unwrap_or_default()
-            },
-            Value::String(string) => {
-                StringValue::non_escaped(string.chars().nth(n).unwrap_or_default())
-            },
+            Value::List(list) => list.get(n).cloned().unwrap_or_default(),
+            Value::String(string) => StringValue::non_escaped(string.chars().nth(n).unwrap_or_default()),
             Value::Null => Value::Null,
 
             _ => unimplemented!("{:?}", self),

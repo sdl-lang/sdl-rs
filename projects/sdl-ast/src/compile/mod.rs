@@ -9,9 +9,8 @@ use std::{
     collections::HashMap,
     rc::{Rc, Weak},
 };
-pub use value::{HTMLElement, Value, StringValue};
+pub use value::{HTMLElement, StringValue, Value};
 pub use variable::Variable;
-
 
 #[derive(Clone, Debug)]
 pub struct SDLContext {
