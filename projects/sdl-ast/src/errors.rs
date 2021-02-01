@@ -9,7 +9,7 @@ pub enum RuntimeError {
         info: String,
         position: String,
     },
-    #[error("IfLostError: The if statement does not cover all cases")]
+    #[error("{position}\nIfLostError: The if statement does not cover all cases\n{info}")]
     IfLost {
         info: String,
         position: String,

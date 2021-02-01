@@ -41,3 +41,13 @@ const STRING_ESCAPED: &'static str = r#"[
 fn string_escaped() {
     assert_eq!(render(STRING_ESCAPED).unwrap(), r#"["\"", "\'", "\\", "\n"]"#)
 }
+
+
+const TEMPLATE_ESCAPED: &'static str = r#"[
+    <i>{{ 1 + "{{2}}" }}</i>
+]"#;
+
+#[test]
+fn template_escaped() {
+    assert_eq!(render(TEMPLATE_ESCAPED).unwrap(), r#"["\"", "\'", "\\", "\n"]"#)
+}

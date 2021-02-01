@@ -126,10 +126,10 @@ html_term = _{html_pair|BadSymbol}
 html_pair = {BadSymbol ~ "=" ~ term}
 
 text_mode = ${
-    "{" ~ statement* ~ "}" | template+ | (HTMLEscape|text_char)+
+    "{{" ~ statement* ~ "}}" | template+ | (HTMLEscape|TextNormal)+
 }
-text_char = @{
-    (!("{"|"}"|"<"|">") ~ ANY) | "{{" | "}}"
+TextNormal = @{
+    (!("<"|">") ~ ANY)
 }
 HTMLEscape = @{
     "&" ~ ASCII_ALPHA_LOWER ~ ";" |
@@ -156,16 +156,16 @@ Integer    = @{"0"|ASCII_NONZERO_DIGIT ~ (Underline? ~ ASCII_DIGIT)*}
 String       = ${SYMBOL? ~ (StringNormal|StringEmpty)}
 StringEmpty  = @{S1{2}|S2{2}|S3{2}|S4{2}}
 StringNormal = _{
-    S1{1} ~ PUSH(S1*) ~ ("{" ~ expr ~ "}" | NS1)+ ~ POP ~ S1{1}
-  | S2{1} ~ PUSH(S2*) ~ ("{" ~ expr ~ "}" | NS2)+ ~ POP ~ S2{1}
-  | S3{1} ~ PUSH(S3*) ~ ("{" ~ expr ~ "}" | NS3)+ ~ POP ~ S3{1}
-  | S4{1} ~ PUSH(S4*) ~ ("{" ~ expr ~ "}" | NS4)+ ~ POP ~ S4{1}
+    S1{1} ~ PUSH(S1*) ~ ("{{" ~ expr ~ "}}" | NS1)+ ~ POP ~ S1{1}
+  | S2{1} ~ PUSH(S2*) ~ ("{{" ~ expr ~ "}}" | NS2)+ ~ POP ~ S2{1}
+  | S3{1} ~ PUSH(S3*) ~ ("{{" ~ expr ~ "}}" | NS3)+ ~ POP ~ S3{1}
+  | S4{1} ~ PUSH(S4*) ~ ("{{" ~ expr ~ "}}" | NS4)+ ~ POP ~ S4{1}
 }
 
-NS1 = @{"{{" | "}}" | Escape ~ ANY | (!(S1 ~ PEEK) ~ ANY)+}
-NS2 = @{"{{" | "}}" | Escape ~ ANY | (!(S2 ~ PEEK) ~ ANY)+}
-NS3 = @{"{{" | "}}" | Escape ~ ANY | (!(S3 ~ PEEK) ~ ANY)+}
-NS4 = @{"{{" | "}}" | Escape ~ ANY | (!(S4 ~ PEEK) ~ ANY)+}
+NS1 = @{Escape ~ ANY | (!(S1 ~ PEEK) ~ ANY)+}
+NS2 = @{Escape ~ ANY | (!(S2 ~ PEEK) ~ ANY)+}
+NS3 = @{Escape ~ ANY | (!(S3 ~ PEEK) ~ ANY)+}
+NS4 = @{Escape ~ ANY | (!(S4 ~ PEEK) ~ ANY)+}
 
 S1  = @{"\""}
 S2  = @{"'"}
