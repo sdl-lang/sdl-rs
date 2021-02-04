@@ -72,7 +72,7 @@ pub enum Rule {
     html_term,
     html_pair,
     text_mode,
-    TextNormal,
+    HTMLText,
     HTMLEscape,
     SpecialValue,
     Number,
@@ -118,12 +118,6 @@ pub enum Rule {
     Colon,
     Question,
     Underline,
-    Load,
-    Save,
-    LeftShift,
-    RightShift,
-    LessEqual,
-    GraterEqual,
     Plus,
     Minus,
     Power,
@@ -498,17 +492,17 @@ impl ::pest::Parser<Rule> for SDLParser {
                 #[inline]
                 #[allow(non_snake_case, unused_variables)]
                 pub fn text_mode(state: Box<::pest::ParserState<Rule>>) -> ::pest::ParseResult<Box<::pest::ParserState<Rule>>> {
-                    state.atomic(::pest::Atomicity::CompoundAtomic, |state| state.rule(Rule::text_mode, |state| state.sequence(|state| state.match_string("{{").and_then(|state| state.repeat(|state| state.restore_on_err(|state| self::statement(state)))).and_then(|state| state.match_string("}}"))).or_else(|state| state.restore_on_err(|state| state.sequence(|state| self::template(state).and_then(|state| state.repeat(|state| state.restore_on_err(|state| self::template(state))))))).or_else(|state| state.sequence(|state| self::HTMLEscape(state).or_else(|state| self::TextNormal(state)).and_then(|state| state.repeat(|state| self::HTMLEscape(state).or_else(|state| self::TextNormal(state))))))))
+                    state.atomic(::pest::Atomicity::CompoundAtomic, |state| state.rule(Rule::text_mode, |state| state.sequence(|state| state.match_string("{{").and_then(|state| state.repeat(|state| state.restore_on_err(|state| self::statement(state)))).and_then(|state| state.match_string("}}"))).or_else(|state| state.restore_on_err(|state| self::template(state))).or_else(|state| self::HTMLEscape(state)).or_else(|state| self::HTMLText(state))))
                 }
                 #[inline]
                 #[allow(non_snake_case, unused_variables)]
-                pub fn TextNormal(state: Box<::pest::ParserState<Rule>>) -> ::pest::ParseResult<Box<::pest::ParserState<Rule>>> {
-                    state.rule(Rule::TextNormal, |state| state.atomic(::pest::Atomicity::Atomic, |state| state.sequence(|state| state.lookahead(false, |state| state.match_string("<").or_else(|state| state.match_string(">"))).and_then(|state| self::ANY(state)))))
+                pub fn HTMLText(state: Box<::pest::ParserState<Rule>>) -> ::pest::ParseResult<Box<::pest::ParserState<Rule>>> {
+                    state.rule(Rule::HTMLText, |state| state.atomic(::pest::Atomicity::Atomic, |state| state.sequence(|state| state.match_string("<").and_then(|state| state.lookahead(false, |state| state.match_string("/").or_else(|state| self::Escape(state))))).or_else(|state| state.sequence(|state| state.lookahead(false, |state| state.match_string("<").or_else(|state| state.match_string(">"))).and_then(|state| self::ANY(state))))))
                 }
                 #[inline]
                 #[allow(non_snake_case, unused_variables)]
                 pub fn HTMLEscape(state: Box<::pest::ParserState<Rule>>) -> ::pest::ParseResult<Box<::pest::ParserState<Rule>>> {
-                    state.rule(Rule::HTMLEscape, |state| state.atomic(::pest::Atomicity::Atomic, |state| state.sequence(|state| state.match_string("&").and_then(|state| self::ASCII_ALPHA_LOWER(state)).and_then(|state| state.match_string(";"))).or_else(|state| state.sequence(|state| state.match_string("&#").and_then(|state| self::Integer(state)).and_then(|state| state.match_string(";")))).or_else(|state| state.match_string(">"))))
+                    state.rule(Rule::HTMLEscape, |state| state.atomic(::pest::Atomicity::Atomic, |state| state.sequence(|state| state.match_string("&").and_then(|state| self::ASCII_ALPHA_LOWER(state)).and_then(|state| state.match_string(";"))).or_else(|state| state.sequence(|state| state.match_string("&#").and_then(|state| self::Integer(state)).and_then(|state| state.match_string(";"))))))
                 }
                 #[inline]
                 #[allow(non_snake_case, unused_variables)]
@@ -648,12 +642,12 @@ impl ::pest::Parser<Rule> for SDLParser {
                 #[inline]
                 #[allow(non_snake_case, unused_variables)]
                 pub fn Logical(state: Box<::pest::ParserState<Rule>>) -> ::pest::ParseResult<Box<::pest::ParserState<Rule>>> {
-                    state.rule(Rule::Logical, |state| state.atomic(::pest::Atomicity::Atomic, |state| state.match_string("a")))
+                    state.rule(Rule::Logical, |state| state.atomic(::pest::Atomicity::Atomic, |state| state.match_string("and").or_else(|state| state.match_string("or"))))
                 }
                 #[inline]
                 #[allow(non_snake_case, unused_variables)]
                 pub fn Compare(state: Box<::pest::ParserState<Rule>>) -> ::pest::ParseResult<Box<::pest::ParserState<Rule>>> {
-                    state.atomic(::pest::Atomicity::NonAtomic, |state| state.rule(Rule::Compare, |state| state.sequence(|state| state.match_string("is").and_then(|state| super::hidden::skip(state)).and_then(|state| state.match_string("not"))).or_else(|state| state.match_string("!=")).or_else(|state| state.match_string("is")).or_else(|state| state.match_string("==")).or_else(|state| state.sequence(|state| state.match_string("not").and_then(|state| super::hidden::skip(state)).and_then(|state| state.match_string("in")))).or_else(|state| state.match_string("in")).or_else(|state| state.match_string(">")).or_else(|state| state.match_string("<"))))
+                    state.atomic(::pest::Atomicity::NonAtomic, |state| state.rule(Rule::Compare, |state| state.sequence(|state| state.match_string("is").and_then(|state| super::hidden::skip(state)).and_then(|state| state.match_string("not"))).or_else(|state| state.match_string("!=")).or_else(|state| state.match_string("is")).or_else(|state| state.match_string("==")).or_else(|state| state.sequence(|state| state.match_string("not").and_then(|state| super::hidden::skip(state)).and_then(|state| state.match_string("in")))).or_else(|state| state.match_string("in")).or_else(|state| state.match_string(">=")).or_else(|state| state.match_string(">>")).or_else(|state| state.match_string("<=")).or_else(|state| state.match_string("<<"))))
                 }
                 #[inline]
                 #[allow(non_snake_case, unused_variables)]
@@ -729,36 +723,6 @@ impl ::pest::Parser<Rule> for SDLParser {
                 #[allow(non_snake_case, unused_variables)]
                 pub fn Underline(state: Box<::pest::ParserState<Rule>>) -> ::pest::ParseResult<Box<::pest::ParserState<Rule>>> {
                     state.rule(Rule::Underline, |state| state.atomic(::pest::Atomicity::Atomic, |state| state.match_string("_")))
-                }
-                #[inline]
-                #[allow(non_snake_case, unused_variables)]
-                pub fn Load(state: Box<::pest::ParserState<Rule>>) -> ::pest::ParseResult<Box<::pest::ParserState<Rule>>> {
-                    state.rule(Rule::Load, |state| state.atomic(::pest::Atomicity::Atomic, |state| state.match_string("<<<").or_else(|state| state.match_string("⋘"))))
-                }
-                #[inline]
-                #[allow(non_snake_case, unused_variables)]
-                pub fn Save(state: Box<::pest::ParserState<Rule>>) -> ::pest::ParseResult<Box<::pest::ParserState<Rule>>> {
-                    state.rule(Rule::Save, |state| state.atomic(::pest::Atomicity::Atomic, |state| state.match_string(">>>").or_else(|state| state.match_string("⋙"))))
-                }
-                #[inline]
-                #[allow(non_snake_case, unused_variables)]
-                pub fn LeftShift(state: Box<::pest::ParserState<Rule>>) -> ::pest::ParseResult<Box<::pest::ParserState<Rule>>> {
-                    state.rule(Rule::LeftShift, |state| state.atomic(::pest::Atomicity::Atomic, |state| state.match_string("<<").or_else(|state| state.match_string("≪"))))
-                }
-                #[inline]
-                #[allow(non_snake_case, unused_variables)]
-                pub fn RightShift(state: Box<::pest::ParserState<Rule>>) -> ::pest::ParseResult<Box<::pest::ParserState<Rule>>> {
-                    state.rule(Rule::RightShift, |state| state.atomic(::pest::Atomicity::Atomic, |state| state.match_string(">>").or_else(|state| state.match_string("≫"))))
-                }
-                #[inline]
-                #[allow(non_snake_case, unused_variables)]
-                pub fn LessEqual(state: Box<::pest::ParserState<Rule>>) -> ::pest::ParseResult<Box<::pest::ParserState<Rule>>> {
-                    state.rule(Rule::LessEqual, |state| state.atomic(::pest::Atomicity::Atomic, |state| state.match_string("<=")))
-                }
-                #[inline]
-                #[allow(non_snake_case, unused_variables)]
-                pub fn GraterEqual(state: Box<::pest::ParserState<Rule>>) -> ::pest::ParseResult<Box<::pest::ParserState<Rule>>> {
-                    state.rule(Rule::GraterEqual, |state| state.atomic(::pest::Atomicity::Atomic, |state| state.match_string(">=")))
                 }
                 #[inline]
                 #[allow(non_snake_case, unused_variables)]
@@ -988,7 +952,7 @@ impl ::pest::Parser<Rule> for SDLParser {
             Rule::html_term => rules::html_term(state),
             Rule::html_pair => rules::html_pair(state),
             Rule::text_mode => rules::text_mode(state),
-            Rule::TextNormal => rules::TextNormal(state),
+            Rule::HTMLText => rules::HTMLText(state),
             Rule::HTMLEscape => rules::HTMLEscape(state),
             Rule::SpecialValue => rules::SpecialValue(state),
             Rule::Number => rules::Number(state),
@@ -1034,12 +998,6 @@ impl ::pest::Parser<Rule> for SDLParser {
             Rule::Colon => rules::Colon(state),
             Rule::Question => rules::Question(state),
             Rule::Underline => rules::Underline(state),
-            Rule::Load => rules::Load(state),
-            Rule::Save => rules::Save(state),
-            Rule::LeftShift => rules::LeftShift(state),
-            Rule::RightShift => rules::RightShift(state),
-            Rule::LessEqual => rules::LessEqual(state),
-            Rule::GraterEqual => rules::GraterEqual(state),
             Rule::Plus => rules::Plus(state),
             Rule::Minus => rules::Minus(state),
             Rule::Power => rules::Power(state),

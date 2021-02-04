@@ -113,27 +113,23 @@ OpenClose     = {"<" ~ PUSH(Symbol) ~ html_term* ~ ">" ~ text_mode* ~ "</" ~ POP
 SDLOpenClose  = {"<\\" ~ PUSH(Symbol) ~ html_term* ~ ">" ~ statement* ~ "</" ~ POP ~ ">" }
 SelfClose     = {"<" ~ Symbol ~ html_term* ~ "/>" }
 HTMLBad       = {"<" ~ HTMLBadTag ~ html_term* ~ ">" }
-HTMLBadTag = @{
+HTMLBadTag    = @{
     "img"|"hr"|"br"|"input"|"link"|"meta"
   | "area"|"base"|"col"|"wbr"
   | "command"|"embed"|"keygen"|"param"|"source"|"track"
 }
 //!Gray: HTMLComment|HtmlDTD
-HTMLComment = {"<!--" ~ (!"-->" ~ ANY*) ~ "-->"}
-HtmlDTD     = {"<!" ~ "DOCTYPE" ~ (!">" ~ ANY*) ~ ">"}
+HTMLComment   = {"<!--" ~ (!"-->" ~ ANY*) ~ "-->"}
+HtmlDTD       = {"<!" ~ "DOCTYPE" ~ (!">" ~ ANY*) ~ ">"}
 
-html_term = _{html_pair|BadSymbol}
-html_pair = {BadSymbol ~ "=" ~ term}
+html_term     = _{html_pair|BadSymbol}
+html_pair     =  {BadSymbol ~ "=" ~ term}
 
-text_mode = ${
-    "{{" ~ statement* ~ "}}" | template+ | (HTMLEscape|TextNormal)+
-}
-TextNormal = @{
-    (!("<"|">") ~ ANY)
-}
-HTMLEscape = @{
+text_mode     = ${"{{" ~ statement* ~ "}}" | template | HTMLEscape | HTMLText}
+HTMLText      = @{"<" ~ !("/"|Escape) | !("<"|">") ~ ANY}
+HTMLEscape    = @{
     "&" ~ ASCII_ALPHA_LOWER ~ ";" |
-    "&#" ~ Integer ~ ";" | ">"
+    "&#" ~ Integer ~ ";"
 }
 /*====================================================================================================================*/
 ///#D19A66
@@ -206,13 +202,13 @@ Infix = _{
 }
 
 Logical = @{
-    "a"
+    "and" | "or"
 }
 Compare = !{
     "is" ~ "not" | "!="
   | "is" | "=="
   | "not" ~ "in" | "in"
-  | ">" | "<"
+  | ">=" | ">>" | "<=" | "<<"
 }
 Additive   = @{Plus|Minus}
 Multiplied = @{Star|"/"}
@@ -238,16 +234,6 @@ Colon = @{":"|"："} //U+FF1A
 ///#56B6C2
 Question=@{"?"}
 Underline = @{"_"}
-
-
-
-Load =@{"<<<"|"⋘"} //U+22D8
-Save =@{">>>"|"⋙"} //U+22D9
-LeftShift =@{"<<"|"≪"} //U+226A
-RightShift =@{">>"|"≫"} //U+226B
-LessEqual =@{"<="}
-GraterEqual =@{">="}
-
 
 Plus =@{"+"}
 Minus =@{"-"}
