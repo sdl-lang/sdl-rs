@@ -1,6 +1,6 @@
-use crate::{ast::Symbol, ASTKind, AST};
+use crate::{ast::Symbol, ASTKind, ASTNode};
 
-impl AST {
+impl ASTNode {
     pub fn as_string(&self) -> String {
         match &self.kind {
             ASTKind::EscapedText(s) => format!("{}", s),
@@ -9,11 +9,11 @@ impl AST {
             _ => String::new(),
         }
     }
-    pub fn as_symbol(self) -> AST {
+    pub fn as_symbol(self) -> ASTNode {
         match &self.kind {
             ASTKind::EscapedText(_) => {
                 let range = self.range.to_owned();
-                AST { kind: ASTKind::Symbol(Box::new(Symbol { path: vec![self] })), range }
+                ASTNode { kind: ASTKind::Symbol(Box::new(Symbol { path: vec![self] })), range }
             }
             ASTKind::Symbol(_) => self,
             _ => unreachable!(),

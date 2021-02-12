@@ -6,7 +6,7 @@ use std::{
     collections::{BTreeMap, BTreeSet},
     fmt::{self, Debug, Formatter},
 };
-
+mod check;
 mod convert;
 mod ops;
 mod string;
@@ -23,13 +23,4 @@ pub enum Value {
     List(Vec<Value>),
     Dict(BTreeMap<String, Value>),
     HTMLElement(Box<HTMLElement>),
-}
-
-impl Value {
-    pub fn is_null(&self) -> bool {
-        match self {
-            Value::Null => true,
-            _ => false,
-        }
-    }
 }

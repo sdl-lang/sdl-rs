@@ -3,7 +3,7 @@ mod variable;
 
 use crate::{
     traits::{Evaluate, Render},
-    Result, AST,
+    Result, ASTNode,
 };
 use std::{
     collections::HashMap,
@@ -37,7 +37,7 @@ impl Default for SDLContextConfig {
 }
 
 impl SDLContext {
-    pub fn evaluate(&mut self, code: &AST) -> Result<Value> {
+    pub fn evaluate(&mut self, code: &ASTNode) -> Result<Value> {
         code.evaluate(self)
     }
     pub fn render(&mut self, code: &Value) -> Result<String> {

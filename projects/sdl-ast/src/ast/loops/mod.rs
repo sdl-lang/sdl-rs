@@ -2,21 +2,21 @@ use super::*;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct ForInLoop {
-    pub pattern: AST,
-    pub terms: AST,
-    pub guard: Option<AST>,
-    pub block: AST,
-    pub for_else: Option<AST>,
+    pub pattern: ASTNode,
+    pub terms: ASTNode,
+    pub guard: Option<ASTNode>,
+    pub block: ASTNode,
+    pub for_else: Option<ASTNode>,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct IfElseChain {
-    pub pairs: Vec<(AST, AST)>,
-    pub cover: Option<AST>,
+    pub pairs: Vec<(ASTNode, ASTNode)>,
+    pub cover: Option<ASTNode>,
 }
 
 impl IfElseChain {
-    pub fn build(cds: Vec<AST>, acts: Vec<AST>) -> Self {
+    pub fn build(cds: Vec<ASTNode>, acts: Vec<ASTNode>) -> Self {
         let cover = match cds.len() == acts.len() {
             true => None,
             false => acts.last().cloned(),

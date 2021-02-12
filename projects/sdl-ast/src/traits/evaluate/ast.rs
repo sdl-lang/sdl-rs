@@ -1,7 +1,7 @@
 use super::*;
 use crate::compile::StringValue;
 
-impl Evaluate for AST {
+impl Evaluate for ASTNode {
     fn evaluate(&self, ctx: &mut SDLContext) -> Result<Value> {
         self.kind.evaluate(ctx)
     }

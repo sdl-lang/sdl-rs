@@ -64,7 +64,7 @@ extendStatement = {
 /*====================================================================================================================*/
 //!#C678DD: assign_word
 assign_statement =  {assign_word ~ (pattern|pattern_bare) ~ Set ~ expr | pattern ~ Set ~ expr}
-assign_word      = @{"let"|"const"}
+assign_word      = @{"let"|"var"}
 /*====================================================================================================================*/
 //!#C678DD: define_word
 define_statement =  {define_word ~ SYMBOL ~ define_terms ~ block | SYMBOL ~ define_terms ~ Set ~ (block|statement)}
@@ -101,26 +101,26 @@ index_step  = !{expr? ~ Colon ~ expr? ~ Colon ~ expr?}
 /*====================================================================================================================*/
 ///Green
 template = {
-    SDLFragment|Fragment|EmptyTemplate
+    HTMLComment|HtmlDTD
+  | SDLFragment|Fragment|EmptyTemplate
   | SDLOpenClose|OpenClose|HTMLBad|SelfClose
-  | HtmlDTD|HTMLComment
 }
 
-EmptyTemplate = {"<|>"}
-Fragment      = {"<>" ~ text_mode* ~ "</>" }
-SDLFragment   = {"<\\>" ~ statement* ~ "</>" }
-OpenClose     = {"<" ~ PUSH(Symbol) ~ html_term* ~ ">" ~ text_mode* ~ "</" ~ POP ~ ">" }
-SDLOpenClose  = {"<\\" ~ PUSH(Symbol) ~ html_term* ~ ">" ~ statement* ~ "</" ~ POP ~ ">" }
-SelfClose     = {"<" ~ Symbol ~ html_term* ~ "/>" }
-HTMLBad       = {"<" ~ HTMLBadTag ~ html_term* ~ ">" }
+EmptyTemplate = @{"<|>"}
+Fragment      = !{"<>" ~ text_mode* ~ "</>" }
+SDLFragment   = !{"<\\>" ~ statement* ~ "</>" }
+OpenClose     = !{"<" ~ PUSH(Symbol) ~ html_term* ~ ">" ~ text_mode* ~ "</" ~ POP ~ ">" }
+SDLOpenClose  = !{"<\\" ~ PUSH(Symbol) ~ html_term* ~ ">" ~ statement* ~ "</" ~ POP ~ ">" }
+SelfClose     = !{"<" ~ Symbol ~ html_term* ~ "/>" }
+HTMLBad       = !{"<" ~ HTMLBadTag ~ html_term* ~ ">" }
 HTMLBadTag    = @{
     "img"|"hr"|"br"|"input"|"link"|"meta"
   | "area"|"base"|"col"|"wbr"
   | "command"|"embed"|"keygen"|"param"|"source"|"track"
 }
 //!Gray: HTMLComment|HtmlDTD
-HTMLComment   = {"<!--" ~ (!"-->" ~ ANY*) ~ "-->"}
-HtmlDTD       = {"<!" ~ "DOCTYPE" ~ (!">" ~ ANY*) ~ ">"}
+HTMLComment   = @{"<!--" ~ (!"-->" ~ ANY*) ~ "-->"}
+HtmlDTD       = @{"<!" ~ WHITE_SPACE* ~ "DOCTYPE" ~ (!">" ~ ANY*) ~ ">"}
 
 html_term     = _{html_pair|BadSymbol}
 html_pair     =  {BadSymbol ~ "=" ~ term}
@@ -188,10 +188,10 @@ namespace = ${SYMBOL ~ (Proportion ~ SYMBOL)+}
 /*====================================================================================================================*/
 //!#56B6C2: Prefix|Infix|Suffix|Additive|Logical
 Prefix = @{
-    (Bang|Plus|Minus|Star)
+    "¬"|"!"|Plus|Minus|Star
 }
 Suffix = @{
-   (Bang | Question)
+   "!" | "?"
 }
 Infix = _{
     Compare
@@ -202,7 +202,8 @@ Infix = _{
 }
 
 Logical = @{
-    "and" | "or"
+    "&&" | "∨" | "and"
+  | "||" | "∧" | "or"
 }
 Compare = !{
     "is" ~ "not" | "!="
@@ -219,8 +220,6 @@ Assign     = @{
 Set = @{"="}
 
 Or = @{"|"}
-LazyOr = @{"||"}
-
 
 Star =@{"*"}
 
@@ -230,7 +229,7 @@ Proportion = @{"::"|"∷"}//U+2237
 Dot = @{"."}
 Comma = @{","}
 Semicolon = @{";"} //U+FF1B
-Colon = @{":"|"："} //U+FF1A
+Colon = @{":"} //U+FF1A
 ///#56B6C2
 Question=@{"?"}
 Underline = @{"_"}
@@ -244,23 +243,12 @@ Surd = @{"√"} //U+221A
 Increase =@{"++"}
 Decrease =@{"--"}
 
-
 To =@{"->"}
 
 Elvis =@{":?"}
 
-
-
-
-LogicOr =@{"||"|"∧"} //U+2227
-LogicAnd =@{"&&"|"∨"} //U+2228
-LogicNot =@{"¬"} //U+00AC
-
 Ellipsis =@{"..."|"…"} // U+2026
 
 Concat =@{"~~"}
-Destruct =@{"~="}
-
-Bang =@{"!"}
 
 Sharp =@{"#"}

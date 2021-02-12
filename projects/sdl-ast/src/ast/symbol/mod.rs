@@ -2,7 +2,7 @@ use super::*;
 
 #[derive(Clone, Eq, PartialEq)]
 pub struct Symbol {
-    pub path: Vec<AST>,
+    pub path: Vec<ASTNode>,
 }
 
 impl Debug for Symbol {
@@ -24,8 +24,8 @@ impl Debug for Symbol {
     }
 }
 
-impl From<Vec<AST>> for Symbol {
-    fn from(path: Vec<AST>) -> Self {
+impl From<Vec<ASTNode>> for Symbol {
+    fn from(path: Vec<ASTNode>) -> Self {
         Self { path }
     }
 }

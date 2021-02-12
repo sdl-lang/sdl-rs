@@ -15,11 +15,11 @@ pub enum TemplateKind {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Template {
     pub kind: TemplateKind,
-    pub tag: Option<AST>,
-    pub end: Option<AST>,
-    pub attributes: Vec<AST>,
-    pub arguments: Vec<(AST, AST)>,
-    pub children: Vec<AST>,
+    pub tag: Option<ASTNode>,
+    pub end: Option<ASTNode>,
+    pub attributes: Vec<ASTNode>,
+    pub arguments: Vec<(ASTNode, ASTNode)>,
+    pub children: Vec<ASTNode>,
 }
 
 impl Default for Template {
@@ -44,16 +44,16 @@ impl Template {
 }
 
 impl Template {
-    pub fn set_tag(&mut self, tag: AST) {
+    pub fn set_tag(&mut self, tag: ASTNode) {
         self.tag = Some(tag)
     }
-    pub fn set_end(&mut self, tag: AST) {
+    pub fn set_end(&mut self, tag: ASTNode) {
         self.end = Some(tag)
     }
-    pub fn set_attributes(&mut self, values: Vec<AST>) {
+    pub fn set_attributes(&mut self, values: Vec<ASTNode>) {
         self.attributes = values
     }
-    pub fn set_arguments(&mut self, values: Vec<(AST, AST)>) {
+    pub fn set_arguments(&mut self, values: Vec<(ASTNode, ASTNode)>) {
         self.arguments = values
     }
 }

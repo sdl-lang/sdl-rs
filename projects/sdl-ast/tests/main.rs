@@ -1,4 +1,4 @@
-use sdl_ast::{ASTKind, AST};
+use sdl_ast::{ASTKind, ASTNode};
 use std::collections::{BTreeMap, HashMap};
 
 #[test]
@@ -8,7 +8,7 @@ fn ready() {
 
 #[test]
 fn sized() {
-    println!("{}", std::mem::size_of::<AST>());
+    println!("{}", std::mem::size_of::<ASTNode>());
     println!("{}", std::mem::size_of::<Box<ASTKind>>());
     println!("{}", std::mem::size_of::<Vec<ASTKind>>());
     println!("{}", std::mem::size_of::<String>());

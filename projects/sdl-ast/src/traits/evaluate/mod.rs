@@ -9,7 +9,7 @@ pub trait Evaluate {
     fn evaluate(&self, ctx: &mut SDLContext) -> Result<Value>;
 }
 
-fn evaluate_vec_ast(v: &[AST], ctx: &mut SDLContext) -> Result<Vec<Value>> {
+fn evaluate_vec_ast(v: &[ASTNode], ctx: &mut SDLContext) -> Result<Vec<Value>> {
     let mut collected = Vec::with_capacity(v.len());
     for e in v {
         let out = e.evaluate(ctx)?;
