@@ -12,6 +12,7 @@ edition = "2018"
 num = "0.3"
 bigdecimal = "0.2"
 thiserror = "1.0"
+lsp-types = "0.81"
 
 [dev-dependencies]
 
