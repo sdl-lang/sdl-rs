@@ -30,7 +30,7 @@ impl ParserConfig {
         ASTNode::program(codes)
     }
     fn parse_statement(&self, pairs: Pair<Rule>) -> ASTNode {
-        let r = self.get_position(pairs.as_span());
+        let r = self.get_position(&pairs);
         let mut codes = vec![];
         for pair in pairs.into_inner() {
             let code = match pair.as_rule() {
@@ -56,7 +56,7 @@ impl ParserConfig {
 
 impl ParserConfig {
     fn parse_if_else(&self, pairs: Pair<Rule>) -> ASTNode {
-        let r = self.get_position(pairs.as_span());
+        let r = self.get_position(&pairs);
         let mut conditions = vec![];
         let mut actions = vec![];
         for pair in pairs.into_inner() {
@@ -70,7 +70,7 @@ impl ParserConfig {
     }
 
     fn parse_for_in(&self, pairs: Pair<Rule>) -> ASTNode {
-        let r = self.get_position(pairs.as_span());
+        let r = self.get_position(&pairs);
         let mut guard = None;
         let mut for_else = None;
         let (mut pattern, mut terms, mut block) = Default::default();
@@ -93,7 +93,7 @@ impl ParserConfig {
 
 impl ParserConfig {
     fn parse_expression(&self, pairs: Pair<Rule>) -> ASTNode {
-        let r = self.get_position(pairs.as_span());
+        let r = self.get_position(&pairs);
         let mut terms = pairs.into_inner();
         let expr = self.parse_expr(terms.next().unwrap());
         let eos = terms.next().is_some();
@@ -102,7 +102,7 @@ impl ParserConfig {
 
     #[rustfmt::skip]
     fn parse_expr(&self, pairs: Pair<Rule>) -> ASTNode {
-        let r = self.get_position(pairs.as_span());
+        let r = self.get_position(&pairs);
         PREC_CLIMBER.climb(
             pairs.into_inner(),
             |pair: Pair<Rule>| match pair.as_rule() {
@@ -117,7 +117,7 @@ impl ParserConfig {
     }
 
     fn parse_term(&self, pairs: Pair<Rule>) -> ASTNode {
-        let r = self.get_position(pairs.as_span());
+        let r = self.get_position(&pairs);
         let mut base = CallChain::default();
         // let mut prefix = vec![];
         // let mut suffix = vec![];
@@ -147,7 +147,7 @@ impl ParserConfig {
     }
 
     fn parse_operation(&self, pairs: Pair<Rule>, kind: &str) -> ASTNode {
-        let r = self.get_position(pairs.as_span());
+        let r = self.get_position(&pairs);
         let op = pairs.as_str();
         ASTNode::operation(op, kind, r)
     }
@@ -160,7 +160,7 @@ impl ParserConfig {
     }
 
     fn parse_chain_call(&self, pairs: Pair<Rule>) -> CallChain {
-        // let r = self.get_position(pairs.as_span());
+        // let r = self.get_position(&pairs);
         let mut items = pairs.into_inner();
         let mut base = CallChain::new(self.parse_data(items.next().unwrap()));
         for pair in items {
@@ -173,7 +173,7 @@ impl ParserConfig {
     }
 
     fn parse_dot_call(&self, pairs: Pair<Rule>) -> ASTNode {
-        let r = self.get_position(pairs.as_span());
+        let r = self.get_position(&pairs);
         // let mut terms = vec![];
         for pair in pairs.into_inner() {
             match pair.as_rule() {
@@ -203,7 +203,7 @@ impl ParserConfig {
         }
     }
     fn parse_template(&self, pairs: Pair<Rule>) -> ASTNode {
-        let r = self.get_position(pairs.as_span());
+        let r = self.get_position(&pairs);
         let mut tag = ASTNode::default();
         let mut attributes = vec![];
         let mut arguments = vec![];
@@ -232,7 +232,7 @@ impl ParserConfig {
         return ASTNode::template(template, r);
     }
     fn parse_text_mode(&self, pairs: Pair<Rule>) -> ASTNode {
-        let r = self.get_position(pairs.as_span());
+        let r = self.get_position(&pairs);
         let mut terms = vec![];
         let mut text = vec![];
         for pair in pairs.into_inner() {
@@ -247,7 +247,7 @@ impl ParserConfig {
     }
 
     fn parse_list(&self, pairs: Pair<Rule>) -> ASTNode {
-        let r = self.get_position(pairs.as_span());
+        let r = self.get_position(&pairs);
         let mut terms = vec![];
         for pair in pairs.into_inner() {
             match pair.as_rule() {
@@ -272,7 +272,7 @@ impl ParserConfig {
         (key, value)
     }
     fn parse_namespace(&self, pairs: Pair<Rule>) -> ASTNode {
-        let r = self.get_position(pairs.as_span());
+        let r = self.get_position(&pairs);
         let mut value = vec![];
         for pair in pairs.into_inner() {
             match pair.as_rule() {
@@ -283,13 +283,13 @@ impl ParserConfig {
         ASTNode::symbol(value, r)
     }
     fn parse_symbol(&self, pairs: Pair<Rule>) -> ASTNode {
-        let r = self.get_position(pairs.as_span());
+        let r = self.get_position(&pairs);
         let value = vec![self.parse_string(pairs)];
         ASTNode::symbol(value, r)
     }
 
     fn parse_string(&self, pairs: Pair<Rule>) -> ASTNode {
-        let r = self.get_position(pairs.as_span());
+        let r = self.get_position(&pairs);
         let mut is_pure_string = true;
         let mut block = vec![];
         let mut _marks = 0;
@@ -333,7 +333,7 @@ impl ParserConfig {
     }
 
     fn parse_number(&self, pairs: Pair<Rule>) -> ASTNode {
-        let r = self.get_position(pairs.as_span());
+        let r = self.get_position(&pairs);
         let pair = pairs.into_inner().nth(0).unwrap();
         match pair.as_rule() {
             Rule::Integer => ASTNode::integer(pair.as_str(), 10, r),
@@ -358,7 +358,7 @@ impl ParserConfig {
         }
     }
     fn parse_special(&self, pairs: Pair<Rule>) -> ASTNode {
-        let r = self.get_position(pairs.as_span());
+        let r = self.get_position(&pairs);
         match pairs.as_str() {
             "true" => ASTNode::boolean(true, r),
             "false" => ASTNode::boolean(false, r),

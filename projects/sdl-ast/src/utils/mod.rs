@@ -1,8 +1,6 @@
 mod check;
-mod range;
 mod transform;
 
-pub use range::TextRange;
 use std::fmt::Debug;
 
 pub fn get_variant_name(e: impl Debug) -> String {

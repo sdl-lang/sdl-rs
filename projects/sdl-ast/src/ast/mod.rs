@@ -14,7 +14,8 @@ pub use crate::ast::{
 use bigdecimal::BigDecimal;
 use num::BigInt;
 use std::fmt::{self, Debug, Display, Formatter};
-use lsp_types::Range;
+pub use lsp_types::Range;
+pub use lsp_types::Position;
 
 #[derive(Clone, Eq, PartialEq)]
 pub struct ASTNode {
