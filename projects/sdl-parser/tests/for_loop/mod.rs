@@ -1,37 +1,25 @@
 use super::*;
 
-const FOR_LIST: &'static str = r#"
-for i in [1, 2, 3] {
-    i + 1
-}
-"#;
 
-#[test]
-fn for_i_in_list() {
-    println!("{}", render(FOR_LIST).unwrap());
-}
-
-const FOR_STRING: &'static str = r#"
-for i in "abc" {
-    i + "x"
-}
-"#;
-
-#[test]
-fn for_i_in_string() {
-    println!("{}", render(FOR_STRING).unwrap());
+macro_rules! run_test {
+    ($($F:ident), +,) => {
+        $(run_test![$F, stringify!($F)];)+
+    };
+    ($function_name:ident, $file_name:expr) => {
+    #[test]
+    fn $function_name() {
+        let out = render(include_str!(concat!($file_name, ".sdl"))).unwrap();
+        assert_eq!(include_str!(concat!($file_name, ".out.sdl")), out)
+    }
+    };
 }
 
-const FOR_IF_GUARD: &'static str = r#"
-for i in "abc" if x {
-    i + 1
-}
-"#;
+run_test![
+    for_i_in_list,
+    for_i_in_string,
+    for_if_guard,
+];
 
-#[test]
-fn for_if_guard() {
-    println!("{}", render(FOR_IF_GUARD).unwrap());
-}
 
 const FOR_ELSE_GUARD: &'static str = r#"
 for i in [ ] {

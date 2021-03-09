@@ -239,7 +239,7 @@ impl ParserConfig {
             match pair.as_rule() {
                 Rule::WHITESPACE => continue,
                 Rule::statement => terms.push(self.parse_statement(pair)),
-                Rule::text_char => text.push(pair.as_str()),
+                Rule::HTMLText => text.push(pair.as_str()),
                 _ => debug_cases!(pair),
             };
         }

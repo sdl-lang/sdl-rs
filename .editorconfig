@@ -2,10 +2,10 @@
 charset = utf-8
 
 
-[*.pest]
+[*.{pest,sdl}]
 indent_style = space
 indent_size = 4
 
 [*.toml]
 indent_style = space
-indent_size = 4
+indent_size = 2
