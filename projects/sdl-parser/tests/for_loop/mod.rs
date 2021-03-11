@@ -1,6 +1,5 @@
 use super::*;
 
-
 macro_rules! run_test {
     ($($F:ident), +,) => {
         $(run_test![$F, stringify!($F)];)+
@@ -18,33 +17,6 @@ run_test![
     for_i_in_list,
     for_i_in_string,
     for_if_guard,
+    for_else_guard,
+    for_if_else_guard,
 ];
-
-
-const FOR_ELSE_GUARD: &'static str = r#"
-for i in [ ] {
-    false
-}
-else {
-    true
-}
-"#;
-
-#[test]
-fn for_else_guard() {
-    assert_eq!(render(FOR_ELSE_GUARD).unwrap(), "true")
-}
-
-const FOR_IF_ELSE_GUARD: &'static str = r#"
-for i in [1, 2, 3] if x > 5 {
-    false
-}
-else {
-    true
-}
-"#;
-
-#[test]
-fn for_if_else_guard() {
-    assert_eq!(render(FOR_IF_ELSE_GUARD).unwrap(), "true")
-}

@@ -30,7 +30,7 @@ fn comment() {
 }
 
 const TEMPLATE_ESCAPED: &'static str = r#"[
-    <i>{{ 1 + "{{2}}" }}</i>
+    <i>{{ 1 ++ "{{2}}" }}</i>
 ]"#;
 
 #[test]
