@@ -123,8 +123,9 @@ impl ParserConfig {
         // let mut suffix = vec![];
         for pair in pairs.into_inner() {
             match pair.as_rule() {
-                Rule::WHITESPACE => continue,
-                Rule::chain_call => base = self.parse_chain_call(pair),
+                Rule::WHITESPACE|Rule::COMMENT => continue,
+                Rule::data => base = CallChain::new(self.parse_data(pair)) ,
+                Rule::dot_call=> base += self.parse_dot_call(pair),
                 //Rule::term => base = self.parse_node(pair),
                 //Rule::Prefix => prefix.push(pair.as_str().to_string()),
                 //Rule::Suffix => suffix.push(pair.as_str().to_string()),
@@ -157,19 +158,6 @@ impl ParserConfig {
         let pattern = self.parse_pattern(terms.next().unwrap());
         let expr = self.parse_expr(terms.next().unwrap());
         unreachable!("{:?}\n{:?}", pattern, expr)
-    }
-
-    fn parse_chain_call(&self, pairs: Pair<Rule>) -> CallChain {
-        // let r = self.get_position(&pairs);
-        let mut items = pairs.into_inner();
-        let mut base = CallChain::new(self.parse_data(items.next().unwrap()));
-        for pair in items {
-            match pair.as_rule() {
-                Rule::dot_call => base += self.parse_dot_call(pair),
-                _ => debug_cases!(pair),
-            };
-        }
-        return base;
     }
 
     fn parse_dot_call(&self, pairs: Pair<Rule>) -> ASTNode {

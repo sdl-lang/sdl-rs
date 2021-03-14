@@ -14,26 +14,8 @@ macro_rules! run_test {
 }
 
 run_test![
+    comment,
     number,
-    string,string_escape,
+    string, string_escape,
+    template_escape,
 ];
-
-
-const COMMENT: &'static str = r#"
-/* 1 /* 2 */ 3 */
-/* 1 */ 2 /* 3 */
-"#;
-
-#[test]
-fn comment() {
-    assert_eq!(render(COMMENT).unwrap(), "2")
-}
-
-const TEMPLATE_ESCAPED: &'static str = r#"[
-    <i>{{ 1 ++ "{{2}}" }}</i>
-]"#;
-
-#[test]
-fn template_escaped() {
-    assert_eq!(render(TEMPLATE_ESCAPED).unwrap(), r#"["\"", "\'", "\\", "\n"]"#)
-}

@@ -74,13 +74,14 @@ define_word      = @{"def"}
 /*====================================================================================================================*/
 //!Orange:annotation_call
 annotation = {annotation_call+~statement}
-annotation_call = @{"@"~(list|apply|Symbol)}
+annotation_call = @{"#"~(list|apply|Symbol)}
 /*====================================================================================================================*/
 expression =  {expr ~ eos?}
 expr       = !{term ~ (Infix ~ term)*}
-term       =  {Prefix* ~ ("(" ~ expr ~ ")"|chain_call)}
-chain_call =  {data ~ (slice|apply|Suffix|dot_call)*}
+term       =  {Prefix* ~ ("(" ~ expr ~ ")"|data) ~ (Suffix|slice|apply|dot_call)*}
 dot_call   = !{Dot ~ Integer|Dot ~ Symbol ~ apply?}
+apply      = !{"(" ~ ")" | "(" ~ apply_kv ~ (Comma ~ apply_kv)* ~ Comma? ~")"}
+apply_kv   =  {SYMBOL ~ Set ~ expr|expr}
 /*====================================================================================================================*/
 data = {template|dict|list|SpecialValue|Number|String|Symbol}
 
@@ -90,9 +91,6 @@ dict  = {"{" ~ "}" | "{" ~ dict_pair ~ (Comma ~ dict_pair)* ~ Comma? ~ "}"}
 
 dict_pair = !{dict_key ~ Colon ~ expr}
 dict_key  = _{Integer | SYMBOL | String}
-
-apply     = !{"(" ~ ")" | "(" ~ apply_kv ~ (Comma ~ apply_kv)* ~ Comma? ~")"}
-apply_kv  = {SYMBOL~ Set ~ expr|expr}
 
 slice       = !{"[" ~ index ~ (Comma ~ index)* ~ Comma? ~ "]"}
 index       =  {index_step|index_range|expr}
@@ -171,11 +169,9 @@ S4  = @{"`"}
 // NEWLINE = @{"\r"~"\n"|"\r"|"\n"}
 WHITESPACE = _{NEWLINE|WHITE_SPACE}
 ///#7F848E
-COMMENT = _{
-    MultiLineComment
-  | "//" ~ (!NEWLINE ~ ANY)*
-}
-MultiLineComment = _{"/*" ~ (MultiLineComment | !"*/" ~ ANY)* ~ "*/"}
+COMMENT = _{CommentMultiLine | CommentLine}
+CommentLine = @{"//" ~ (!NEWLINE ~ ANY)*}
+CommentMultiLine = @{"//+" ~ (CommentMultiLine | !"//-" ~ ANY)* ~ "//-"}
 /*====================================================================================================================*/
 ///#61AFEF
 SYMBOL = @{
@@ -186,7 +182,7 @@ BadSymbol = @{(XID_START|":"|"_") ~ (XID_CONTINUE|":"|"-"|".")*}
 Symbol    = ${namespace|SYMBOL}
 namespace = ${SYMBOL ~ (Proportion ~ SYMBOL)+}
 /*====================================================================================================================*/
-//!#56B6C2: Prefix|Infix|Suffix|Additive|Logical
+//!#56B6C2: Infix
 Prefix = @{
     "¬"|"!"|Plus|Minus|Star
 }
@@ -211,7 +207,7 @@ Compare = !{
   | "not" ~ "in" | "in"
   | ">=" | ">>" | "<=" | "<<"
 }
-Additive   = @{Plus|Minus}
+Additive   = @{"++"|Plus|Minus}
 Multiplied = @{Star|"/"}
 Assign     = @{
     "+=" | "-="
@@ -243,12 +239,6 @@ Surd = @{"√"} //U+221A
 Increase =@{"++"}
 Decrease =@{"--"}
 
-To =@{"->"}
-
-Elvis =@{":?"}
-
 Ellipsis =@{"..."|"…"} // U+2026
-
-Concat =@{"~~"}
 
 Sharp =@{"#"}

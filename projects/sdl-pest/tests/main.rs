@@ -13,7 +13,7 @@ fn ready() {
 #[test]
 #[ignore]
 pub fn gen_sdl_lexer() {
-    let pest = Path::new(concat!(env!("CARGO_MANIFEST_DIR"), "./src/sdl.pest"));
+    let pest = Path::new(concat!(env!("CARGO_MANIFEST_DIR"), "./sdl.pest"));
     let rs = Path::new(concat!(env!("CARGO_MANIFEST_DIR"), "./src/sdl.rs"));
 
     let derived = {
@@ -28,4 +28,3 @@ pub fn gen_sdl_lexer() {
     let out = format!("pub struct SDLParser;{}", derived);
     writeln!(file, "{}", out).unwrap();
 }
-
