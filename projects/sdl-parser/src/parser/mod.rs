@@ -162,13 +162,15 @@ impl ParserConfig {
 
     fn parse_dot_call(&self, pairs: Pair<Rule>) -> ASTNode {
         let r = self.get_position(&pairs);
-        // let mut terms = vec![];
+        let mut positive = true;
         for pair in pairs.into_inner() {
             match pair.as_rule() {
                 Rule::Dot => continue,
                 Rule::Symbol => continue,
                 Rule::apply => continue,
-                Rule::Integer => return ASTNode::call_index(pair.as_str(), r),
+                Rule::Minus => positive = false,
+                Rule::Plus => positive = true,
+                Rule::Integer => return ASTNode::call_index(pair.as_str(), positive, r),
                 _ => debug_cases!(pair),
             };
         }

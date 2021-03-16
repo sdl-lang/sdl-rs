@@ -146,9 +146,13 @@ impl ASTNode {
         Self { kind: ASTKind::CallChain(Box::new(chain)), range, }
     }
 
-    pub fn call_index(index: &str, range: Range) -> Self {
+    pub fn call_index(index: &str, is_positive: bool, range: Range) -> Self {
         let n = BigInt::parse_bytes(index.as_bytes(), 10).unwrap_or_default();
-        Self { kind: ASTKind::CallIndex(Box::new(n)), range, }
+        let kind = match is_positive {
+            true => {ASTKind::CallIndex(Box::new(n))}
+            false => {ASTKind::CallIndex(Box::new(-n))}
+        };
+        Self { kind, range, }
     }
 
     pub fn template(value: Template, range: Range) -> Self {

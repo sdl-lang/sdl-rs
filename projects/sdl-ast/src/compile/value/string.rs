@@ -90,3 +90,12 @@ fn string_escape(input: &str) -> String {
 fn string_unescape(input: &str) -> String {
     input.to_owned()
 }
+
+impl StringValue {
+    pub fn length(&self) -> usize {
+        match self {
+            StringValue::Escaped(s) => {s.len()}
+            StringValue::Unsafe(s) => {s.len()}
+        }
+    }
+}

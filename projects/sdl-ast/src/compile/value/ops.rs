@@ -1,7 +1,7 @@
 use super::*;
 use crate::utils::get_variant_name;
-use num::ToPrimitive;
-use std::ops::{Add, Div, Mul, Sub};
+use num::{ToPrimitive, Zero};
+use std::ops::{Add, Div, Mul, Sub, Neg};
 
 impl Add<Value> for Value {
     type Output = Result<Value>;
@@ -71,15 +71,58 @@ impl Div<Value> for Value {
 
 impl Value {
     pub fn get_index(&self, n: &BigInt) -> Result<Value> {
-        // TODO: Invalid Index Error
-        let n = n.to_usize().unwrap_or_default();
-        let out = match self {
-            Value::List(list) => list.get(n).cloned().unwrap_or_default(),
-            Value::String(string) => StringValue::non_escaped(string.chars().nth(n).unwrap_or_default()),
-            Value::Null => Value::Null,
+        match n {
+            n if n > &BigInt::zero()  => {
+                // TODO: Invalid Index Error
+                let n = n.to_usize().unwrap_or_default() - 1 ;
+                let out = match self {
+                    Value::List(list) => list.get(n).cloned().unwrap_or_default(),
+                    Value::String(string) => {
+                        match string.chars().nth(n) {
+                            Some(s) => StringValue::non_escaped(s),
+                            None => Value::Null,
+                        }
+                    },
+                    Value::Null => Value::Null,
 
-            _ => unimplemented!("{:?}", self),
-        };
-        Ok(out)
+                    _ => unimplemented!("{:?}", self),
+                };
+                Ok(out)
+            }
+            n if n < &BigInt::zero() => {
+                // TODO: Invalid Index Error
+                let n = n.neg().to_usize().unwrap_or_default();
+                let out = match self {
+                    Value::List(list) => {
+                        let l = match list.len().checked_sub(n) {
+                            Some(u) => {u},
+                            None => {return Ok(Value::Null)}
+                        };
+                        list.get(l).cloned().unwrap_or_default()
+                    },
+                    Value::String(string) => {
+                        let l = match string.length().checked_sub(n) {
+                            Some(u) => {u},
+                            None => {return Ok(Value::Null)}
+                        };
+                        match string.chars().nth(l) {
+                            Some(s) => StringValue::non_escaped(s),
+                            None => Value::Null,
+                        }
+                    },
+                    Value::Null => Value::Null,
+
+                    _ => unimplemented!("{:?}", self),
+                };
+                Ok(out)
+            }
+            // n is zero
+            _ => {
+                Ok(Value::Null)
+            }
+        }
+
+
+
     }
 }
