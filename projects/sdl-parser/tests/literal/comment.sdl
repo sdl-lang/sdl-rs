@@ -1,2 +1,9 @@
-/* 1 /* 2 */ 3 */
-/* 1 */ 2 /* 3 */
+// single line comment
+
+
+//+
+comment level 1
+    //+
+    comment level 2
+    //-
+//-

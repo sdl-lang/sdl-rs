@@ -8,7 +8,7 @@ macro_rules! run_test {
     #[test]
     fn $function_name() {
         let out = render(include_str!(concat!($file_name, ".sdl"))).unwrap();
-        assert_eq!(include_str!(concat!($file_name, ".out.sdl")), out)
+        assert_eq!(out, include_str!(concat!($file_name, ".out.sdl")))
     }
     };
 }

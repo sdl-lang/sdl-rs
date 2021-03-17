@@ -1,7 +1,12 @@
 use super::*;
 use crate::utils::get_variant_name;
-use num::{ToPrimitive, Zero};
+use num::{ToPrimitive, Zero, Integer};
 use std::ops::{Add, Div, Mul, Sub, Neg};
+
+pub trait Concat<Rhs = Self> {
+    type Output;
+    fn concat(self, rhs: Rhs) -> Self::Output;
+}
 
 impl Add<Value> for Value {
     type Output = Result<Value>;
@@ -69,6 +74,25 @@ impl Div<Value> for Value {
     }
 }
 
+impl Concat<Value> for Value {
+    type Output = Result<Value>;
+
+    fn concat(self, rhs: Value) -> Self::Output {
+        let error = format!("(Value::{:?}, Value::{:?}) => {{}}", &self, &rhs);
+        let out = match (self, rhs) {
+            (Value::Integer(lhs), Value::Integer(rhs)) => {
+              let new = lhs.mul(rhs.to_string().len()) + rhs.as_ref();
+                Value::Integer(Box::new(new))
+            },
+            (Value::Integer(lhs), Value::String(rhs)) => {
+                StringValue::non_escaped(lhs.to_string() + rhs.as_str())
+            }
+            _ => unimplemented!("{}", error),
+        };
+        Ok(out)
+    }
+}
+
 impl Value {
     pub fn get_index(&self, n: &BigInt) -> Result<Value> {
         match n {
@@ -121,8 +145,5 @@ impl Value {
                 Ok(Value::Null)
             }
         }
-
-
-
     }
 }

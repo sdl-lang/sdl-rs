@@ -3,4 +3,3 @@ let y = x + 1;
 
 write(x)
 write(y)
-

@@ -32,12 +32,3 @@ pub fn render_steps(input: &str) -> Result<String> {
     println!("{:?}", out);
     Ok(out)
 }
-
-const CODE: &'static str = r#"
-<img rel src="https://avatars.githubusercontent.com/u/17541209?s=60&amp;v=4" alt="@GalAster" size="20" height="20" width="20" class="avatar-user avatar avatar--small ">
-"#;
-
-#[test]
-fn template() {
-    println!("{}", render(CODE).unwrap());
-}

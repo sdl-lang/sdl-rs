@@ -1,5 +1,5 @@
-for i in [1, 2, 3] if x > 5 {
-    false
+for i in [1, 2, 3] if i > 5 {
+    i
 }
 else {
     true

@@ -4,6 +4,7 @@ impl Evaluate for InfixExpression {
     fn evaluate(&self, ctx: &mut SDLContext) -> Result<Value> {
         match self.op.as_string().as_str() {
             "+" => self.lhs.evaluate(ctx)? + self.rhs.evaluate(ctx)?,
+            "++" => self.lhs.evaluate(ctx)? + self.rhs.evaluate(ctx)?,
             "-" => self.lhs.evaluate(ctx)? - self.rhs.evaluate(ctx)?,
             "*" => self.lhs.evaluate(ctx)? * self.rhs.evaluate(ctx)?,
             "/" => self.lhs.evaluate(ctx)? / self.rhs.evaluate(ctx)?,

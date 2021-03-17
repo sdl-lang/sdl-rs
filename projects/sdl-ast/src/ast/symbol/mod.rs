@@ -37,6 +37,7 @@ impl Symbol {
             .take(self.path.len() - 1)
             .map(|e| match &e.kind {
                 ASTKind::EscapedText(s) => s.to_owned(),
+                ASTKind::UnescapedText(s) => s.to_owned(),
                 _ => unreachable!(),
             })
             .collect()
@@ -44,6 +45,7 @@ impl Symbol {
     pub fn name(&self) -> String {
         match &self.path.last().unwrap().kind {
             ASTKind::EscapedText(s) => s.to_owned(),
+            ASTKind::UnescapedText(s) => s.to_owned(),
             _ => unreachable!(),
         }
     }
