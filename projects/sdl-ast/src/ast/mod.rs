@@ -3,6 +3,7 @@ mod loops;
 mod operations;
 mod symbol;
 mod template;
+mod check;
 
 pub use crate::ast::{
     expression::{CallChain, InfixExpression, StringExpression, UnaryExpression},

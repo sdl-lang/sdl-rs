@@ -1,4 +1,3 @@
-mod check;
 mod transform;
 
 use std::fmt::Debug;

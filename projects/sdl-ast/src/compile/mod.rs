@@ -1,4 +1,4 @@
-mod value;
+// mod value;
 mod variable;
 
 use crate::{
@@ -9,14 +9,13 @@ use std::{
     collections::HashMap,
     rc::{Rc, Weak},
 };
-pub use value::{HTMLElement, StringValue, Value};
 pub use variable::Variable;
 
 #[derive(Clone, Debug)]
 pub struct SDLContext {
     config: Option<Box<SDLContextConfig>>,
     father: Option<Weak<SDLContext>>,
-    variables: HashMap<String, Value>,
+    variables: HashMap<String, ASTNode>,
 }
 
 #[derive(Clone, Debug)]
@@ -37,19 +36,19 @@ impl Default for SDLContextConfig {
 }
 
 impl SDLContext {
-    pub fn evaluate(&mut self, code: &ASTNode) -> Result<Value> {
+    pub fn evaluate(&mut self, code: &ASTNode) -> Result<ASTNode> {
         code.evaluate(self)
     }
-    pub fn render(&mut self, code: &Value) -> Result<String> {
+    pub fn render(&mut self, code: &ASTNode) -> Result<String> {
         let mut output = String::new();
         code.render(&mut output, &*self)?;
         Ok(output)
     }
 
-    pub fn insert(&mut self, key: &str, v: impl Into<Value>) {
+    pub fn insert(&mut self, key: &str, v: impl Into<ASTNode>) {
         self.variables.insert(key.to_string(), v.into());
     }
-    pub fn get(&mut self, key: &str) -> Value {
+    pub fn get(&mut self, key: &str) -> ASTNode {
         self.variables.get(key).cloned().unwrap_or_default()
     }
 

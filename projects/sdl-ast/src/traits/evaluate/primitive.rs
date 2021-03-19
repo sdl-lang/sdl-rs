@@ -1,5 +1,5 @@
 use super::*;
-use crate::{compile::StringValue, traits::Render};
+use crate::{traits::Render};
 use std::collections::BTreeSet;
 
 #[rustfmt::skip]
@@ -9,14 +9,14 @@ pub static VOID_TAGS: &[&str; 16] = &[
 ];
 
 impl Evaluate for Template {
-    fn evaluate(&self, ctx: &mut SDLContext) -> Result<Value> {
+    fn evaluate(&self, ctx: &mut SDLContext) -> Result<ASTNode> {
         let tag = match &self.tag {
             None => unimplemented!(),
             Some(s) => s.as_string(),
         };
         let is_void = VOID_TAGS.contains(&tag.as_str());
 
-        let class = BTreeSet::new();
+        // let class = BTreeSet::new();
 
         // if let Some(s) = &self.class {
         //     match &s.kind {
@@ -28,31 +28,33 @@ impl Evaluate for Template {
         //         _ => ()
         //     }
         // }
-
-        let html =
-            HTMLElement { is_void, tag, id: vec![], class, attributes: Default::default(), arguments: Default::default(), children: vec![] };
-        Ok(Value::HTMLElement(Box::new(html)))
+        unimplemented!()
+        // let html =
+        //     HTMLElement { is_void, tag, id: vec![], class, attributes: Default::default(), arguments: Default::default(), children: vec![] };
+        // Ok(Value::HTMLElement(Box::new(html)))
     }
 }
 
 impl Evaluate for Symbol {
-    fn evaluate(&self, ctx: &mut SDLContext) -> Result<Value> {
-        Ok(ctx.get(&self.name()))
+    fn evaluate(&self, ctx: &mut SDLContext) -> Result<ASTNode> {
+        unimplemented!()
+        // Ok(ctx.get(&self.name()))
     }
 }
 
 impl Evaluate for StringExpression {
-    fn evaluate(&self, ctx: &mut SDLContext) -> Result<Value> {
-        let out = match self.handler {
-            Some(_) => unimplemented!(),
-            None => {
-                let mut out = String::new();
-                for e in &self.inner {
-                    e.evaluate(ctx)?.render(&mut out, ctx)?;
-                }
-                StringValue::non_escaped(out)
-            }
-        };
-        Ok(out)
+    fn evaluate(&self, ctx: &mut SDLContext) -> Result<ASTNode> {
+        unimplemented!()
+        // let out = match self.handler {
+        //     Some(_) => unimplemented!(),
+        //     None => {
+        //         let mut out = String::new();
+        //         for e in &self.inner {
+        //             e.evaluate(ctx)?.render(&mut out, ctx)?;
+        //         }
+        //         StringValue::non_escaped(out)
+        //     }
+        // };
+        // Ok(out)
     }
 }
