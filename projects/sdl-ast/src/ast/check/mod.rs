@@ -15,7 +15,7 @@ impl ASTKind {
         matches!(self, Self::Boolean(false))
     }
     pub fn is_string(&self) -> bool {
-        matches!(self, Self::EscapedText(_)|Self::UnescapedText(_))
+        matches!(self, Self::HTMLText(_)|Self::String(_))
     }
     pub fn is_safe(&self) -> bool {
         unreachable!()

@@ -44,17 +44,19 @@ impl Evaluate for Symbol {
 
 impl Evaluate for StringExpression {
     fn evaluate(&self, ctx: &mut SDLContext) -> Result<ASTNode> {
-        unimplemented!()
-        // let out = match self.handler {
-        //     Some(_) => unimplemented!(),
-        //     None => {
-        //         let mut out = String::new();
-        //         for e in &self.inner {
-        //             e.evaluate(ctx)?.render(&mut out, ctx)?;
-        //         }
-        //         StringValue::non_escaped(out)
-        //     }
-        // };
-        // Ok(out)
+        let out = match self.handler {
+            Some(_) => unimplemented!(),
+            None => {
+                let mut out = String::new();
+                for e in &self.inner {
+                    e.evaluate(ctx)?.render(&mut out, ctx)?;
+                }
+                ASTKind::String(out)
+            }
+        };
+        Ok(ASTNode {
+            kind: out,
+            range: Default::default()
+        })
     }
 }

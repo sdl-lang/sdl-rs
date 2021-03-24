@@ -1,3 +1,4 @@
+mod native;
 use super::*;
 
 #[derive(Clone, Eq, PartialEq)]

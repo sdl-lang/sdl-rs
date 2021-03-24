@@ -8,3 +8,8 @@ mod primitive;
 pub trait Evaluate {
     fn evaluate(&self, ctx: &mut SDLContext) -> Result<ASTNode>;
 }
+
+pub trait Concat<Rhs = Self> {
+    type Output;
+    fn concat(self, rhs: Rhs) -> Self::Output;
+}

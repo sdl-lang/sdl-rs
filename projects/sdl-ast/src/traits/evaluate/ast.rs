@@ -11,12 +11,14 @@ impl Evaluate for ASTNode {
                 }
             },
             ASTKind::Expression(e, eos) => {
-                // let out = e.kind.evaluate(ctx)?;
-                // match eos {
-                //     true => ASTKind::Null,
-                //     false => out,
-                // }
-                unimplemented!()
+                let out = e.kind.evaluate(ctx)?;
+                ASTNode {
+                    kind: match eos {
+                        true => ASTKind::Null,
+                        false => out.kind,
+                    },
+                    range: self.range
+                }
             }
             ASTKind::InfixExpression(inner) => inner.evaluate(ctx)?,
             ASTKind::StringExpression(inner) => inner.evaluate(ctx)?,
@@ -38,8 +40,8 @@ impl Evaluate for ASTNode {
 
             ASTKind::Null |
             ASTKind::Boolean(_) |
-            ASTKind::EscapedText(_) |
-            ASTKind::UnescapedText(_) |
+            ASTKind::HTMLText(_) |
+            ASTKind::String(_) |
             ASTKind::Integer(_) |
             ASTKind::Decimal(_) => self.to_owned(),
 

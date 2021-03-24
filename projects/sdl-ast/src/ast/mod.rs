@@ -51,8 +51,10 @@ pub enum ASTKind {
 
     Null,
     Boolean(bool),
-    EscapedText(String),
-    UnescapedText(String),
+    /// Normal String
+    String(String),
+    /// HTML Escaped Text
+    HTMLText(String),
     Integer(Box<BigInt>),
     Decimal(Box<BigDecimal>),
     Operator(Box<Operator>),
@@ -172,10 +174,10 @@ impl ASTNode {
         Self { kind: ASTKind::Boolean(value), range, }
     }
     pub fn string(value: String, range: Range) -> Self {
-        Self { kind: ASTKind::UnescapedText(value), range, }
+        Self { kind: ASTKind::String(value), range, }
     }
     pub fn string_escaped(value: String, range: Range) -> Self {
-        Self { kind: ASTKind::EscapedText(value), range, }
+        Self { kind: ASTKind::HTMLText(value), range, }
     }
     pub fn integer(value: &str, base: u32, range: Range) -> Self {
         let n = BigInt::parse_bytes(value.as_bytes(), base).unwrap_or_default();

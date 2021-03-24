@@ -16,7 +16,8 @@ impl Render for ASTNode {
 
 impl Render for ASTKind {
     fn render(&self, text: &mut impl Write, ctx: &SDLContext) -> Result<()> {
-        match self.kind {
+        match self {
+            Self::None => (),
             Self::Block(v) => {
                 for e in v {
                     e.render(text, ctx)?
@@ -26,7 +27,7 @@ impl Render for ASTKind {
             Self::Boolean(v) => write!(text, "{}", v)?,
             Self::Integer(v) => write!(text, "{}", v)?,
             Self::Decimal(v) => write!(text, "{}", v)?,
-            Self::String(v) => write!(text, "{:?}", v)?,
+            Self::HTMLText(v) | Self::String(v) => write!(text, "{:?}", v)?,
             Self::List(v) => {
                 write!(text, "[")?;
                 for (i, e) in v.iter().enumerate() {
@@ -37,8 +38,9 @@ impl Render for ASTKind {
                 }
                 write!(text, "]")?;
             }
-            Self::Dict(v) => write!(text, "{:#?}", v)?,
-            Self::HTMLElement(html) => html.render(text, ctx)?,
+            _ => unimplemented!("{:?}", self)
+            // Self::Dict(v) => write!(text, "{:#?}", v)?,
+            // Self::HTMLElement(html) => html.render(text, ctx)?,
         };
         Ok(())
     }
