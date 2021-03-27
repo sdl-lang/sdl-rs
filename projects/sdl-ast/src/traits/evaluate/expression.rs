@@ -22,7 +22,7 @@ impl Evaluate for CallChain {
         let mut base = self.base.evaluate(ctx)?;
         for i in &self.chain {
             base = match &i.kind {
-                ASTKind::CallIndex(n) => base.get_index(n.as_ref())?,
+                ASTKind::CallIndex(n) => base.get_index(n.as_ref(), i.range)?,
                 _ => unimplemented!("ASTKind::{:?} => {{}}", i.kind),
             }
         }

@@ -10,6 +10,7 @@ macro_rules! run_test {
         let out = render(include_str!(concat!($file_name, ".sdl"))).unwrap();
         assert_eq!(out, include_str!(concat!($file_name, ".out.sdl")))
     }
+
     };
 }
 
@@ -18,3 +19,17 @@ run_test![
     index_of_string,
     index_of_nested_list,
 ];
+
+#[test]
+fn error_index_of_null() {
+    let e = render("null.1").unwrap_err();
+    assert_eq!(e.to_string(), "IndexError: Unable to get index 1 on type `Null`
+--> 3:0")
+}
+
+#[test]
+fn error_index_of_decimal() {
+    let e = render("1.0.1").unwrap_err();
+    assert_eq!(e.to_string(), "IndexError: Unable to get index 1 on type `Decimal`
+--> 3:0")
+}

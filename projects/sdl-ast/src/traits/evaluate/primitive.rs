@@ -43,7 +43,11 @@ impl Evaluate for Symbol {
 }
 
 impl Evaluate for StringExpression {
-    fn evaluate(&self, ctx: &mut SDLContext) -> Result<ASTNode> {
+    fn evaluate(&self, _: &mut SDLContext) -> Result<ASTNode> {
+        unreachable!()
+    }
+
+    fn evaluate_kind(&self, ctx: &mut SDLContext) -> Result<ASTKind> {
         let out = match self.handler {
             Some(_) => unimplemented!(),
             None => {
@@ -54,9 +58,6 @@ impl Evaluate for StringExpression {
                 ASTKind::String(out)
             }
         };
-        Ok(ASTNode {
-            kind: out,
-            range: Default::default()
-        })
+        Ok(out)
     }
 }

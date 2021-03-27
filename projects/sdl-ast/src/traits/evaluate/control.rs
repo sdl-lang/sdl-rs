@@ -9,10 +9,10 @@ impl Evaluate for ForInLoop {
         //     _ => unreachable!(),
         // };
         // let iter = match terms {
-        //     Value::List(v) => v.into_iter(),
-        //     Value::String(v) => {
+        //     ASTKind::List(v) => v.into_iter(),
+        //     ASTKind::String(v) => {
         //         // FIXME: avoid collect
-        //         let v: Vec<_> = v.chars().map(|e| Value::from(e)).collect();
+        //         let v: Vec<_> = v.chars().map(|e| ASTKind::from(e)).collect();
         //         v.into_iter()
         //     }
         //     _ => unimplemented!("Value::{:?} => {{}}", terms),
@@ -24,7 +24,7 @@ impl Evaluate for ForInLoop {
         //     let result = self.block.evaluate(&mut ctx)?;
         //     out.push(result)
         // }
-        // Ok(Value::Block(out))
+        // Ok(ASTKind::Block(out))
     }
 }
 

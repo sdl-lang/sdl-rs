@@ -2,9 +2,9 @@ mod config;
 mod regroup;
 
 pub use crate::parser::config::ParserConfig;
-use crate::{parser::regroup::PREC_CLIMBER, Result};
+use crate::{parser::regroup::PREC_CLIMBER, Result, SDLError};
 use sdl_ast::{ast::CallChain, Template, ASTNode};
-use sdl_pest::{Pair, Pairs, Parser, Rule, SDLParser};
+use sdl_pest::{Pair, Pairs, Parser, Rule, SDLParser, Error};
 
 macro_rules! debug_cases {
     ($i:ident) => {{
@@ -18,7 +18,16 @@ macro_rules! debug_cases {
 impl ParserConfig {
     pub fn parse(&mut self, input: impl AsRef<str>) -> Result<ASTNode> {
         let input = input.as_ref().replace("\r\n", "\n").replace("\\\n", "").replace("\t", &" ".repeat(self.tab_size));
-        Ok(self.parse_program(SDLParser::parse(Rule::program, &input)?))
+        match SDLParser::parse(Rule::program, &input) {
+            Ok(o) => {Ok(self.parse_program(o))}
+            Err(e) => {
+                Err(
+                    SDLError::lexer_error(e.to_string())
+                )
+            }
+        }
+
+
     }
     fn parse_program(&self, pairs: Pairs<Rule>) -> ASTNode {
         let mut codes = vec![];

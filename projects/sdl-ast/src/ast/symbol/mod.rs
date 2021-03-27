@@ -10,13 +10,13 @@ impl Debug for Symbol {
         let mut path = self.path.iter();
         if let Some(head) = path.next() {
             match &head.kind {
-                ASTKind::HTMLText(s) => write!(f, "{}", s)?,
+                ASTKind::String(s) => write!(f, "{}", s)?,
                 _ => unreachable!(),
             }
         }
         for i in path {
             match &i.kind {
-                ASTKind::HTMLText(s) => write!(f, "::{}", s)?,
+                ASTKind::String(s) => write!(f, "::{}", s)?,
                 _ => unreachable!(),
             }
         }

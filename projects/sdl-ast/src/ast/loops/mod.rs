@@ -1,5 +1,29 @@
 use super::*;
 
+///
+///
+/// ```sdl
+/// for $pattern in $terms if $guard {
+///     $block
+/// }
+/// else {
+///     $for_else
+/// }
+/// ```
+///
+///
+///
+/// ```sdl
+/// let items = $terms.filter($guard)
+/// if items is empty {
+///     $for_else
+/// }
+/// else {
+///     for $pattern in items {
+///         $block
+///     }
+/// }
+/// ```
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct ForInLoop {
     pub pattern: ASTNode,
@@ -9,6 +33,11 @@ pub struct ForInLoop {
     pub for_else: Option<ASTNode>,
 }
 
+///
+///
+/// ```
+///
+/// ```
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct IfElseChain {
     pub pairs: Vec<(ASTNode, ASTNode)>,

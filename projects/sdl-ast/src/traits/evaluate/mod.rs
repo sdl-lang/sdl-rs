@@ -1,4 +1,4 @@
-use crate::{ast::*, Result, RuntimeError, SDLContext};
+use crate::{ast::*, Result, SDLError, SDLContext};
 
 mod ast;
 mod control;
@@ -7,6 +7,9 @@ mod primitive;
 
 pub trait Evaluate {
     fn evaluate(&self, ctx: &mut SDLContext) -> Result<ASTNode>;
+    fn evaluate_kind(&self, ctx: &mut SDLContext) -> Result<ASTKind> {
+        Ok(self.evaluate(ctx)?.kind)
+    }
 }
 
 pub trait Concat<Rhs = Self> {

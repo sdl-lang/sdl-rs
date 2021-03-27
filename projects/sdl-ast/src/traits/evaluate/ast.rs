@@ -21,7 +21,10 @@ impl Evaluate for ASTNode {
                 }
             }
             ASTKind::InfixExpression(inner) => inner.evaluate(ctx)?,
-            ASTKind::StringExpression(inner) => inner.evaluate(ctx)?,
+            ASTKind::StringExpression(inner) => ASTNode {
+                kind: inner.evaluate_kind(ctx)?,
+                range: self.range
+            },
 
             ASTKind::IfElseChain(inner) => inner.evaluate(ctx)?,
             ASTKind::ForInLoop(inner) => inner.evaluate(ctx)?,

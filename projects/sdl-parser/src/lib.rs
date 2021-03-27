@@ -1,7 +1,6 @@
 #![feature(once_cell)]
 
-mod errors;
 mod parser;
 
-pub use errors::{Error, Result};
+pub use sdl_ast::{SDLError, Result};
 pub use parser::ParserConfig;

@@ -1,10 +1,11 @@
 use crate::utils::get_variant_name;
 use num::{ToPrimitive, Zero, Integer, BigInt};
 use std::ops::{Add, Div, Mul, Sub, Neg};
-use crate::{ASTNode, ASTKind};
+use crate::{ASTNode, ASTKind, SDLError};
 use crate::Result;
 use crate::traits::Concat;
 use bigdecimal::BigDecimal;
+use lsp_types::Range;
 
 impl Add<ASTNode> for ASTNode {
     type Output = Result<ASTNode>;
@@ -113,37 +114,41 @@ impl Concat<ASTNode> for ASTNode {
 }
 
 impl ASTNode {
-    pub fn get_index(&self, n: &BigInt) -> Result<ASTNode> {
+    pub fn get_index(&self, n: &BigInt, p: Range) -> Result<ASTNode> {
         match n {
             n if n > &BigInt::zero()  => {
                 // TODO: Invalid Index Error
                 let n = n.to_usize().unwrap_or_default() - 1 ;
-                let out = match &self.kind {
-                    ASTKind::List(list) => list.get(n).cloned().unwrap_or_default(),
-                    ASTKind::String(string) => {
-                        match string.chars().nth(n) {
-                            Some(s) => ASTNode {
-                                kind: ASTKind::String(s.to_string()),
-                                range: self.range
-                            },
-                            None => ASTNode {
-                                kind: ASTKind::Null,
-                                range: self.range
-                            },
+                let kind = match &self.kind {
+                    ASTKind::List(list) => {
+                        match list.get(n) {
+                            Some(s) => {s.kind.to_owned()},
+                            None => ASTKind::Null,
                         }
                     },
-                    ASTKind::Null => ASTNode {
-                        kind: ASTKind::Null,
-                        range: self.range
+                    ASTKind::String(string) => {
+                        match string.chars().nth(n) {
+                            Some(s) => ASTKind::String(s.to_string()),
+                            None => ASTKind::Null,
+                        }
                     },
-                    _ => unimplemented!("{:?}", self),
+                    _ => {
+                        return Err(SDLError::invalid_index(
+                             n.add(1).to_string(),
+                             get_variant_name(&self.kind),
+                          p
+                        ))
+                    }
                 };
-                Ok(out)
+                Ok(ASTNode {
+                    kind,
+                    range: self.range
+                })
             }
             n if n < &BigInt::zero() => {
                 // TODO: Invalid Index Error
                 let n = n.neg().to_usize().unwrap_or_default();
-                let out = match &self.kind {
+                let kind = match &self.kind {
                     ASTKind::List(list) => {
                         let l = match list.len().checked_sub(n) {
                             Some(u) => {u},
@@ -152,7 +157,10 @@ impl ASTNode {
                                 range: self.range
                             })}
                         };
-                        list.get(l).cloned().unwrap_or_default()
+                        match list.get(l) {
+                            Some(s) => {s.kind.to_owned()},
+                            None => ASTKind::Null,
+                        }
                     },
                     ASTKind::String(string) => {
                         let l = match string.len().checked_sub(n) {
@@ -162,23 +170,23 @@ impl ASTNode {
                                 range: self.range
                             })}
                         };
-                        let kind = match string.chars().nth(l) {
+                        match string.chars().nth(l) {
                             Some(s) => ASTKind::String(s.to_string()),
                             None => ASTKind::Null,
-                        };
-                        ASTNode {
-                            kind,
-                            range: self.range
                         }
                     },
-                    ASTKind::Null => ASTNode {
-                        kind: ASTKind::Null,
-                        range: self.range
-                    },
-
-                    _ => unimplemented!("{:?}", self),
+                    _ => {
+                        return Err(SDLError::invalid_index(
+                            n.to_string(),
+                            get_variant_name(&self.kind),
+                            p
+                        ))
+                    }
                 };
-                Ok(out)
+                Ok(ASTNode {
+                    kind,
+                    range: self.range
+                })
             }
             // n is zero
             _ => {
