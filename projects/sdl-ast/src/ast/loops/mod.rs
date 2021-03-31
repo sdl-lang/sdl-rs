@@ -42,15 +42,16 @@ pub struct ForInLoop {
 pub struct IfElseChain {
     pub pairs: Vec<(ASTNode, ASTNode)>,
     pub cover: Option<ASTNode>,
+    pub range: Range,
 }
 
 impl IfElseChain {
-    pub fn build(cds: Vec<ASTNode>, acts: Vec<ASTNode>) -> Self {
+    pub fn build(cds: Vec<ASTNode>, acts: Vec<ASTNode>, range: Range) -> Self {
         let cover = match cds.len() == acts.len() {
             true => None,
             false => acts.last().cloned(),
         };
         let pairs = cds.into_iter().zip(acts.into_iter()).collect();
-        Self { pairs, cover }
+        Self { pairs, cover, range }
     }
 }

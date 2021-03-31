@@ -15,13 +15,13 @@ impl ASTKind {
         matches!(self, Self::Boolean(false))
     }
     pub fn is_string(&self) -> bool {
-        matches!(self, Self::HTMLText(_)|Self::String(_))
+        matches!(self, Self::HTMLText(_) | Self::String(_))
     }
     pub fn is_safe(&self) -> bool {
         unreachable!()
     }
     pub fn is_number(&self) -> bool {
-        matches!(self, Self::Integer(_)|Self::Decimal(_))
+        matches!(self, Self::Integer(_) | Self::Decimal(_))
     }
     pub fn is_integer(&self) -> bool {
         matches!(self, Self::Integer(_))
@@ -31,13 +31,9 @@ impl ASTKind {
     }
     pub fn is_zero(&self) -> bool {
         match self {
-            Self::Integer(v) => {
-                v.is_zero()
-            }
-            Self::Decimal(v) => {
-                v.is_zero()
-            }
-            _ => false
+            Self::Integer(v) => v.is_zero(),
+            Self::Decimal(v) => v.is_zero(),
+            _ => false,
         }
     }
     pub fn is_empty(&self) -> bool {
@@ -45,13 +41,11 @@ impl ASTKind {
             // Self::String(_) => {
             //     unimplemented!()
             // }
-            Self::List(v) => {
-                v.is_empty()
-            }
+            Self::List(v) => v.is_empty(),
             // Self::Dict(v) => {
             //     v.is_empty()
             // }
-            _ => false
+            _ => false,
         }
     }
     pub fn is_falsy(&self) -> bool {
@@ -61,19 +55,13 @@ impl ASTKind {
             // Self::String(_) => {
             //     unimplemented!()
             // }
-            Self::Integer(v) => {
-                v.is_zero()
-            }
-            Self::Decimal(v) => {
-                v.is_zero()
-            }
-            Self::List(v) => {
-                v.is_empty()
-            }
+            Self::Integer(v) => v.is_zero(),
+            Self::Decimal(v) => v.is_zero(),
+            Self::List(v) => v.is_empty(),
             // Self::Dict(v) => {
             //     v.is_empty()
             // }
-            _ => true
+            _ => true,
         }
     }
 }

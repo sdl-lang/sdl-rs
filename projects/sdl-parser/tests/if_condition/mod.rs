@@ -14,9 +14,13 @@ macro_rules! run_test {
 }
 
 run_test![
-    value,
-    comment,
-    number,
-    string, string_escape,
-    template_escape,
+    if_simple,
 ];
+
+//
+// #[test]
+// fn error_for_in_decimal() {
+//     let e = render("for i in 0.0 {}").unwrap_err();
+//     assert_eq!(e.to_string(), "IteratorError: Type `Decimal` is not an iterable element
+// --> 1:10")
+// }

@@ -4,6 +4,7 @@ mod operations;
 mod symbol;
 mod template;
 mod check;
+mod convert;
 
 pub use crate::ast::{
     expression::{CallChain, InfixExpression, StringExpression, UnaryExpression},
@@ -101,7 +102,7 @@ impl ASTNode {
     }
 
     pub fn if_else_chain(cds: Vec<ASTNode>, acts: Vec<ASTNode>, range: Range) -> Self {
-        let kind = ASTKind::IfElseChain(Box::new(IfElseChain::build(cds, acts)));
+        let kind = ASTKind::IfElseChain(Box::new(IfElseChain::build(cds, acts,range)));
         Self { kind, range, }
     }
 

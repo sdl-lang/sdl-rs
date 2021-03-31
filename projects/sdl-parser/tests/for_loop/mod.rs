@@ -20,3 +20,10 @@ run_test![
     for_else_guard,
     for_if_else_guard,
 ];
+
+#[test]
+fn error_for_in_decimal() {
+    let e = render("for i in 0.0 {}").unwrap_err();
+    assert_eq!(e.to_string(), "IteratorError: Type `Decimal` is not an iterable element
+--> 1:10")
+}

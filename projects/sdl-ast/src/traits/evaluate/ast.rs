@@ -27,7 +27,12 @@ impl Evaluate for ASTNode {
             },
 
             ASTKind::IfElseChain(inner) => inner.evaluate(ctx)?,
-            ASTKind::ForInLoop(inner) => inner.evaluate(ctx)?,
+            ASTKind::ForInLoop(inner) => {
+                ASTNode {
+                    kind: inner.evaluate_kind(ctx)?,
+                    range: self.range
+                }
+            },
             ASTKind::Template(inner) => inner.evaluate(ctx)?,
             ASTKind::Symbol(inner) => inner.evaluate(ctx)?,
 

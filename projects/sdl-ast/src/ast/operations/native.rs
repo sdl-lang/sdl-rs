@@ -1,5 +1,5 @@
 use crate::utils::get_variant_name;
-use num::{ToPrimitive, Zero, Integer, BigInt};
+use num::{ToPrimitive, Zero, BigInt};
 use std::ops::{Add, Div, Mul, Sub, Neg};
 use crate::{ASTNode, ASTKind, SDLError};
 use crate::Result;

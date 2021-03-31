@@ -24,12 +24,12 @@ run_test![
 fn error_index_of_null() {
     let e = render("null.1").unwrap_err();
     assert_eq!(e.to_string(), "IndexError: Unable to get index 1 on type `Null`
---> 3:0")
+--> 1:5")
 }
 
 #[test]
 fn error_index_of_decimal() {
     let e = render("1.0.1").unwrap_err();
     assert_eq!(e.to_string(), "IndexError: Unable to get index 1 on type `Decimal`
---> 3:0")
+--> 1:4")
 }

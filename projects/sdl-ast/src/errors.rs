@@ -16,11 +16,14 @@ pub enum SDLErrorKind {
     },
     InvalidIndex {
         index: String,
-        lhs_type: String,
+        item_type: String,
+        position: Range,
+    },
+    InvalidIterator {
+        item_type: String,
         position: Range,
     },
     IfLost {
-        info: String,
         position: Range,
     },
     LexerError {
@@ -38,13 +41,21 @@ impl Display for SDLError {
         match self.kind.as_ref() {
             SDLErrorKind::FileNotFound(_) => {write!(f, "FileNotFound")}
             SDLErrorKind::InvalidOperation { .. } => {write!(f, "InvalidOperation")}
-            SDLErrorKind::InvalidIndex { index, lhs_type, position } => {
-                writeln!(f, "IndexError: Unable to get index {} on type `{}`", index, lhs_type)?;
-                write!(f, "--> {}:{}",position.start.character,position.start.line)
+            SDLErrorKind::InvalidIndex { index, item_type, position } => {
+                writeln!(f, "IndexError: Unable to get index {} on type `{}`", index, item_type)?;
+                write!(f, "--> {}:{}",position.start.line+ 1,position.start.character + 1)
             }
-            SDLErrorKind::IfLost { .. } => {write!(f, "IfLostError: The if statement does not cover all cases")}
+            SDLErrorKind::InvalidIterator { item_type, position } => {
+                writeln!(f, "IteratorError: Type `{}` is not an iterable element", item_type)?;
+                write!(f, "--> {}:{}",position.start.line+ 1,position.start.character + 1)
+            }
+            SDLErrorKind::IfLost { position } => {
+                writeln!(f, "IfLostError: If statements are not exhaustive")?;
+                write!(f, "--> {}:{}",position.start.line+ 1,position.start.character + 1)
+            }
             SDLErrorKind::FormatError(_) => {write!(f, "FormatError")}
             SDLErrorKind::LexerError { .. } => {write!(f, "LexerError")}
+
         }
     }
 }
@@ -67,31 +78,40 @@ impl SDLError {
         }
     }
 
-    pub fn invalid_operation(msg: &str, p: Range) -> SDLError {
-
+    pub fn invalid_operation(msg: impl Into<String>, p: Range) -> SDLError {
         Self {
             kind: Box::new(SDLErrorKind::InvalidOperation {
-                info: String::from(msg),
+                info: msg.into(),
                 position: p
             })
         }
     }
-    pub fn if_lost(msg: &str, p: Range) -> SDLError {
+
+    pub fn invalid_iterator(item_type: impl Into<String>, p: Range) -> SDLError {
+        Self {
+            kind: Box::new(SDLErrorKind::InvalidIterator {
+                item_type: item_type.into(),
+                position: p
+            })
+        }
+    }
+
+    pub fn if_lost(p: Range) -> SDLError {
         Self {
             kind: Box::new(SDLErrorKind::IfLost {
-                info: String::from(msg),
                 position: p
             })
         }
 
     }
+
     pub fn invalid_index(index: impl Into<String>,
-                         lhs_type: impl Into<String>,
+                         item_type: impl Into<String>,
                          position: Range,) -> SDLError {
         Self {
             kind: Box::new(SDLErrorKind::InvalidIndex {
                 index: index.into(),
-                lhs_type: lhs_type.into(),
+                item_type: item_type.into(),
                 position
             })
         }

@@ -3,6 +3,7 @@ mod call_chain;
 mod declare;
 mod for_loop;
 mod literal;
+mod if_condition;
 
 use sdl_ast::SDLContext;
 use sdl_parser::{ParserConfig, Result};

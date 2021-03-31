@@ -3,8 +3,8 @@ mod regroup;
 
 pub use crate::parser::config::ParserConfig;
 use crate::{parser::regroup::PREC_CLIMBER, Result, SDLError};
-use sdl_ast::{ast::CallChain, Template, ASTNode};
-use sdl_pest::{Pair, Pairs, Parser, Rule, SDLParser, Error};
+use sdl_ast::{ast::CallChain, Template, ASTNode, ASTKind};
+use sdl_pest::{Pair, Pairs, Parser, Rule, SDLParser};
 
 macro_rules! debug_cases {
     ($i:ident) => {{
@@ -39,7 +39,7 @@ impl ParserConfig {
         ASTNode::program(codes)
     }
     fn parse_statement(&self, pairs: Pair<Rule>) -> ASTNode {
-        let r = self.get_position(&pairs);
+        let range = self.get_position(&pairs);
         let mut codes = vec![];
         for pair in pairs.into_inner() {
             let code = match pair.as_rule() {
@@ -52,13 +52,24 @@ impl ParserConfig {
             };
             codes.push(code);
         }
-        ASTNode::statement(codes, r)
+        ASTNode {
+            kind: ASTKind::Statement(codes),
+            range
+        }
     }
     fn parse_block(&self, pairs: Pair<Rule>) -> ASTNode {
-        let pair = pairs.into_inner().nth(0).unwrap();
-        match pair.as_rule() {
-            Rule::statement => self.parse_statement(pair),
-            _ => unreachable!(),
+        let range = self.get_position(&pairs);
+        let mut codes = vec![];
+        for pair in pairs.into_inner() {
+            let code = match pair.as_rule() {
+                Rule::statement =>self.parse_statement(pair),
+                _ => unreachable!(),
+            };
+            codes.push(code);
+        }
+        ASTNode {
+            kind: ASTKind::Block(codes),
+            range
         }
     }
 }
