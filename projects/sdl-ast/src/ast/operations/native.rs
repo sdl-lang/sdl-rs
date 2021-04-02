@@ -90,7 +90,7 @@ impl Concat<ASTNode> for ASTNode {
 
     fn concat(self, rhs: ASTNode) -> Self::Output {
         let error = format!("(ASTKind::{}(lhs), ASTKind::{}(rhs)) => {{}}", get_variant_name(&self.kind), get_variant_name(&rhs.kind));
-        let out = match (self.kind, rhs.kind) {
+        let out = match (&self.kind, rhs.kind) {
             (ASTKind::Integer(lhs), ASTKind::Integer(rhs)) => {
               let new = lhs.mul(rhs.to_string().len()) + rhs.as_ref();
                 ASTKind::Integer(Box::new(new))
@@ -99,10 +99,15 @@ impl Concat<ASTNode> for ASTNode {
                 ASTKind::String(lhs.to_string() + rhs.as_str())
             }
             (ASTKind::String(lhs), ASTKind::String(rhs)) => {
-                ASTKind::String(lhs + rhs.as_ref())
+                ASTKind::String(lhs.to_string() + rhs.as_ref())
             }
             (ASTKind::String(lhs), ASTKind::Integer(rhs)) => {
-                ASTKind::String(lhs + rhs.to_string().as_ref())
+                ASTKind::String(lhs.to_string() + rhs.to_string().as_ref())
+            }
+            (_, ASTKind::List(rhs)) => {
+                let mut new = vec![self.to_owned()];
+                new.extend(rhs);
+                ASTKind::List(new)
             }
             _ => unimplemented!("{}", error),
         };

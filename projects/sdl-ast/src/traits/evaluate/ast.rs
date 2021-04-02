@@ -53,7 +53,7 @@ impl Evaluate for ASTNode {
             ASTKind::Integer(_) |
             ASTKind::Decimal(_) => self.to_owned(),
 
-            _ => unimplemented!("ASTKind::{:?} => {{}}", self),
+            _ => unimplemented!("ASTKind::{:?} => {{}}", self.kind),
         };
         Ok(result)
     }

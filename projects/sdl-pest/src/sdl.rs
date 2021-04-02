@@ -45,14 +45,14 @@ pub enum Rule {
     expr,
     term,
     dot_call,
+    apply,
+    apply_kv,
     data,
     tuple,
     list,
     dict,
     dict_pair,
     dict_key,
-    apply,
-    apply_kv,
     slice,
     index,
     index_range,
@@ -348,7 +348,17 @@ impl ::pest::Parser<Rule> for SDLParser {
                 #[inline]
                 #[allow(non_snake_case, unused_variables)]
                 pub fn dot_call(state: Box<::pest::ParserState<Rule>>) -> ::pest::ParseResult<Box<::pest::ParserState<Rule>>> {
-                    state.atomic(::pest::Atomicity::NonAtomic, |state| state.rule(Rule::dot_call, |state| state.sequence(|state| self::Dot(state).and_then(|state| super::hidden::skip(state)).and_then(|state| self::Integer(state).or_else(|state| state.sequence(|state| self::Symbol(state).and_then(|state| super::hidden::skip(state)).and_then(|state| state.optional(|state| state.restore_on_err(|state| self::apply(state))))))))))
+                    state.atomic(::pest::Atomicity::NonAtomic, |state| state.rule(Rule::dot_call, |state| state.sequence(|state| self::Dot(state).and_then(|state| super::hidden::skip(state)).and_then(|state| state.sequence(|state| state.optional(|state| self::Plus(state).or_else(|state| self::Minus(state))).and_then(|state| super::hidden::skip(state)).and_then(|state| self::Integer(state))).or_else(|state| state.sequence(|state| self::Symbol(state).and_then(|state| super::hidden::skip(state)).and_then(|state| state.optional(|state| state.restore_on_err(|state| self::apply(state))))))))))
+                }
+                #[inline]
+                #[allow(non_snake_case, unused_variables)]
+                pub fn apply(state: Box<::pest::ParserState<Rule>>) -> ::pest::ParseResult<Box<::pest::ParserState<Rule>>> {
+                    state.atomic(::pest::Atomicity::NonAtomic, |state| state.rule(Rule::apply, |state| state.sequence(|state| state.match_string("(").and_then(|state| super::hidden::skip(state)).and_then(|state| state.match_string(")").or_else(|state| state.restore_on_err(|state| state.sequence(|state| self::apply_kv(state).and_then(|state| super::hidden::skip(state)).and_then(|state| state.sequence(|state| state.optional(|state| state.restore_on_err(|state| state.sequence(|state| self::Comma(state).and_then(|state| super::hidden::skip(state)).and_then(|state| self::apply_kv(state)))).and_then(|state| state.repeat(|state| state.sequence(|state| super::hidden::skip(state).and_then(|state| state.restore_on_err(|state| state.sequence(|state| self::Comma(state).and_then(|state| super::hidden::skip(state)).and_then(|state| self::apply_kv(state))))))))))).and_then(|state| super::hidden::skip(state)).and_then(|state| state.optional(|state| self::Comma(state))).and_then(|state| super::hidden::skip(state)).and_then(|state| state.match_string(")")))))))))
+                }
+                #[inline]
+                #[allow(non_snake_case, unused_variables)]
+                pub fn apply_kv(state: Box<::pest::ParserState<Rule>>) -> ::pest::ParseResult<Box<::pest::ParserState<Rule>>> {
+                    state.rule(Rule::apply_kv, |state| state.restore_on_err(|state| state.sequence(|state| self::SYMBOL(state).and_then(|state| super::hidden::skip(state)).and_then(|state| self::Set(state)).and_then(|state| super::hidden::skip(state)).and_then(|state| self::expr(state)))).or_else(|state| state.restore_on_err(|state| self::expr(state))))
                 }
                 #[inline]
                 #[allow(non_snake_case, unused_variables)]
@@ -379,16 +389,6 @@ impl ::pest::Parser<Rule> for SDLParser {
                 #[allow(non_snake_case, unused_variables)]
                 pub fn dict_key(state: Box<::pest::ParserState<Rule>>) -> ::pest::ParseResult<Box<::pest::ParserState<Rule>>> {
                     self::Integer(state).or_else(|state| self::SYMBOL(state)).or_else(|state| state.restore_on_err(|state| self::String(state)))
-                }
-                #[inline]
-                #[allow(non_snake_case, unused_variables)]
-                pub fn apply(state: Box<::pest::ParserState<Rule>>) -> ::pest::ParseResult<Box<::pest::ParserState<Rule>>> {
-                    state.atomic(::pest::Atomicity::NonAtomic, |state| state.rule(Rule::apply, |state| state.sequence(|state| state.match_string("(").and_then(|state| super::hidden::skip(state)).and_then(|state| state.match_string(")").or_else(|state| state.restore_on_err(|state| state.sequence(|state| self::apply_kv(state).and_then(|state| super::hidden::skip(state)).and_then(|state| state.sequence(|state| state.optional(|state| state.restore_on_err(|state| state.sequence(|state| self::Comma(state).and_then(|state| super::hidden::skip(state)).and_then(|state| self::apply_kv(state)))).and_then(|state| state.repeat(|state| state.sequence(|state| super::hidden::skip(state).and_then(|state| state.restore_on_err(|state| state.sequence(|state| self::Comma(state).and_then(|state| super::hidden::skip(state)).and_then(|state| self::apply_kv(state))))))))))).and_then(|state| super::hidden::skip(state)).and_then(|state| state.optional(|state| self::Comma(state))).and_then(|state| super::hidden::skip(state)).and_then(|state| state.match_string(")")))))))))
-                }
-                #[inline]
-                #[allow(non_snake_case, unused_variables)]
-                pub fn apply_kv(state: Box<::pest::ParserState<Rule>>) -> ::pest::ParseResult<Box<::pest::ParserState<Rule>>> {
-                    state.rule(Rule::apply_kv, |state| state.restore_on_err(|state| state.sequence(|state| self::SYMBOL(state).and_then(|state| super::hidden::skip(state)).and_then(|state| self::Set(state)).and_then(|state| super::hidden::skip(state)).and_then(|state| self::expr(state)))).or_else(|state| state.restore_on_err(|state| self::expr(state))))
                 }
                 #[inline]
                 #[allow(non_snake_case, unused_variables)]
@@ -583,7 +583,7 @@ impl ::pest::Parser<Rule> for SDLParser {
                 #[inline]
                 #[allow(non_snake_case, unused_variables)]
                 pub fn COMMENT(state: Box<::pest::ParserState<Rule>>) -> ::pest::ParseResult<Box<::pest::ParserState<Rule>>> {
-                    state.rule(Rule::COMMENT, |state| state.atomic(::pest::Atomicity::Atomic, |state| self::CommentMultiLine(state).or_else(|state| self::CommentLine(state))))
+                    state.atomic(::pest::Atomicity::Atomic, |state| self::CommentMultiLine(state).or_else(|state| self::CommentLine(state)))
                 }
                 #[inline]
                 #[allow(non_snake_case, unused_variables)]
@@ -638,7 +638,7 @@ impl ::pest::Parser<Rule> for SDLParser {
                 #[inline]
                 #[allow(non_snake_case, unused_variables)]
                 pub fn Compare(state: Box<::pest::ParserState<Rule>>) -> ::pest::ParseResult<Box<::pest::ParserState<Rule>>> {
-                    state.atomic(::pest::Atomicity::NonAtomic, |state| state.rule(Rule::Compare, |state| state.sequence(|state| state.match_string("is").and_then(|state| super::hidden::skip(state)).and_then(|state| state.match_string("not"))).or_else(|state| state.match_string("!=")).or_else(|state| state.match_string("is")).or_else(|state| state.match_string("==")).or_else(|state| state.sequence(|state| state.match_string("not").and_then(|state| super::hidden::skip(state)).and_then(|state| state.match_string("in")))).or_else(|state| state.match_string("in")).or_else(|state| state.match_string(">=")).or_else(|state| state.match_string(">>")).or_else(|state| state.match_string("<=")).or_else(|state| state.match_string("<<"))))
+                    state.atomic(::pest::Atomicity::NonAtomic, |state| state.rule(Rule::Compare, |state| state.sequence(|state| state.match_string("is").and_then(|state| super::hidden::skip(state)).and_then(|state| state.match_string("not"))).or_else(|state| state.match_string("!=")).or_else(|state| state.match_string("is")).or_else(|state| state.match_string("==")).or_else(|state| state.sequence(|state| state.match_string("not").and_then(|state| super::hidden::skip(state)).and_then(|state| state.match_string("in")))).or_else(|state| state.match_string("in")).or_else(|state| state.match_string(">=")).or_else(|state| state.match_string("|>")).or_else(|state| state.match_string("<=")).or_else(|state| state.match_string("<|"))))
                 }
                 #[inline]
                 #[allow(non_snake_case, unused_variables)]
@@ -871,14 +871,14 @@ impl ::pest::Parser<Rule> for SDLParser {
             Rule::expr => rules::expr(state),
             Rule::term => rules::term(state),
             Rule::dot_call => rules::dot_call(state),
+            Rule::apply => rules::apply(state),
+            Rule::apply_kv => rules::apply_kv(state),
             Rule::data => rules::data(state),
             Rule::tuple => rules::tuple(state),
             Rule::list => rules::list(state),
             Rule::dict => rules::dict(state),
             Rule::dict_pair => rules::dict_pair(state),
             Rule::dict_key => rules::dict_key(state),
-            Rule::apply => rules::apply(state),
-            Rule::apply_kv => rules::apply_kv(state),
             Rule::slice => rules::slice(state),
             Rule::index => rules::index(state),
             Rule::index_range => rules::index_range(state),

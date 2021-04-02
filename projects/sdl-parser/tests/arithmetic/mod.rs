@@ -17,4 +17,5 @@ run_test![
     integer_basic,
     decimal_cast,
     string_join,
+    list_join,
 ];

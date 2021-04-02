@@ -41,13 +41,19 @@ impl Evaluate for IfElseChain {
         }
         match &self.cover {
             Some(last) => Ok(last.evaluate(ctx)?),
-            None => match ctx.config().is_debug {
-                true => Err(SDLError::if_lost(self.range)),
-                false => Ok(ASTNode {
-                    kind: ASTKind::Null,
-                    range: self.range
-                }),
-            },
+            None => {
+                let err = SDLError::if_lost(self.range);
+                match ctx.config().is_debug {
+                    true => Err(err),
+                    false => {
+                        println!("{}", err);
+                        Ok(ASTNode {
+                            kind: ASTKind::Null,
+                            range: self.range
+                        })
+                    },
+                }
+            }
         }
     }
 }

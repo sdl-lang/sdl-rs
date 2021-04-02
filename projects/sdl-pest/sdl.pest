@@ -79,7 +79,7 @@ annotation_call = @{"#"~(list|apply|Symbol)}
 expression =  {expr ~ eos?}
 expr       = !{term ~ (Infix ~ term)*}
 term       =  {Prefix* ~ ("(" ~ expr ~ ")"|data) ~ (Suffix|slice|apply|dot_call)*}
-dot_call   = !{Dot ~ Integer|Dot ~ Symbol ~ apply?}
+dot_call   = !{Dot ~ (Plus|Minus)? ~ Integer|Dot ~ Symbol ~ apply?}
 apply      = !{"(" ~ ")" | "(" ~ apply_kv ~ (Comma ~ apply_kv)* ~ Comma? ~")"}
 apply_kv   =  {SYMBOL ~ Set ~ expr|expr}
 /*====================================================================================================================*/
@@ -124,7 +124,7 @@ html_term     = _{html_pair|BadSymbol}
 html_pair     =  {BadSymbol ~ "=" ~ term}
 
 text_mode     = ${"{{" ~ statement* ~ "}}" | template | HTMLEscape | HTMLText}
-HTMLText      = @{"<" ~ !("/"|Escape) | !("<"|">") ~ ANY}
+HTMLText      = @{">"|"<" ~ !("/"|Escape) | !("<"|">") ~ ANY}
 HTMLEscape    = @{
     "&" ~ ASCII_ALPHA_LOWER ~ ";" |
     "&#" ~ Integer ~ ";"
@@ -205,7 +205,7 @@ Compare = !{
     "is" ~ "not" | "!="
   | "is" | "=="
   | "not" ~ "in" | "in"
-  | ">=" | ">>" | "<=" | "<<"
+  | ">=" | "|>" | "<=" | "<|"
 }
 Additive   = @{"++"|Plus|Minus}
 Multiplied = @{Star|"/"}
