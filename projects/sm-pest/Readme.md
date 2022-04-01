@@ -1,10 +1,19 @@
 SM parser via Pest
 ========================
 
-```kotlin
-[1,2,3].map {f(x)}
+```rs
+f'(x)
+f('x: int) := x
 ```
 
 ```wolframlanguage
-Map[f, {1, 2, 3}]
+F[x_Integer] := x
+```
+
+```rs
+[1, 2, 3].map { $a * 2 }
+```
+
+```wolframlanguage
+Map[# * 2&, {1, 2, 3}]
 ```
